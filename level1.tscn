@@ -1,0 +1,39 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://agent.tscn" type="PackedScene" id=1]
+[ext_resource path="res://wall.tscn" type="PackedScene" id=2]
+
+[sub_resource type="RectangleShape2D" id=1]
+extents = Vector2( 111.5, 164.5 )
+
+[node name="Level1" type="Node2D" groups=["level"]]
+
+[node name="Agent1" parent="." instance=ExtResource( 1 )]
+position = Vector2( 93, 280 )
+
+[node name="Wall" parent="." instance=ExtResource( 2 )]
+position = Vector2( 477, 438 )
+scale = Vector2( -59.7816, 0.802072 )
+
+[node name="Wall2" parent="." instance=ExtResource( 2 )]
+position = Vector2( 511, 92 )
+scale = Vector2( -59.7816, 0.802072 )
+
+[node name="Wall3" parent="." instance=ExtResource( 2 )]
+position = Vector2( 1019, 307 )
+rotation = 1.5708
+scale = Vector2( -59.7816, 0.802072 )
+
+[node name="Wall4" parent="." instance=ExtResource( 2 )]
+position = Vector2( 2, 273 )
+rotation = 1.5708
+scale = Vector2( -59.7816, 0.802072 )
+
+[node name="SpawningArea" type="Area2D" parent="."]
+position = Vector2( 122, 266 )
+__meta__ = {
+"_edit_group_": true
+}
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SpawningArea"]
+shape = SubResource( 1 )
