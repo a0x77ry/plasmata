@@ -1,6 +1,6 @@
 extends KinematicBody2D
 
-export (int) var speed = 250
+export (int) var speed = 200
 export (float) var rotation_speed = 3.0
 
 const NN = preload("res://scripts/neural_network.gd")

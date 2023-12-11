@@ -1,15 +1,18 @@
 extends Node2D
 
-const NUMBER_OF_AGENTS := 10
-const NUMBER_OF_SELECTED := 5
+# const NUMBER_OF_SELECTED := 5
+const TARGET_POPULATION := 22
 
 onready var spawning_area = get_node("SpawningArea")
 
+var number_of_agents = 22
 var agents = []
 
 
 func _ready():
   randomize()
+  if !Main.genomes.empty():
+    number_of_agents = Main.genomes.size()
   generate_population()
 
 
@@ -19,9 +22,10 @@ func _process(_delta):
 
 
 func change_generation():
-    var parent_genomes = Main.select(agents)
-    Main.genomes = Main.mutate(parent_genomes)
-    Main.genomes.append_array(Main.mutate(parent_genomes))
+    # var parent_genomes = Main.select_naive(agents)
+    var parent_genomes = Main.select_roulette(agents)
+    var crossovered_genomes = Main.crossover_sbx(parent_genomes, TARGET_POPULATION)
+    Main.genomes = Main.mutate(crossovered_genomes)
     var err = get_tree().change_scene("res://level1.tscn")
     if err:
       print("Failed to load scene with error: %s" % err)
@@ -30,7 +34,7 @@ func change_generation():
 func generate_population():
   var agent: Node2D
   var area_extents = spawning_area.get_node("CollisionShape2D").shape.extents
-  for i in range(NUMBER_OF_AGENTS):
+  for i in range(number_of_agents):
     agent = preload("res://agent.tscn").instance()
     var pos_x = rand_range(spawning_area.get_position().x - area_extents.x,
         spawning_area.get_position().x + area_extents.x)
