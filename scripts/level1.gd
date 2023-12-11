@@ -15,6 +15,10 @@ func _ready():
 
 func _process(_delta):
   if Input.is_action_just_pressed("ui_accept"):
+    change_generation()
+
+
+func change_generation():
     var parent_genomes = Main.select(agents)
     Main.genomes = Main.mutate(parent_genomes)
     Main.genomes.append_array(Main.mutate(parent_genomes))
@@ -36,5 +40,15 @@ func generate_population():
       agent.set_genome(Main.genomes[i])
     agent.set_position(Vector2(pos_x, pos_y))
     agents.append(agent)
+    agent.add_to_group("agents")
     add_child(agent)
+
+
+func _on_FinishLine_body_entered(body:Node):
+  if body.is_in_group("agents"):
+    change_generation()
+
+
+func _on_Timer_timeout():
+  change_generation()
 

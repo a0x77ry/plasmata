@@ -5,7 +5,16 @@ const NUMBER_OF_SELECTED := 5
 var used_node_ids := []
 var genomes := [] # A list of genomes
 
-# onready var agent: Node2D
+
+func select(agents):
+    agents.sort_custom(AgentSorter, "sort_ascenting")
+    var fittest_agents = agents.slice(-NUMBER_OF_SELECTED, -1)
+    print("fittest_agents length is %s" % fittest_agents.size())
+    var _genomes = []
+    for agent in fittest_agents:
+      print("agent's position.x is: %s" % agent.position.x)
+      _genomes.append(agent.genome)
+    return _genomes
 
 
 func mutate(parent_genomes):
@@ -30,19 +39,11 @@ func generate_UID():
   return id
 
 
-func select(agents):
-    agents.sort_custom(AgentSorter, "sort_ascenting")
-    var fittest_agents = agents.slice(-NUMBER_OF_SELECTED, -1)
-    print("fittest_agents length is %s" % fittest_agents.size())
-    var _genomes = []
-    for agent in fittest_agents:
-      print("agent's position.x is: %s" % agent.position.x)
-      _genomes.append(agent.genome)
-    return _genomes
-
 
 class AgentSorter:
   static func sort_ascenting(a, b):
     if a.position.x < b.position.x:
       return true
     return false
+
+

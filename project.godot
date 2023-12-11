@@ -35,6 +35,8 @@ settings/fps/force_fps=60
 
 [display]
 
+window/size/width=1300
+window/size/height=800
 window/vsync/use_vsync=false
 
 [gui]
