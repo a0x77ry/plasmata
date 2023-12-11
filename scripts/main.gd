@@ -57,7 +57,7 @@ func couple_crossover_sbx(couple_genomes, number_of_offspring):
   var crossovered_genome = couple_genomes[0]
   for _i in number_of_offspring:
     for i in range(couple_genomes[0]["links"].size()):
-      var b = random.randfn(1)
+      var b = random.randfn(1.0, 0.2)
       var offspring_link_weight: float
       if random.randf() > 0.5:
         offspring_link_weight = ((1.0 + b) * couple_genomes[0]["links"][i]["weight"] 

@@ -4,6 +4,8 @@ extends Node2D
 const TARGET_POPULATION := 22
 
 onready var spawning_area = get_node("SpawningArea")
+onready var timer = get_node("Timer")
+onready var countdown = get_node("Countdown/Time")
 
 var number_of_agents = 22
 var agents = []
@@ -19,6 +21,8 @@ func _ready():
 func _process(_delta):
   if Input.is_action_just_pressed("ui_accept"):
     change_generation()
+
+  countdown.text = String("%.1f" % timer.time_left)
 
 
 func change_generation():
