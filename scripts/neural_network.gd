@@ -1,9 +1,11 @@
 class_name NeuralNetwork
 
 const INPUT_INCREMENT := 0.01
+const NO_ID := -1
 
 var input_layer = [] 
 var output_layer = [] 
+var hidden_layer = [] 
 var links = []
 
 var genome
@@ -11,18 +13,43 @@ var genome
 func _init(_genome):
   genome = _genome
 
+  for input_node_gene in genome["input_nodes"]:
+    var i_node = InputNode.new(input_node_gene["id"], input_node_gene["name"])
+    input_layer.append(i_node)
+
+  for hidden_node_gene in genome["hidden_nodes"]:
+    var h_node = OutputNode.new(hidden_node_gene["id"])
+    hidden_layer.append(h_node)
+
+  for output_node_gene in genome["output_nodes"]:
+    var o_node = OutputNode.new(output_node_gene["id"], output_node_gene["name"])
+    output_layer.append(o_node)
+
+  var all_nodes = input_layer + hidden_layer + output_layer
+
   if !genome.has("links"):
-    for input_node_gene in genome["input_nodes"]:
-      var i_node = InputNode.new(input_node_gene["id"], input_node_gene["name"])
-      input_layer.append(i_node)
-
-    for output_node_gene in genome["output_nodes"]:
-      var o_node = OutputNode.new(output_node_gene["id"], output_node_gene["name"])
-      output_layer.append(o_node)
-
+    genome["links"] = []
     for i_node in input_layer:
       for o_node in output_layer:
-        links.append(Link.new(-1, i_node, o_node, randf()))
+        var new_link = Link.new(NO_ID, i_node, o_node, randf())
+        links.append(new_link)
+        genome["links"].append({"id": new_link.id,
+            "weight": new_link.weight, "from_id": new_link.source_node.id,
+            "to_id": new_link.target_node.id})
+  else:
+    for link in genome["links"]:
+      var source_node
+      var target_node
+      for node in all_nodes:
+        var nid = node.id
+        if nid == link["from_id"]:
+          source_node = node
+        elif nid == link["to_id"]:
+          target_node = node
+      if (source_node != null) && (target_node != null):
+        var link_instance = Link.new(link["id"], source_node, target_node, link["weight"])
+        links.append(link_instance)
+
 
 
 func set_input(input_dict: Dictionary):

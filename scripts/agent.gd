@@ -18,24 +18,25 @@ var nn_outputs = [
   {"name": "go_forward"},
   {"name": "go_backward"},
 ]
-var genome: Dictionary
+var genome: Dictionary = {} setget set_genome, get_genome
 
 func _ready():
   randomize()
   rot = 0
 
-  var i = 0
-  for dict in nn_inputs:
-    dict["id"] = i
-    Main.used_node_ids.append(i)
-    i += 1
-  for dict in nn_outputs:
-    dict["id"] = i
-    Main.used_node_ids.append(i)
-    i += 1
+  if genome.empty():
+    var i = 0
+    for dict in nn_inputs:
+      dict["id"] = i
+      Main.used_node_ids.append(i)
+      i += 1
+    for dict in nn_outputs:
+      dict["id"] = i
+      Main.used_node_ids.append(i)
+      i += 1
+    genome = {"input_nodes": nn_inputs, "hidden_nodes": [],
+        "output_nodes": nn_outputs}
 
-  genome = {"input_nodes": nn_inputs, "hidden_nodes": [],
-      "output_nodes": nn_outputs}
   nn = NN.new(genome)
 
 
@@ -44,6 +45,13 @@ func _physics_process(delta):
   get_nn_controls(nn, get_sensor_input())
   rotation += rotation_dir * rotation_speed * delta
   velocity = move_and_slide(velocity)
+
+
+func set_genome(_genome):
+   genome = _genome
+
+func get_genome():
+  return genome
 
 
 func get_player_input():

@@ -1,28 +1,26 @@
 extends Node2D
 
-const NUMBER_OF_AGENTS := 10
+const NUMBER_OF_SELECTED := 5
 
 var used_node_ids := []
+var genomes := [] # A list of genomes
 
-onready var agent: Node2D
-onready var spawning_area: Area2D
-onready var level: Node2D
+# onready var agent: Node2D
 
 
-func _ready():
-  randomize()
-  level = get_tree().get_nodes_in_group("level")[0]
-  spawning_area = level.get_node("SpawningArea")
-  var area_extents = spawning_area.get_node("CollisionShape2D").get_shape().get_extents()
-  for _i in range(NUMBER_OF_AGENTS):
-    agent = preload("res://agent.tscn").instance()
-    var pos_x = rand_range(spawning_area.get_position().x - area_extents.x,
-        spawning_area.get_position().x + area_extents.x)
-    var pos_y = rand_range(spawning_area.get_position().y - area_extents.y,
-        spawning_area.get_position().y + area_extents.y)
-
-    agent.set_position(Vector2(pos_x, pos_y))
-    add_child(agent)
+func mutate(parent_genomes):
+  var random = RandomNumberGenerator.new()
+  random.randomize()
+  if random.randf() > 0.95:
+    print("Mutated")
+    var mutated_genomes = parent_genomes
+    for genome in mutated_genomes:
+      for link in genome["links"]:
+        if random.randf() < 1 / genome["links"].size():
+          link["weight"] = random.randfn(link["weight"], 1.0)
+    return mutated_genomes
+  else:
+    return parent_genomes
 
 
 func generate_UID():
@@ -30,3 +28,21 @@ func generate_UID():
   while id in used_node_ids:
     id = randi() % 1000
   return id
+
+
+func select(agents):
+    agents.sort_custom(AgentSorter, "sort_ascenting")
+    var fittest_agents = agents.slice(-NUMBER_OF_SELECTED, -1)
+    print("fittest_agents length is %s" % fittest_agents.size())
+    var _genomes = []
+    for agent in fittest_agents:
+      print("agent's position.x is: %s" % agent.position.x)
+      _genomes.append(agent.genome)
+    return _genomes
+
+
+class AgentSorter:
+  static func sort_ascenting(a, b):
+    if a.position.x < b.position.x:
+      return true
+    return false
