@@ -69,7 +69,7 @@ margin_top = 470.0
 margin_right = 1238.0
 margin_bottom = 522.0
 
-[node name="Time left" type="Label" parent="Countdown"]
+[node name="TimeLeft" type="Label" parent="Countdown"]
 margin_top = 8.0
 margin_right = 122.0
 margin_bottom = 43.0
@@ -85,6 +85,31 @@ margin_right = 158.0
 margin_bottom = 43.0
 custom_fonts/font = SubResource( 3 )
 text = "20"
+align = 1
+valign = 1
+
+[node name="GenCounter" type="HBoxContainer" parent="."]
+margin_left = 54.0
+margin_top = 464.0
+margin_right = 268.0
+margin_bottom = 515.0
+
+[node name="Generation" type="Label" parent="GenCounter"]
+margin_top = 8.0
+margin_right = 156.0
+margin_bottom = 43.0
+custom_fonts/font = SubResource( 3 )
+text = "Generation: "
+align = 1
+valign = 1
+
+[node name="GenNumber" type="Label" parent="GenCounter"]
+margin_left = 160.0
+margin_top = 8.0
+margin_right = 208.0
+margin_bottom = 43.0
+custom_fonts/font = SubResource( 3 )
+text = "666"
 align = 1
 valign = 1
 

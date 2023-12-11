@@ -6,6 +6,7 @@ const TARGET_POPULATION := 22
 onready var spawning_area = get_node("SpawningArea")
 onready var timer = get_node("Timer")
 onready var countdown = get_node("Countdown/Time")
+onready var gen_counter = get_node("GenCounter/GenNumber")
 
 var number_of_agents = 22
 var agents = []
@@ -16,6 +17,8 @@ func _ready():
   if !Main.genomes.empty():
     number_of_agents = Main.genomes.size()
   generate_population()
+  Main.generation += 1
+  gen_counter.text = str(Main.generation)
 
 
 func _process(_delta):
