@@ -5,7 +5,7 @@
 [ext_resource path="res://scripts/level1.gd" type="Script" id=3]
 
 [sub_resource type="RectangleShape2D" id=1]
-extents = Vector2( 111.5, 164.5 )
+extents = Vector2( 21.5, 40 )
 
 [sub_resource type="RectangleShape2D" id=2]
 extents = Vector2( 10, 169.5 )
@@ -30,22 +30,33 @@ position = Vector2( 511, 92 )
 scale = Vector2( -59.7816, 0.802072 )
 
 [node name="Wall3" parent="." instance=ExtResource( 2 )]
-position = Vector2( 1299, 266 )
+position = Vector2( 671, 438 )
 rotation = 1.5708
-scale = Vector2( -59.7816, 0.802072 )
+scale = Vector2( 2, 0.802 )
+
+[node name="Wall6" parent="." instance=ExtResource( 2 )]
+position = Vector2( 672, 89 )
+rotation = 1.5708
+scale = Vector2( 2, 0.802 )
 
 [node name="Wall4" parent="." instance=ExtResource( 2 )]
 position = Vector2( 2, 273 )
 rotation = 1.5708
 scale = Vector2( -59.7816, 0.802072 )
 
+[node name="Wall5" parent="." instance=ExtResource( 2 )]
+position = Vector2( 2, 273 )
+rotation = 1.5708
+scale = Vector2( -59.7816, 0.802072 )
+
 [node name="SpawningArea" type="Area2D" parent="."]
-position = Vector2( 122, 266 )
+position = Vector2( 72, 266 )
 __meta__ = {
 "_edit_group_": true
 }
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SpawningArea"]
+position = Vector2( -27.5, -15 )
 shape = SubResource( 1 )
 
 [node name="FinishLine" type="Area2D" parent="."]

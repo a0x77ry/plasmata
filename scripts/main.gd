@@ -2,7 +2,7 @@ extends Node2D
 
 const NUMBER_OF_SELECTED := 5
 const MUTATION_RATE = 0.05
-const MUTATION_STANDARD_DEVIATION = 1.0
+const MUTATION_STANDARD_DEVIATION = 3.0
 
 var used_node_ids := []
 var genomes := [] # A list of genomes
@@ -53,11 +53,11 @@ func crossover_sbx(parent_genomes_original, target_polutation: int):
 
 func couple_crossover_sbx(couple_genomes, number_of_offspring):
   var random = RandomNumberGenerator.new()
-  var crossovered_genomes := []
   random.randomize()
+  var crossovered_genomes := []
   var crossovered_genome = couple_genomes[0].duplicate()
   for _i in number_of_offspring:
-    for i in range(couple_genomes[0]["links"].size()):
+    for i in range(crossovered_genome["links"].size()):
       var b = random.randfn(1.0, 0.2)
       var offspring_link_weight: float
       if random.randf() > 0.5:
@@ -84,21 +84,13 @@ func mutate(parent_genomes):
         if random.randf() < 1.0 / float(genome["links"].size()):
           link["weight"] = random.randfn(link["weight"], MUTATION_STANDARD_DEVIATION)
 
-  # for i_gen in mutated_genomes.size():
-  #   if random.randf() < MUTATION_RATE:
-  #     print("Mutated")
-  #     check = true
-  #     for i_link in mutated_genomes[i_gen]["links"].size():
-  #       if random.randf() < 1.0 / float(mutated_genomes[i_gen]["links"][i_link].size()):
-  #         mutated_genomes[i_gen]["links"][i_link]["weight"] = random.randfn(mutated_genomes[i_gen]["links"][i_link]["weight"], MUTATION_STANDARD_DEVIATION)
-
   if check:
     for i in parent_genomes.size():
       for link_i in parent_genomes[i]["links"].size():
         var original_w = parent_genomes[i]["links"][link_i]["weight"]
         var mutated_w = mutated_genomes[i]["links"][link_i]["weight"]
         if original_w != mutated_w:
-          print("Gene %s. Original: %s. Mutated: %s" % [i, original_w, mutated_w])
+          print("Genome %s. Original: %s. Mutated: %s" % [i, original_w, mutated_w])
 
   return mutated_genomes
 

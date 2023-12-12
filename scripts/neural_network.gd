@@ -2,41 +2,43 @@ class_name NeuralNetwork
 
 const INPUT_INCREMENT := 0.01
 const NO_ID := -1
+const THRESHOLD := 1.0
 
+var random = RandomNumberGenerator.new()
 var input_layer = [] 
 var output_layer = [] 
-var hidden_layer = [] 
+var hidden_layer_1 = [] 
 var links = []
 
 var genome
 
 func _init(_genome):
+  # Warning: passed by reference
   genome = _genome
+  random.randomize()
 
+  # Create nodes according to the genome (made in agent.gd)
   for input_node_gene in genome["input_nodes"]:
     var i_node = InputNode.new(input_node_gene["id"], input_node_gene["name"])
     input_layer.append(i_node)
 
-  for hidden_node_gene in genome["hidden_nodes"]:
-    var h_node = OutputNode.new(hidden_node_gene["id"])
-    hidden_layer.append(h_node)
+  for hidden_node_1_gene in genome["hidden_nodes_1"]:
+    var h1_node = HiddenNode.new(hidden_node_1_gene["id"])
+    hidden_layer_1.append(h1_node)
 
   for output_node_gene in genome["output_nodes"]:
     var o_node = OutputNode.new(output_node_gene["id"], output_node_gene["name"])
     output_layer.append(o_node)
 
-  var all_nodes = input_layer + hidden_layer + output_layer
+  var all_nodes = input_layer + hidden_layer_1 + output_layer
 
+  # Create the links between the nodes
   if !genome.has("links"):
     genome["links"] = []
-    for i_node in input_layer:
-      for o_node in output_layer:
-        var new_link = Link.new(NO_ID, i_node, o_node, randf())
-        links.append(new_link)
-        genome["links"].append({"id": new_link.id,
-            "weight": new_link.weight, "from_id": new_link.source_node.id,
-            "to_id": new_link.target_node.id})
+    connect_nn_layers(input_layer, hidden_layer_1)
+    connect_nn_layers(hidden_layer_1, output_layer)
   else:
+    # Use genome to connect the links
     for link in genome["links"]:
       var source_node
       var target_node
@@ -51,20 +53,29 @@ func _init(_genome):
         links.append(link_instance)
 
 
+func connect_nn_layers(source_layer, target_layer):
+  for s_node in source_layer:
+    for t_node in target_layer:
+      var new_link = Link.new(NO_ID, s_node, t_node, random.randfn(0.0))
+      links.append(new_link)
+      genome["links"].append({"id": new_link.id,
+          "weight": new_link.weight, "from_id": new_link.source_node.id,
+          "to_id": new_link.target_node.id})
+
 
 func set_input(input_dict: Dictionary):
   for node in input_layer:
-    node.set_value(input_dict[node.get_name()] + INPUT_INCREMENT)
+    node.set_value(input_dict[node.get_name()])
 
 
 func get_output() -> Dictionary:
-
   var output_dict = {}
   for node in output_layer:
     var node_name = node.get_name()
     output_dict[node_name] = node.get_value()
     output_dict[node_name + "_threshold"] = node.get_normalized_threshold()
 
+  # print("Output dict: %s" % output_dict)
   return output_dict
 
 
@@ -86,7 +97,8 @@ class NNNode:
     return id
 
   func _relu(value):
-    return 0 if value <= 0 else value
+    # return 0 if value <= 0 else value
+    return value
 
 
 
@@ -132,7 +144,8 @@ class OutputNode:
 
 
   func get_normalized_threshold():
-    return (incoming_links.size() / 2.0) as float
+    # return (incoming_links.size() / 2.0) as float
+    return THRESHOLD
 
 
 
@@ -143,7 +156,7 @@ class HiddenNode:
   var outgoing_links = []
 
 
-  func _init(_name="").(_name):
+  func _init(_id, _name="").(_id, _name):
     name = _name
 
 
@@ -185,3 +198,4 @@ class Link:
 
   func get_value():
     return source_node.get_value() * weight
+
