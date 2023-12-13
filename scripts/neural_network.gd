@@ -73,7 +73,7 @@ func get_output() -> Dictionary:
   for node in output_layer:
     var node_name = node.get_name()
     output_dict[node_name] = node.get_value()
-    output_dict[node_name + "_threshold"] = node.get_normalized_threshold()
+    # output_dict[node_name + "_threshold"] = node.get_normalized_threshold()
 
   # print("Output dict: %s" % output_dict)
   return output_dict

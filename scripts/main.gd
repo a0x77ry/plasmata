@@ -27,11 +27,12 @@ func select_roulette(agents):
   var total_distance := 0.0
   var _genomes = []
   for agent in agents:
-    # total_distance += pow(agent.position.x, 2.0)
-    total_distance += agent.position.x
+    total_distance += pow(agent.position.x, 2.0)
+    # total_distance += agent.position.x
   while _genomes.size() < ceil(agents.size() / 2.0):
     for agent in agents:
-      var selection_probability = agent.position.x / total_distance
+      # var selection_probability = agent.position.x / total_distance
+      var selection_probability = pow(agent.position.x, 2.0) / total_distance
       # print("Selection Probability: %s" % selection_probability)
       if random.randf() < selection_probability:
         _genomes.append(agent.genome.duplicate())
@@ -49,6 +50,7 @@ func crossover_sbx(parent_genomes_original, target_polutation: int):
   while parent_genomes.size() >= 2:
     var couple := [parent_genomes.pop_at(random.randi_range(0, parent_genomes.size() - 1)),
         parent_genomes.pop_at(random.randi_range(0, parent_genomes.size() - 1))]
+
     offspring_genomes.append_array(couple_crossover_sbx(couple, (target_polutation / original_gens_size) * 2))
     # print("Number of offspring: %s" % ((target_polutation / original_gens_size) * 2))
   # print("Offspring genomes size after crossover: %s" % offspring_genomes.size())
@@ -62,8 +64,8 @@ func couple_crossover_sbx(couple_genomes, number_of_offspring):
   var crossovered_genome = couple_genomes[0].duplicate()
   for _i in range(number_of_offspring):
     for i in range(crossovered_genome["links"].size()):
-      var b = random.randfn(1.0, 0.5)
-      var c = random.randfn(1.0, 0.5)
+      var b = random.randfn(1.0, 0.2)
+      var c = random.randfn(1.0, 0.2)
       var offspring_link_weight_1: float
       var offspring_link_w_shift_1: float
       var offspring_link_weight_2: float
@@ -78,13 +80,13 @@ func couple_crossover_sbx(couple_genomes, number_of_offspring):
       offspring_link_weight_2 = ((1.0 - b) * p0_w + (1.0 + b) * p1_w) / 2.0
       offspring_link_w_shift_2 = ((1.0 - c) * p0_ws + (1.0 + c) * p1_ws) / 2.0
 
-      if p0_w != p1_w or p0_ws != p1_ws:
-        print("Parent 0 weight: %s" % p0_w)
-        print("Parent 1 weight: %s" % p1_w)
-        print("Offspring weight: %s" % offspring_link_weight_1)
-        print("Parent 0 w_shift: %s" % p0_ws)
-        print("Parent 1 w_shift: %s" % p1_ws)
-        print("Offspring w_shift: %s" % offspring_link_w_shift_1)
+      # if p0_w != p1_w or p0_ws != p1_ws:
+      #   print("Parent 0 weight: %s" % p0_w)
+      #   print("Parent 1 weight: %s" % p1_w)
+      #   print("Offspring weight: %s" % offspring_link_weight_1)
+      #   print("Parent 0 w_shift: %s" % p0_ws)
+      #   print("Parent 1 w_shift: %s" % p1_ws)
+      #   print("Offspring w_shift: %s" % offspring_link_w_shift_1)
 
       crossovered_genome["links"][i]["weight"] = offspring_link_weight_1
       crossovered_genome["links"][i]["w_shift"] = offspring_link_w_shift_1
@@ -102,7 +104,7 @@ func mutate(parent_genomes):
   for genome in mutated_genomes:
     if random.randf() < MUTATION_RATE:
       print("Mutated")
-      check = true
+      check = false
       for link in genome["links"]:
         if random.randf() < 1.0 / float(genome["links"].size()):
           link["weight"] = random.randfn(link["weight"], MUTATION_STANDARD_DEVIATION)

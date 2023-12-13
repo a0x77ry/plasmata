@@ -16,6 +16,7 @@ var rot
 var nn: NN
 var nn_inputs = [
   {"name": "rotation"},
+  {"name": "inverse_rotation"},
 ]
 var nn_outputs = [
   {"name": "go_right"},
@@ -70,9 +71,10 @@ func get_sensor_input():
   var current_rot = get_rotation()
   # Normalized rotation in positive radians
   var newrot = (current_rot if current_rot > 0 else current_rot + TAU) / TAU
+  var invrot = 1 - newrot
   # var newrot = current_rot / PI
   # var newrot = current_rot
-  return {"rotation": newrot}
+  return {"rotation": newrot, "inverse_rotation": invrot}
 
 
 func get_nn_controls(_nn: NN, sensor_input: Dictionary):
@@ -95,8 +97,8 @@ func get_nn_controls(_nn: NN, sensor_input: Dictionary):
   # nn_rotation = nn_output["go_right"] - nn_output["go_left"]
   # nn_speed = nn_output["go_forward"] - nn_output["go_backward"]
   nn_speed = nn_output["go_forward"]
-  # var real_speed = clamp(nn_speed * speed, -200.0, 300.0)
-  var real_speed = 200.0 if nn_speed > 0 else 0.0
+  var real_speed = clamp(nn_speed * speed, 0.0, 200.0)
+  # var real_speed = 200.0 if nn_speed > 0 else 0.0
   velocity = Vector2(real_speed, 0).rotated(rotation)
 
 
