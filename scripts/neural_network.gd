@@ -56,7 +56,7 @@ func _init(_genome):
 func connect_nn_layers(source_layer, target_layer):
   for s_node in source_layer:
     for t_node in target_layer:
-      var new_link = Link.new(NO_ID, s_node, t_node, random.randfn(0.0))
+      var new_link = Link.new(NO_ID, s_node, t_node, random.randf_range(-1.0, 1.0))
       links.append(new_link)
       genome["links"].append({"id": new_link.id,
           "weight": new_link.weight, "from_id": new_link.source_node.id,
@@ -96,9 +96,9 @@ class NNNode:
   func get_id():
     return id
 
-  func _relu(value):
+  func _relu(val):
     # return 0 if value <= 0 else value
-    return value
+    return val
 
 
 
@@ -109,7 +109,7 @@ class InputNode:
   var outgoing_links = []
 
   func _init(_id, _name, _value=randf()).(_id, _name):
-    value = _value
+    value = _value 
 
   func set_value(_value):
     value = _value
@@ -126,10 +126,12 @@ class OutputNode:
   extends NNNode
 
   var incoming_links = []
+  var value: float
 
 
-  func _init(_id, _name="").(_id, _name):
+  func _init(_id, _name="", _value=randf()).(_id, _name):
     name = _name
+    value = _value
 
 
   func get_value():
@@ -154,9 +156,11 @@ class HiddenNode:
 
   var incoming_links = []
   var outgoing_links = []
+  var value: float
 
 
-  func _init(_id, _name="").(_id, _name):
+  func _init(_id, _name="", _value=randf()).(_id, _name):
+    value = _value
     name = _name
 
 
@@ -183,7 +187,7 @@ class Link:
   var weight: float
 
 
-  func _init(_id, _source_node: NNNode, _target_node: NNNode, _weight=randf()):
+  func _init(_id, _source_node: NNNode, _target_node: NNNode, _weight):
     if _id < 0:
       id = Main.generate_UID()
     else:

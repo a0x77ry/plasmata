@@ -4,6 +4,7 @@ extends KinematicBody2D
 # export (float) var rotation_speed = 3.0
 export (int) var speed = 50
 export (float) var rotation_speed = 1.0 
+export (int) var number_of_hidden_nodes = 8
 
 const NN = preload("res://scripts/neural_network.gd")
 
@@ -28,7 +29,8 @@ var genome: Dictionary = {} setget set_genome, get_genome
 func _ready():
   randomize()
   rot = 0
-  var number_of_hidden_nodes = ceil((float(nn_inputs.size()) * 2.0) / 3.0) + nn_outputs.size()
+  # var number_of_hidden_nodes = ceil((float(nn_inputs.size()) * 2.0) / 3.0) + nn_outputs.size()
+  # var number_of_hidden_nodes = 8
 
   if genome.empty():
     var i = 0
@@ -121,7 +123,8 @@ func get_nn_controls(_nn: NN, sensor_input: Dictionary):
   # nn_rotation = nn_output["go_right"] - nn_output["go_left"]
   # nn_speed = nn_output["go_forward"] - nn_output["go_backward"]
   nn_speed = nn_output["go_forward"]
-  var real_speed = clamp(nn_speed * speed, -200.0, 300.0)
+  # var real_speed = clamp(nn_speed * speed, -200.0, 300.0)
+  var real_speed = 200.0 if nn_speed > 0 else - 200.0
   velocity = Vector2(real_speed, 0).rotated(rotation)
 
 
