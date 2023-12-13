@@ -19,9 +19,9 @@ var nn_inputs = [
 ]
 var nn_outputs = [
   {"name": "go_right"},
-  {"name": "go_left"},
+  # {"name": "go_left"},
   {"name": "go_forward"},
-  {"name": "go_backward"},
+  # {"name": "go_backward"},
 ]
 var nn_h1 = []
 var genome: Dictionary = {} setget set_genome, get_genome
@@ -66,40 +66,12 @@ func get_genome():
   return genome
 
 
-func get_player_input():
-  rotation_dir = 0
-  velocity = Vector2()
-  if Input.is_action_pressed("right"):
-    go_right()
-  if Input.is_action_pressed("left"):
-    go_left()
-  if Input.is_action_pressed("down"):
-    go_backward()
-  if Input.is_action_pressed("up"):
-    go_forward()
-
-func go_right():
-	rotation_dir += 1
-
-func go_left():
-	rotation_dir -= 1
-
-func go_forward():
-	velocity = Vector2(speed, 0).rotated(rotation)
-
-func go_backward():
-	velocity = Vector2((-speed / 2.0), 0).rotated(rotation)
-
-
 func get_sensor_input():
   var current_rot = get_rotation()
   # Normalized rotation in positive radians
-  var newrot = ((current_rot if current_rot > 0 else current_rot + TAU) / TAU) + 0.5
+  var newrot = (current_rot if current_rot > 0 else current_rot + TAU) / TAU
   # var newrot = current_rot / PI
   # var newrot = current_rot
-  # if rot != newrot:
-  #   rot = newrot
-  #   print(rot)
   return {"rotation": newrot}
 
 
@@ -119,12 +91,12 @@ func get_nn_controls(_nn: NN, sensor_input: Dictionary):
   #   go_backward()
 
   # nn_rotation = clamp(nn_output["go_right"] - nn_output["go_left"], -4.0, 4.0)
-  nn_rotation = clamp(nn_output["go_right"], -4.0, 4.0)
+  nn_rotation = clamp(nn_output["go_right"], -8.0, 8.0)
   # nn_rotation = nn_output["go_right"] - nn_output["go_left"]
   # nn_speed = nn_output["go_forward"] - nn_output["go_backward"]
   nn_speed = nn_output["go_forward"]
   # var real_speed = clamp(nn_speed * speed, -200.0, 300.0)
-  var real_speed = 200.0 if nn_speed > 0 else - 200.0
+  var real_speed = 200.0 if nn_speed > 0 else 0.0
   velocity = Vector2(real_speed, 0).rotated(rotation)
 
 

@@ -50,6 +50,7 @@ func generate_population():
     if !Main.genomes.empty():
       agent.set_genome(Main.genomes[i])
     agent.set_position(Vector2(pos_x, pos_y))
+    # agent.rotation = Main.init_rot
     agent.rotation = rand_range(-PI, PI)
     agents.append(agent)
     agent.add_to_group("agents")

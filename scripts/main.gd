@@ -1,12 +1,13 @@
 extends Node2D
 
-const NUMBER_OF_SELECTED := 5
+const NUMBER_OF_SELECTED := 10
 const MUTATION_RATE = 0.05
 const MUTATION_STANDARD_DEVIATION = 3.0
 
 var used_node_ids := []
 var genomes := [] # A list of genomes
 var generation := 0
+var init_rot = rand_range(-PI, PI)
 
 
 func select_naive(agents):
@@ -26,10 +27,12 @@ func select_roulette(agents):
   var total_distance := 0.0
   var _genomes = []
   for agent in agents:
+    # total_distance += pow(agent.position.x, 2.0)
     total_distance += agent.position.x
   while _genomes.size() < ceil(agents.size() / 2.0):
     for agent in agents:
       var selection_probability = agent.position.x / total_distance
+      # print("Selection Probability: %s" % selection_probability)
       if random.randf() < selection_probability:
         _genomes.append(agent.genome.duplicate())
   return _genomes
@@ -40,6 +43,7 @@ func crossover_sbx(parent_genomes_original, target_polutation: int):
   var random = RandomNumberGenerator.new()
   var parent_genomes = parent_genomes_original.duplicate()
   var original_gens_size = parent_genomes.size()
+  print("Parent genomes size: %s" % parent_genomes.size())
   random.randomize()
   var offspring_genomes := []
   while parent_genomes.size() >= 2:
@@ -56,17 +60,36 @@ func couple_crossover_sbx(couple_genomes, number_of_offspring):
   random.randomize()
   var crossovered_genomes := []
   var crossovered_genome = couple_genomes[0].duplicate()
-  for _i in number_of_offspring:
+  for _i in range(number_of_offspring):
     for i in range(crossovered_genome["links"].size()):
-      var b = random.randfn(1.0, 0.2)
-      var offspring_link_weight: float
-      if random.randf() > 0.5:
-        offspring_link_weight = ((1.0 + b) * couple_genomes[0]["links"][i]["weight"] 
-            + (1 - b) * couple_genomes[1]["links"][i]["weight"]) / 2.0
-      else:
-        offspring_link_weight = ((1.0 - b) * couple_genomes[0]["links"][i]["weight"] 
-            + (1 + b) * couple_genomes[1]["links"][i]["weight"]) / 2.0
-      crossovered_genome["links"][i]["weight"] = offspring_link_weight
+      var b = random.randfn(1.0, 0.5)
+      var c = random.randfn(1.0, 0.5)
+      var offspring_link_weight_1: float
+      var offspring_link_w_shift_1: float
+      var offspring_link_weight_2: float
+      var offspring_link_w_shift_2: float
+
+      var p0_w = couple_genomes[0]["links"][i]["weight"]
+      var p1_w = couple_genomes[1]["links"][i]["weight"]
+      var p0_ws = couple_genomes[0]["links"][i]["w_shift"]
+      var p1_ws = couple_genomes[1]["links"][i]["w_shift"]
+      offspring_link_weight_1 = ((1.0 + b) * p0_w + (1.0 - b) * p1_w) / 2.0
+      offspring_link_w_shift_1 = ((1.0 + c) * p0_ws + (1.0 - c) * p1_ws) / 2.0
+      offspring_link_weight_2 = ((1.0 - b) * p0_w + (1.0 + b) * p1_w) / 2.0
+      offspring_link_w_shift_2 = ((1.0 - c) * p0_ws + (1.0 + c) * p1_ws) / 2.0
+
+      if p0_w != p1_w or p0_ws != p1_ws:
+        print("Parent 0 weight: %s" % p0_w)
+        print("Parent 1 weight: %s" % p1_w)
+        print("Offspring weight: %s" % offspring_link_weight_1)
+        print("Parent 0 w_shift: %s" % p0_ws)
+        print("Parent 1 w_shift: %s" % p1_ws)
+        print("Offspring w_shift: %s" % offspring_link_w_shift_1)
+
+      crossovered_genome["links"][i]["weight"] = offspring_link_weight_1
+      crossovered_genome["links"][i]["w_shift"] = offspring_link_w_shift_1
+      crossovered_genome["links"][i]["weight"] = offspring_link_weight_2
+      crossovered_genome["links"][i]["w_shift"] = offspring_link_w_shift_2
     crossovered_genomes.append(crossovered_genome)
   return crossovered_genomes
 
@@ -83,14 +106,19 @@ func mutate(parent_genomes):
       for link in genome["links"]:
         if random.randf() < 1.0 / float(genome["links"].size()):
           link["weight"] = random.randfn(link["weight"], MUTATION_STANDARD_DEVIATION)
+        if random.randf() < 1.0 / float(genome["links"].size()):
+          link["w_shift"] = random.randfn(link["w_shift"], MUTATION_STANDARD_DEVIATION)
 
   if check:
     for i in parent_genomes.size():
       for link_i in parent_genomes[i]["links"].size():
         var original_w = parent_genomes[i]["links"][link_i]["weight"]
         var mutated_w = mutated_genomes[i]["links"][link_i]["weight"]
-        if original_w != mutated_w:
+        var original_w_s = parent_genomes[i]["links"][link_i]["w_shift"]
+        var mutated_w_s = mutated_genomes[i]["links"][link_i]["w_shift"]
+        if original_w != mutated_w || original_w_s != mutated_w_s:
           print("Genome %s. Original: %s. Mutated: %s" % [i, original_w, mutated_w])
+          print("Genome %s. Original shift: %s. Mutated shift: %s" % [i, original_w_s, mutated_w_s])
 
   return mutated_genomes
 
