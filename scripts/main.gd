@@ -7,7 +7,7 @@ const MUTATION_STANDARD_DEVIATION = 3.0
 var used_node_ids := []
 var genomes := [] # A list of genomes
 var generation := 0
-var init_rot = rand_range(-PI, PI)
+# var init_rot = rand_range(-PI, PI)
 
 
 func select_naive(agents):
@@ -30,6 +30,7 @@ func select_roulette(agents):
     total_distance += pow(agent.position.x, 2.0)
     # total_distance += agent.position.x
   while _genomes.size() < ceil(agents.size() / 2.0):
+    print("Attempting to select. Generation: %s" % generation)
     for agent in agents:
       # var selection_probability = agent.position.x / total_distance
       var selection_probability = pow(agent.position.x, 2.0) / total_distance
@@ -43,16 +44,22 @@ func crossover_sbx(parent_genomes_original, target_polutation: int):
   # print("Parent genomes size: %s" % parent_genomes.size())
   var random = RandomNumberGenerator.new()
   var parent_genomes = parent_genomes_original.duplicate()
-  var original_gens_size = parent_genomes.size()
-  print("Parent genomes size: %s" % parent_genomes.size())
+  var original_genomes_size = parent_genomes.size()
+  # print("Parent genomes size: %s" % parent_genomes.size())
   random.randomize()
   var offspring_genomes := []
-  while parent_genomes.size() >= 2:
-    var couple := [parent_genomes.pop_at(random.randi_range(0, parent_genomes.size() - 1)),
-        parent_genomes.pop_at(random.randi_range(0, parent_genomes.size() - 1))]
+  # while parent_genomes.size() >= 2:
+  #   var couple := [parent_genomes.pop_at(random.randi_range(0, parent_genomes.size() - 1)),
+  #       parent_genomes.pop_at(random.randi_range(0, parent_genomes.size() - 1))]
+  #
+  #   offspring_genomes.append_array(couple_crossover_sbx(couple, (target_polutation / original_genomes_size) * 2))
+  #   print("Number of offspring: %s" % ((target_polutation / original_genomes_size) * 2))
+  for _i in range(parent_genomes.size() / 2):
+    var couple := [parent_genomes[random.randi_range(0, parent_genomes.size() - 1)],
+        parent_genomes[random.randi_range(0, parent_genomes.size() - 1)]]
 
-    offspring_genomes.append_array(couple_crossover_sbx(couple, (target_polutation / original_gens_size) * 2))
-    # print("Number of offspring: %s" % ((target_polutation / original_gens_size) * 2))
+    offspring_genomes.append_array(couple_crossover_sbx(couple, (target_polutation / original_genomes_size) * 2))
+  #   print("Number of offspring: %s" % ((target_polutation / original_genomes_size) * 2))
   # print("Offspring genomes size after crossover: %s" % offspring_genomes.size())
   return offspring_genomes
 
@@ -93,6 +100,7 @@ func couple_crossover_sbx(couple_genomes, number_of_offspring):
       crossovered_genome["links"][i]["weight"] = offspring_link_weight_2
       crossovered_genome["links"][i]["w_shift"] = offspring_link_w_shift_2
     crossovered_genomes.append(crossovered_genome)
+  # print("Couple crossover returning %s offspring" % crossovered_genomes.size())
   return crossovered_genomes
 
 
@@ -103,13 +111,18 @@ func mutate(parent_genomes):
   var mutated_genomes = parent_genomes.duplicate(true)
   for genome in mutated_genomes:
     if random.randf() < MUTATION_RATE:
-      print("Mutated")
       check = false
       for link in genome["links"]:
         if random.randf() < 1.0 / float(genome["links"].size()):
+          print("Weight Mutated")
+          print("Original: %s" % link["weight"])
           link["weight"] = random.randfn(link["weight"], MUTATION_STANDARD_DEVIATION)
+          print("Mutated: %s" % link["weight"])
         if random.randf() < 1.0 / float(genome["links"].size()):
+          print("Weight Shift Mutated")
+          print("Original: %s" % link["w_shift"])
           link["w_shift"] = random.randfn(link["w_shift"], MUTATION_STANDARD_DEVIATION)
+          print("Mutated: %s" % link["w_shift"])
 
   if check:
     for i in parent_genomes.size():
