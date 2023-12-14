@@ -1,7 +1,7 @@
 extends Node2D
 
 # const NUMBER_OF_SELECTED := 5
-const TARGET_POPULATION := 22
+const TARGET_POPULATION := 42
 
 onready var spawning_area = get_node("SpawningArea")
 onready var timer = get_node("Timer")
@@ -52,6 +52,7 @@ func generate_population():
     agent.set_position(Vector2(pos_x, pos_y))
     # agent.rotation = Main.init_rot
     agent.rotation = rand_range(-PI, PI)
+    agent.timer = get_node("Timer")
     agents.append(agent)
     agent.add_to_group("agents")
     add_child(agent)

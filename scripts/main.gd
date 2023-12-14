@@ -1,8 +1,9 @@
 extends Node2D
 
 const NUMBER_OF_SELECTED := 10
-const MUTATION_RATE = 0.05
-const MUTATION_STANDARD_DEVIATION = 3.0
+const MUTATION_RATE = 0.1
+const MUTATION_STANDARD_DEVIATION = 2.0
+const EXPECTED_MUTATED_GENES = 2.0
 
 var used_node_ids := []
 var genomes := [] # A list of genomes
@@ -30,22 +31,18 @@ func select_roulette(agents):
     total_distance += pow(agent.position.x, 2.0)
     # total_distance += agent.position.x
   while _genomes.size() < ceil(agents.size() / 2.0):
-    print("Attempting to select. Generation: %s" % generation)
     for agent in agents:
       # var selection_probability = agent.position.x / total_distance
       var selection_probability = pow(agent.position.x, 2.0) / total_distance
-      # print("Selection Probability: %s" % selection_probability)
       if random.randf() < selection_probability:
         _genomes.append(agent.genome.duplicate())
   return _genomes
 
 
 func crossover_sbx(parent_genomes_original, target_polutation: int):
-  # print("Parent genomes size: %s" % parent_genomes.size())
   var random = RandomNumberGenerator.new()
   var parent_genomes = parent_genomes_original.duplicate()
   var original_genomes_size = parent_genomes.size()
-  # print("Parent genomes size: %s" % parent_genomes.size())
   random.randomize()
   var offspring_genomes := []
   # while parent_genomes.size() >= 2:
@@ -113,12 +110,12 @@ func mutate(parent_genomes):
     if random.randf() < MUTATION_RATE:
       check = false
       for link in genome["links"]:
-        if random.randf() < 1.0 / float(genome["links"].size()):
+        if random.randf() < EXPECTED_MUTATED_GENES / float(genome["links"].size()):
           print("Weight Mutated")
           print("Original: %s" % link["weight"])
           link["weight"] = random.randfn(link["weight"], MUTATION_STANDARD_DEVIATION)
           print("Mutated: %s" % link["weight"])
-        if random.randf() < 1.0 / float(genome["links"].size()):
+        if random.randf() < EXPECTED_MUTATED_GENES / float(genome["links"].size()):
           print("Weight Shift Mutated")
           print("Original: %s" % link["w_shift"])
           link["w_shift"] = random.randfn(link["w_shift"], MUTATION_STANDARD_DEVIATION)
