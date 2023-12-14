@@ -31,6 +31,7 @@ var nn_outputs = [
   # {"name": "go_backward"},
 ]
 var nn_h1 = []
+var nn_h2 = []
 var genome: Dictionary = {} setget set_genome, get_genome
 
 func _ready():
@@ -48,12 +49,15 @@ func _ready():
     for _i_hidden in range(number_of_hidden_nodes):
       nn_h1.append({"id": i})
       i += 1
+    for _i_hidden in range(number_of_hidden_nodes):
+      nn_h2.append({"id": i})
+      i += 1
     for dict in nn_outputs:
       dict["id"] = i
       Main.used_node_ids.append(i)
       i += 1
     genome = {"input_nodes": nn_inputs, "hidden_nodes_1": nn_h1,
-        "output_nodes": nn_outputs}
+        "hidden_nodes_2": nn_h2, "output_nodes": nn_outputs}
 
   nn = NN.new(genome)
 

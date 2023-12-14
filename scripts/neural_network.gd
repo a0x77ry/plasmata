@@ -8,6 +8,7 @@ var random = RandomNumberGenerator.new()
 var input_layer = [] 
 var output_layer = [] 
 var hidden_layer_1 = [] 
+var hidden_layer_2 = [] 
 var links = []
 
 var genome
@@ -26,17 +27,22 @@ func _init(_genome):
     var h1_node = HiddenNode.new(hidden_node_1_gene["id"])
     hidden_layer_1.append(h1_node)
 
+  for hidden_node_2_gene in genome["hidden_nodes_2"]:
+    var h2_node = HiddenNode.new(hidden_node_2_gene["id"])
+    hidden_layer_2.append(h2_node)
+
   for output_node_gene in genome["output_nodes"]:
     var o_node = OutputNode.new(output_node_gene["id"], output_node_gene["name"])
     output_layer.append(o_node)
 
-  var all_nodes = input_layer + hidden_layer_1 + output_layer
+  var all_nodes = input_layer + hidden_layer_1 + hidden_layer_2 + output_layer
 
   # Create the links between the nodes
   if !genome.has("links"):
     genome["links"] = []
     connect_nn_layers(input_layer, hidden_layer_1)
-    connect_nn_layers(hidden_layer_1, output_layer)
+    connect_nn_layers(hidden_layer_1, hidden_layer_2)
+    connect_nn_layers(hidden_layer_2, output_layer)
   else:
     # Use genome to connect the links
     for link in genome["links"]:
