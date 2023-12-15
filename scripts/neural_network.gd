@@ -55,17 +55,18 @@ func _init(_genome):
         elif nid == link["to_id"]:
           target_node = node
       if (source_node != null) && (target_node != null):
-        var link_instance = Link.new(link["id"], source_node, target_node, link["weight"], link["w_shift"])
+        # var link_instance = Link.new(link["id"], source_node, target_node, link["weight"], link["w_shift"])
+        var link_instance = Link.new(link["id"], source_node, target_node, link["weight"])
         links.append(link_instance)
 
 
 func connect_nn_layers(source_layer, target_layer):
   for s_node in source_layer:
     for t_node in target_layer:
-      var new_link = Link.new(NO_ID, s_node, t_node, random.randf_range(-1.0, 1.0), random.randf_range(-1.0, 1.0))
+      var new_link = Link.new(NO_ID, s_node, t_node, random.randf_range(-1.0, 1.0))
       links.append(new_link)
       genome["links"].append({"id": new_link.id,
-          "weight": new_link.weight, "w_shift": new_link.w_shift, "from_id": new_link.source_node.id,
+          "weight": new_link.weight, "from_id": new_link.source_node.id,
           "to_id": new_link.target_node.id})
 
 
@@ -191,10 +192,9 @@ class Link:
   var source_node: NNNode
   var target_node: NNNode
   var weight: float
-  var w_shift: float
 
 
-  func _init(_id, _source_node: NNNode, _target_node: NNNode, _weight, _w_shift):
+  func _init(_id, _source_node: NNNode, _target_node: NNNode, _weight):
     if _id < 0:
       id = Main.generate_UID()
     else:
@@ -202,12 +202,11 @@ class Link:
     source_node = _source_node
     target_node = _target_node
     weight = _weight
-    w_shift = _w_shift
     
     source_node.add_outgoing_link(self)
     target_node.add_incoming_link(self)
 
 
   func get_value():
-    return (source_node.get_value() * weight) + w_shift
+    return source_node.get_value() * weight
 
