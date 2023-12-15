@@ -3,6 +3,7 @@ class_name NeuralNetwork
 const INPUT_INCREMENT := 0.01
 const NO_ID := -1
 const THRESHOLD := 1.0
+const E = 2.7182
 
 var random = RandomNumberGenerator.new()
 var input_layer = [] 
@@ -104,8 +105,10 @@ class NNNode:
     return id
 
   func _relu(val):
-    # return 0 if value <= 0 else value
-    return val
+    return 0 if val <= 0 else val
+
+  func _sigmoid(val):
+    return 1 / (1 + pow(E, -val))
 
 
 
@@ -145,7 +148,7 @@ class OutputNode:
     var _value := 0.0
     for link in incoming_links:
       _value += link.get_value()
-    return _relu(_value)
+    return _value
 
 
   func add_incoming_link(link: Link):
@@ -175,7 +178,7 @@ class HiddenNode:
     var _value := 0.0
     for link in incoming_links:
       _value += link.get_value()
-    return _relu(_value)
+    return _value
 
 
   func add_incoming_link(link: Link):

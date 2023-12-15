@@ -23,7 +23,7 @@ var rot
 var nn: NN
 var nn_inputs = [
   {"name": "rotation"},
-  {"name": "inverse_rotation"},
+  # {"name": "inverse_rotation"},
   {"name": "time_since_birth"},
   {"name": "pos_x"},
   {"name": "pos_y"},
@@ -90,7 +90,7 @@ func get_sensor_input():
   var newrot = (current_rot if current_rot > 0 else current_rot + TAU) / TAU
   # var newrot = current_rot / PI
   # var newrot = current_rot
-  var invrot = 1 - newrot
+  # var invrot = 1 - newrot
   var time_since_birth = (timer.wait_time - timer.time_left) / timer.wait_time
   var norm_pos_x = global_position.x / level_width
   var norm_pos_y = global_position.y / level_height
@@ -113,7 +113,8 @@ func get_sensor_input():
     ray_f_down_distance = distance / ray_length
 
 
-  return {"rotation": newrot, "inverse_rotation": invrot,
+  return {"rotation": newrot,
+      # "inverse_rotation": invrot,
       "time_since_birth": time_since_birth, "pos_x": norm_pos_x,
       "pos_y": norm_pos_y, "ray_f_distance": ray_f_distance,
       "ray_f_up_distance": ray_f_up_distance, "ray_f_down_distance": ray_f_down_distance}
@@ -127,7 +128,6 @@ func get_nn_controls(_nn: NN, sensor_input: Dictionary):
 
   # nn_rotation = clamp(nn_output["go_right"] - nn_output["go_left"], -4.0, 4.0)
   nn_rotation = clamp(nn_output["go_right"], -8.0, 8.0)
-  # nn_rotation = nn_output["go_right"] - nn_output["go_left"]
   # nn_speed = nn_output["go_forward"] - nn_output["go_backward"]
   nn_speed = nn_output["go_forward"]
   var real_speed = clamp(nn_speed * speed, 0.0, 200.0)
