@@ -3,7 +3,8 @@ extends Node2D
 const NUMBER_OF_SELECTED := 10
 const MUTATION_RATE = 0.1
 const MUTATION_STANDARD_DEVIATION = 2.0
-const EXPECTED_MUTATED_GENES = 2.0
+const EXPECTED_MUTATED_GENES = 3.0
+const DEVIATION_FROM_PARENTS = 0.1
 
 var used_node_ids := []
 var genomes := [] # A list of genomes
@@ -68,8 +69,8 @@ func couple_crossover_sbx(couple_genomes, number_of_offspring):
   var crossovered_genome = couple_genomes[0].duplicate()
   for _i in range(number_of_offspring):
     for i in range(crossovered_genome["links"].size()):
-      var b = random.randfn(1.0, 0.2)
-      var c = random.randfn(1.0, 0.2)
+      var b = random.randfn(1.0, DEVIATION_FROM_PARENTS)
+      var c = random.randfn(1.0, DEVIATION_FROM_PARENTS)
       var offspring_link_weight_1: float
       var offspring_link_w_shift_1: float
       var offspring_link_weight_2: float
@@ -111,15 +112,15 @@ func mutate(parent_genomes):
       check = false
       for link in genome["links"]:
         if random.randf() < EXPECTED_MUTATED_GENES / float(genome["links"].size()):
-          print("Weight Mutated")
-          print("Original: %s" % link["weight"])
+          # print("Weight Mutated")
+          # print("Original: %s" % link["weight"])
           link["weight"] = random.randfn(link["weight"], MUTATION_STANDARD_DEVIATION)
-          print("Mutated: %s" % link["weight"])
+          # print("Mutated: %s" % link["weight"])
         if random.randf() < EXPECTED_MUTATED_GENES / float(genome["links"].size()):
-          print("Weight Shift Mutated")
-          print("Original: %s" % link["w_shift"])
+          # print("Weight Shift Mutated")
+          # print("Original: %s" % link["w_shift"])
           link["w_shift"] = random.randfn(link["w_shift"], MUTATION_STANDARD_DEVIATION)
-          print("Mutated: %s" % link["w_shift"])
+          # print("Mutated: %s" % link["w_shift"])
 
   if check:
     for i in parent_genomes.size():

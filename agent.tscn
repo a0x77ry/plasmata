@@ -24,4 +24,19 @@ shape = SubResource( 1 )
 [node name="Timer" type="Timer" parent="."]
 autostart = true
 
+[node name="ray_forward" type="RayCast2D" parent="."]
+enabled = true
+cast_to = Vector2( 200, 0 )
+collision_mask = 2
+
+[node name="ray_f_up" type="RayCast2D" parent="."]
+enabled = true
+cast_to = Vector2( 150, -100 )
+collision_mask = 2
+
+[node name="ray_f_down" type="RayCast2D" parent="."]
+enabled = true
+cast_to = Vector2( 150, 100 )
+collision_mask = 2
+
 [connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]

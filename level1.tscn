@@ -24,30 +24,42 @@ script = ExtResource( 3 )
 [node name="Wall" parent="." instance=ExtResource( 2 )]
 position = Vector2( 477, 438 )
 scale = Vector2( -59.7816, 0.802072 )
+collision_layer = 3
 
 [node name="Wall2" parent="." instance=ExtResource( 2 )]
 position = Vector2( 511, 92 )
 scale = Vector2( -59.7816, 0.802072 )
+collision_layer = 3
 
 [node name="Wall3" parent="." instance=ExtResource( 2 )]
-position = Vector2( 660, 347 )
+position = Vector2( 477, 407 )
 rotation = 1.5708
 scale = Vector2( 6.88, 0.802 )
+collision_layer = 3
 
 [node name="Wall6" parent="." instance=ExtResource( 2 )]
-position = Vector2( 676, 47 )
+position = Vector2( 810, 177 )
 rotation = 1.5708
-scale = Vector2( 2, 0.802 )
+scale = Vector2( 4.8, 0.802 )
+collision_layer = 3
+
+[node name="Wall7" parent="." instance=ExtResource( 2 )]
+position = Vector2( 1053, 523 )
+rotation = 1.5708
+scale = Vector2( 4.8, 0.802 )
+collision_layer = 3
 
 [node name="Wall4" parent="." instance=ExtResource( 2 )]
 position = Vector2( 2, 273 )
 rotation = 1.5708
 scale = Vector2( -59.7816, 0.802072 )
+collision_layer = 3
 
 [node name="Wall5" parent="." instance=ExtResource( 2 )]
 position = Vector2( 2, 273 )
 rotation = 1.5708
 scale = Vector2( -59.7816, 0.802072 )
+collision_layer = 3
 
 [node name="SpawningArea" type="Area2D" parent="."]
 position = Vector2( 72, 266 )

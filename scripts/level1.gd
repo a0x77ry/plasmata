@@ -1,7 +1,7 @@
 extends Node2D
 
 # const NUMBER_OF_SELECTED := 5
-const TARGET_POPULATION := 42
+const TARGET_POPULATION := 22
 
 onready var spawning_area = get_node("SpawningArea")
 onready var timer = get_node("Timer")

@@ -4,11 +4,15 @@ extends KinematicBody2D
 # export (float) var rotation_speed = 3.0
 export (int) var speed = 50
 export (float) var rotation_speed = 1.0 
-export (int) var number_of_hidden_nodes = 8
+export (int) var number_of_hidden_nodes = 10
 export (int) var level_width = 1300
 export (int) var level_height = 350
 
 const NN = preload("res://scripts/neural_network.gd")
+
+onready var ray_forward = get_node("ray_forward")
+onready var ray_f_up = get_node("ray_f_up")
+onready var ray_f_down = get_node("ray_f_down")
 
 var timer: Timer
 var nn_rotation := 0.0
@@ -23,6 +27,9 @@ var nn_inputs = [
   {"name": "time_since_birth"},
   {"name": "pos_x"},
   {"name": "pos_y"},
+  {"name": "ray_f_distance"},
+  {"name": "ray_f_up_distance"},
+  {"name": "ray_f_down_distance"},
 ]
 var nn_outputs = [
   {"name": "go_right"},
@@ -81,15 +88,35 @@ func get_sensor_input():
   var current_rot = get_rotation()
   # Normalized rotation in positive radians
   var newrot = (current_rot if current_rot > 0 else current_rot + TAU) / TAU
+  # var newrot = current_rot / PI
+  # var newrot = current_rot
   var invrot = 1 - newrot
   var time_since_birth = (timer.wait_time - timer.time_left) / timer.wait_time
   var norm_pos_x = global_position.x / level_width
   var norm_pos_y = global_position.y / level_height
-  # var newrot = current_rot / PI
-  # var newrot = current_rot
+
+  var ray_f_distance = 1.0
+  if ray_forward.is_colliding():
+    var distance = global_position.distance_to(ray_forward.get_collision_point())
+    ray_f_distance = distance / ray_forward.cast_to.x
+
+  var ray_f_up_distance = 1.0
+  if ray_f_up.is_colliding():
+    var distance = global_position.distance_to(ray_f_up.get_collision_point())
+    var ray_length = Vector2.ZERO.distance_to(Vector2(ray_f_up.cast_to.x, ray_f_up.cast_to.y))
+    ray_f_up_distance = distance / ray_length
+
+  var ray_f_down_distance = 1.0
+  if ray_f_down.is_colliding():
+    var distance = global_position.distance_to(ray_f_down.get_collision_point())
+    var ray_length = Vector2.ZERO.distance_to(Vector2(ray_f_down.cast_to.x, ray_f_up.cast_to.y))
+    ray_f_down_distance = distance / ray_length
+
+
   return {"rotation": newrot, "inverse_rotation": invrot,
       "time_since_birth": time_since_birth, "pos_x": norm_pos_x,
-      "pos_y": norm_pos_y}
+      "pos_y": norm_pos_y, "ray_f_distance": ray_f_distance,
+      "ray_f_up_distance": ray_f_up_distance, "ray_f_down_distance": ray_f_down_distance}
 
 
 func get_nn_controls(_nn: NN, sensor_input: Dictionary):
