@@ -2,7 +2,7 @@ extends Node2D
 
 const NUMBER_OF_SELECTED := 10
 const MUTATION_RATE = 0.1
-const MUTATION_STANDARD_DEVIATION = 1.0
+const MUTATION_STANDARD_DEVIATION = 2.0
 const EXPECTED_MUTATED_GENES = 3.0
 const DEVIATION_FROM_PARENTS = 0.1
 
@@ -75,11 +75,17 @@ func couple_crossover_sbx(couple_genomes, number_of_offspring):
       var b = random.randfn(1.0, DEVIATION_FROM_PARENTS)
       var offspring_link_weight_1: float
       var offspring_link_weight_2: float
+      var offspring_link_bias_1: float
+      var offspring_link_bias_2: float
 
       var p0_w = couple_genomes[0]["links"][i]["weight"]
       var p1_w = couple_genomes[1]["links"][i]["weight"]
+      var p0_b = couple_genomes[0]["links"][i]["bias"]
+      var p1_b = couple_genomes[1]["links"][i]["bias"]
       offspring_link_weight_1 = ((1.0 + b) * p0_w + (1.0 - b) * p1_w) / 2.0
       offspring_link_weight_2 = ((1.0 - b) * p0_w + (1.0 + b) * p1_w) / 2.0
+      offspring_link_bias_1 = ((1.0 + b) * p0_b + (1.0 - b) * p1_b) / 2.0
+      offspring_link_bias_2 = ((1.0 - b) * p0_b + (1.0 + b) * p1_b) / 2.0
 
       # if p0_w != p1_w or p0_ws != p1_ws:
       #   print("Parent 0 weight: %s" % p0_w)
@@ -91,6 +97,8 @@ func couple_crossover_sbx(couple_genomes, number_of_offspring):
 
       crossovered_genome["links"][i]["weight"] = offspring_link_weight_1
       crossovered_genome["links"][i]["weight"] = offspring_link_weight_2
+      crossovered_genome["links"][i]["bias"] = offspring_link_bias_1
+      crossovered_genome["links"][i]["bias"] = offspring_link_bias_2
     crossovered_genomes.append(crossovered_genome)
   # print("Couple crossover returning %s offspring" % crossovered_genomes.size())
   return crossovered_genomes
@@ -110,6 +118,9 @@ func mutate(parent_genomes):
           # print("Original: %s" % link["weight"])
           link["weight"] = random.randfn(link["weight"], MUTATION_STANDARD_DEVIATION)
           # print("Mutated: %s" % link["weight"])
+        if random.randf() < EXPECTED_MUTATED_GENES / float(genome["links"].size()):
+          link["bias"] = random.randfn(link["bias"], MUTATION_STANDARD_DEVIATION)
+
 
   if check:
     for i in parent_genomes.size():

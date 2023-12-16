@@ -102,22 +102,25 @@ func get_sensor_input():
   var norm_pos_x = global_position.x / level_width
   var norm_pos_y = global_position.y / level_height
 
-  var ray_f_distance = 1.0
+  var ray_f_distance = 0.0 # is was 1.0
   if ray_forward.is_colliding():
     var distance = global_position.distance_to(ray_forward.get_collision_point())
-    ray_f_distance = distance / ray_forward.cast_to.x
+    # ray_f_distance = distance / ray_forward.cast_to.x
+    ray_f_distance = (ray_forward.cast_to.x - distance) / ray_forward.cast_to.x
 
-  var ray_f_up_distance = 1.0
+  var ray_f_up_distance = 0.0
   if ray_f_up.is_colliding():
     var distance = global_position.distance_to(ray_f_up.get_collision_point())
     var ray_length = Vector2.ZERO.distance_to(Vector2(ray_f_up.cast_to.x, ray_f_up.cast_to.y))
-    ray_f_up_distance = distance / ray_length
+    # ray_f_up_distance = distance / ray_length
+    ray_f_up_distance = (ray_length - distance) / ray_length
 
-  var ray_f_down_distance = 1.0
+  var ray_f_down_distance = 0.0
   if ray_f_down.is_colliding():
     var distance = global_position.distance_to(ray_f_down.get_collision_point())
     var ray_length = Vector2.ZERO.distance_to(Vector2(ray_f_down.cast_to.x, ray_f_up.cast_to.y))
-    ray_f_down_distance = distance / ray_length
+    # ray_f_down_distance = distance / ray_length
+    ray_f_down_distance = (ray_length - distance) / ray_length
 
   var inp_dict = {"rotation": newrot,
       "inverse_rotation": invrot,
