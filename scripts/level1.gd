@@ -1,14 +1,15 @@
 extends Node2D
 
-# const NUMBER_OF_SELECTED := 5
-const TARGET_POPULATION := 22
+const TARGET_POPULATION := 32
 
 onready var spawning_area = get_node("SpawningArea")
 onready var timer = get_node("Timer")
 onready var countdown = get_node("Countdown/Time")
 onready var gen_counter = get_node("GenCounter/GenNumber")
+onready var curve = get_node("Path2D").curve
 
-var number_of_agents = 22
+var number_of_agents = TARGET_POPULATION
+var number_of_extra_agents = 0
 var agents = []
 
 
@@ -30,7 +31,7 @@ func _process(_delta):
 
 func change_generation():
     # var parent_genomes = Main.select_naive(agents)
-    var parent_genomes = Main.select_roulette(agents)
+    var parent_genomes = Main.select_roulette(curve, agents)
     var crossovered_genomes = Main.crossover_sbx(parent_genomes, TARGET_POPULATION)
     Main.genomes = Main.mutate(crossovered_genomes)
     var err = get_tree().change_scene("res://level1.tscn")
@@ -41,13 +42,13 @@ func change_generation():
 func generate_population():
   var agent: Node2D
   var area_extents = spawning_area.get_node("CollisionShape2D").shape.extents
-  for i in range(number_of_agents):
+  for i in range(number_of_agents + number_of_extra_agents):
     agent = preload("res://agent.tscn").instance()
     var pos_x = rand_range(spawning_area.get_position().x - area_extents.x,
         spawning_area.get_position().x + area_extents.x)
     var pos_y = rand_range(spawning_area.get_position().y - area_extents.y,
         spawning_area.get_position().y + area_extents.y)
-    if !Main.genomes.empty():
+    if !Main.genomes.empty() && i < number_of_agents: 
       agent.set_genome(Main.genomes[i])
     agent.set_position(Vector2(pos_x, pos_y))
     # agent.rotation = Main.init_rot

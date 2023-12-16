@@ -110,6 +110,9 @@ class NNNode:
   func _sigmoid(val):
     return 1 / (1 + pow(E, -val))
 
+  func _tanh(val):
+    return (2.0 / (1.0 + pow(E, -2.0 * val))) - 1.0
+
 
 
 class InputNode:

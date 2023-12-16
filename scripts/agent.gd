@@ -2,35 +2,40 @@ extends KinematicBody2D
 
 # export (int) var speed = 200
 # export (float) var rotation_speed = 3.0
-export (int) var speed = 50
-export (float) var rotation_speed = 1.0 
-export (int) var number_of_hidden_nodes = 10
-export (int) var level_width = 1300
-export (int) var level_height = 350
+export (float) var speed = 70.0
+export (float) var rotation_speed = 1.5
+export (float) var speed_limit = 500.0
+export (float) var rotation_speed_limit = 10.0
+export (int) var number_of_hidden_nodes = 8
+# export (int) var level_width = 1300
+# export (int) var level_height = 350
 
 const NN = preload("res://scripts/neural_network.gd")
 
 onready var ray_forward = get_node("ray_forward")
 onready var ray_f_up = get_node("ray_f_up")
 onready var ray_f_down = get_node("ray_f_down")
+onready var timer = get_parent().get_node("Timer")
+onready var level_width = get_tree().get_root().size.x
+onready var level_height = get_tree().get_root().size.y
 
-var timer: Timer
 var nn_rotation := 0.0
 var nn_speed := 0.0
 var velocity = Vector2()
 var rotation_dir = 0
 var rot
 var nn: NN
-var nn_inputs = [
-  {"name": "rotation"},
-  # {"name": "inverse_rotation"},
-  {"name": "time_since_birth"},
-  {"name": "pos_x"},
-  {"name": "pos_y"},
-  {"name": "ray_f_distance"},
-  {"name": "ray_f_up_distance"},
-  {"name": "ray_f_down_distance"},
+var nn_activated_inputs = [
+  "rotation",
+  "inverse_rotation",
+  "time_since_birth",
+  "pos_x",
+  "pos_y",
+  "ray_f_distance",
+  "ray_f_up_distance",
+  "ray_f_down_distance",
 ]
+var nn_inputs = []
 var nn_outputs = [
   {"name": "go_right"},
   # {"name": "go_left"},
@@ -46,6 +51,8 @@ func _ready():
   rot = 0
   # var number_of_hidden_nodes = ceil((float(nn_inputs.size()) * 2.0) / 3.0) + nn_outputs.size()
   # var number_of_hidden_nodes = 8
+  for input in nn_activated_inputs:
+    nn_inputs.append({"name": input})
 
   if genome.empty():
     var i = 0
@@ -90,7 +97,7 @@ func get_sensor_input():
   var newrot = (current_rot if current_rot > 0 else current_rot + TAU) / TAU
   # var newrot = current_rot / PI
   # var newrot = current_rot
-  # var invrot = 1 - newrot
+  var invrot = 1 - newrot
   var time_since_birth = (timer.wait_time - timer.time_left) / timer.wait_time
   var norm_pos_x = global_position.x / level_width
   var norm_pos_y = global_position.y / level_height
@@ -112,12 +119,17 @@ func get_sensor_input():
     var ray_length = Vector2.ZERO.distance_to(Vector2(ray_f_down.cast_to.x, ray_f_up.cast_to.y))
     ray_f_down_distance = distance / ray_length
 
-
-  return {"rotation": newrot,
-      # "inverse_rotation": invrot,
+  var inp_dict = {"rotation": newrot,
+      "inverse_rotation": invrot,
       "time_since_birth": time_since_birth, "pos_x": norm_pos_x,
       "pos_y": norm_pos_y, "ray_f_distance": ray_f_distance,
       "ray_f_up_distance": ray_f_up_distance, "ray_f_down_distance": ray_f_down_distance}
+
+  var activated_input_dict := {}
+  for input in nn_activated_inputs:
+    activated_input_dict[input] = inp_dict[input]
+
+  return activated_input_dict
 
 
 func get_nn_controls(_nn: NN, sensor_input: Dictionary):
@@ -127,10 +139,10 @@ func get_nn_controls(_nn: NN, sensor_input: Dictionary):
   var nn_output = _nn.get_output() # a dict
 
   # nn_rotation = clamp(nn_output["go_right"] - nn_output["go_left"], -4.0, 4.0)
-  nn_rotation = clamp(nn_output["go_right"], -8.0, 8.0)
+  nn_rotation = clamp(nn_output["go_right"], -rotation_speed_limit, rotation_speed_limit)
   # nn_speed = nn_output["go_forward"] - nn_output["go_backward"]
   nn_speed = nn_output["go_forward"]
-  var real_speed = clamp(nn_speed * speed, 0.0, 200.0)
+  var real_speed = clamp(nn_speed * speed, 0.0, speed_limit)
   # var real_speed = 200.0 if nn_speed > 0 else 0.0
   velocity = Vector2(real_speed, 0).rotated(rotation)
 

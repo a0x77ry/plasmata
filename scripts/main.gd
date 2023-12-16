@@ -2,7 +2,7 @@ extends Node2D
 
 const NUMBER_OF_SELECTED := 10
 const MUTATION_RATE = 0.1
-const MUTATION_STANDARD_DEVIATION = 2.0
+const MUTATION_STANDARD_DEVIATION = 1.0
 const EXPECTED_MUTATED_GENES = 3.0
 const DEVIATION_FROM_PARENTS = 0.1
 
@@ -23,18 +23,21 @@ func select_naive(agents):
   return _genomes
 
 
-func select_roulette(agents):
+func select_roulette(curve, agents):
   var random = RandomNumberGenerator.new()
   random.randomize()
   var total_distance := 0.0
   var _genomes = []
+
+  var offset = 0.0
   for agent in agents:
-    total_distance += pow(agent.position.x, 2.0)
-    # total_distance += agent.position.x
+  #   total_distance += pow(agent.global_position.x, 2.0)
+    total_distance += pow(curve.get_closest_offset(agent.position), 2.0)
   while _genomes.size() < ceil(agents.size() / 2.0):
     for agent in agents:
-      # var selection_probability = agent.position.x / total_distance
-      var selection_probability = pow(agent.position.x, 2.0) / total_distance
+      offset = curve.get_closest_offset(agent.position)
+      # var selection_probability = pow(agent.global_position.x, 2.0) / total_distance
+      var selection_probability = pow(offset, 2.0) / total_distance
       if random.randf() < selection_probability:
         _genomes.append(agent.genome.duplicate())
   return _genomes

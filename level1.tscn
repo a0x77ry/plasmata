@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://fonts/Jura-Light.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://wall.tscn" type="PackedScene" id=2]
@@ -17,6 +17,11 @@ outline_color = Color( 0.0117647, 0, 0, 1 )
 use_filter = true
 font_data = ExtResource( 1 )
 
+[sub_resource type="Curve2D" id=4]
+_data = {
+"points": PoolVector2Array( 0, 0, 0, 0, 61, 253, 0, 0, 0, 0, 352, 375, 0, 0, 0, 0, 346, 158, 0, 0, 0, 0, 620, 160, 0, 0, 0, 0, 628, 400, 0, 0, 0, 0, 898, 393, 0, 0, 0, 0, 895, 138, 0, 0, 0, 0, 1207, 134, 0, 0, 0, 0, 1209, 363, 0, 0, 0, 0, 1287, 359 )
+}
+
 [node name="Level1" type="Node2D" groups=["level"]]
 position = Vector2( 0, 131 )
 script = ExtResource( 3 )
@@ -32,21 +37,21 @@ scale = Vector2( -59.7816, 0.802072 )
 collision_layer = 3
 
 [node name="Wall3" parent="." instance=ExtResource( 2 )]
-position = Vector2( 477, 407 )
+position = Vector2( 488, 330 )
 rotation = 1.5708
-scale = Vector2( 6.88, 0.802 )
+scale = Vector2( 6.88, 11.122 )
 collision_layer = 3
 
 [node name="Wall6" parent="." instance=ExtResource( 2 )]
-position = Vector2( 810, 177 )
+position = Vector2( 770, 228 )
 rotation = 1.5708
-scale = Vector2( 4.8, 0.802 )
+scale = Vector2( 8.36, 11.482 )
 collision_layer = 3
 
 [node name="Wall7" parent="." instance=ExtResource( 2 )]
-position = Vector2( 1053, 523 )
+position = Vector2( 1053, 322 )
 rotation = 1.5708
-scale = Vector2( 4.8, 0.802 )
+scale = Vector2( 8.28, 12.602 )
 collision_layer = 3
 
 [node name="Wall4" parent="." instance=ExtResource( 2 )]
@@ -82,7 +87,7 @@ position = Vector2( 0, -37.5 )
 shape = SubResource( 2 )
 
 [node name="Timer" type="Timer" parent="."]
-wait_time = 10.0
+wait_time = 20.0
 one_shot = true
 autostart = true
 
@@ -135,6 +140,9 @@ custom_fonts/font = SubResource( 3 )
 text = "666"
 align = 1
 valign = 1
+
+[node name="Path2D" type="Path2D" parent="."]
+curve = SubResource( 4 )
 
 [connection signal="body_entered" from="FinishLine" to="." method="_on_FinishLine_body_entered"]
 [connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]
