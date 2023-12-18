@@ -209,11 +209,14 @@ class Link:
     source_node = _source_node
     target_node = _target_node
     weight = _weight
-    
+    bias = _bias
+
     source_node.add_outgoing_link(self)
     target_node.add_incoming_link(self)
 
 
   func get_value():
-    return (source_node.get_value() * weight) + bias
+    var val = source_node.get_value()
+    # print("Val: %s, Weight: %s, Bias: %s" % [val, weight, bias])
+    return (val * weight) + bias
 

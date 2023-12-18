@@ -3,7 +3,7 @@ extends Node2D
 const NUMBER_OF_SELECTED := 10
 const MUTATION_RATE = 0.1
 const MUTATION_STANDARD_DEVIATION = 2.0
-const EXPECTED_MUTATED_GENES = 3.0
+const EXPECTED_MUTATED_GENES = 1.0
 const DEVIATION_FROM_PARENTS = 0.1
 
 var used_node_ids := []
@@ -117,6 +117,7 @@ func mutate(parent_genomes):
           # print("Weight Mutated")
           # print("Original: %s" % link["weight"])
           link["weight"] = random.randfn(link["weight"], MUTATION_STANDARD_DEVIATION)
+          # link["weight"] = -link["weight"]
           # print("Mutated: %s" % link["weight"])
         if random.randf() < EXPECTED_MUTATED_GENES / float(genome["links"].size()):
           link["bias"] = random.randfn(link["bias"], MUTATION_STANDARD_DEVIATION)

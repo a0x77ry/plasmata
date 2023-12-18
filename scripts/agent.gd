@@ -4,9 +4,9 @@ extends KinematicBody2D
 # export (float) var rotation_speed = 3.0
 export (float) var speed = 70.0
 export (float) var rotation_speed = 1.5
-export (float) var speed_limit = 500.0
-export (float) var rotation_speed_limit = 10.0
-export (int) var number_of_hidden_nodes = 8
+export (float) var speed_limit = 400.0
+export (float) var rotation_speed_limit = 8.0
+export (int) var number_of_hidden_nodes = 6
 # export (int) var level_width = 1300
 # export (int) var level_height = 350
 
@@ -27,7 +27,7 @@ var rot
 var nn: NN
 var nn_activated_inputs = [
   "rotation",
-  "inverse_rotation",
+  # "inverse_rotation",
   "time_since_birth",
   "pos_x",
   "pos_y",
@@ -143,6 +143,7 @@ func get_nn_controls(_nn: NN, sensor_input: Dictionary):
 
   # nn_rotation = clamp(nn_output["go_right"] - nn_output["go_left"], -4.0, 4.0)
   nn_rotation = clamp(nn_output["go_right"], -rotation_speed_limit, rotation_speed_limit)
+  # nn_rotation = 4.0 if nn_output["go_right"] > 0 else -4.0
   # nn_speed = nn_output["go_forward"] - nn_output["go_backward"]
   nn_speed = nn_output["go_forward"]
   var real_speed = clamp(nn_speed * speed, 0.0, speed_limit)
