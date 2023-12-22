@@ -23,8 +23,8 @@ func _ready():
 
 
 func _process(_delta):
-  if Input.is_action_just_pressed("ui_accept"):
-    change_generation()
+  # if Input.is_action_just_pressed("ui_accept"):
+  #   change_generation()
 
   countdown.text = String("%.1f" % timer.time_left)
 
@@ -34,9 +34,16 @@ func change_generation():
     var parent_genomes = Main.select_roulette(curve, agents)
     var crossovered_genomes = Main.crossover_sbx(parent_genomes, TARGET_POPULATION)
     Main.genomes = Main.mutate(crossovered_genomes)
+    Main.speciate()
+    # breakpoint
     var err = get_tree().change_scene("res://level1.tscn")
     if err:
       print("Failed to load scene with error: %s" % err)
+
+
+func add_species(genome):
+  var sp = {"prototype": genome, "members": [genome], "avg_fitness": []}
+  Main.species.append(sp)
 
 
 func generate_population():
