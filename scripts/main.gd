@@ -5,6 +5,7 @@ const MUTATION_RATE = 0.1
 const MUTATION_STANDARD_DEVIATION = 2.0
 const EXPECTED_MUTATED_GENES = 1.0
 const DEVIATION_FROM_PARENTS = 0.1
+const SELECTION_EXPONENT = 2.0
 const C1 := 1.0
 const C2 := 1.0
 const C3 := 0.4
@@ -21,6 +22,14 @@ var generation := 0
 
 func _ready():
   random.randomize()
+
+
+func calculate_fitness(curve: Curve2D, agents: Array) -> Array:
+  var _genomes = []
+  for agent in agents:
+    agent.genome["fitness"] = curve.get_closest_offset(agent.position)
+    _genomes.append(agent.genome)
+  return _genomes
 
 
 func select_naive(agents):
@@ -42,12 +51,12 @@ func select_roulette(curve, agents):
   var offset = 0.0
   for agent in agents:
   #   total_distance += pow(agent.global_position.x, 2.0)
-    total_distance += pow(curve.get_closest_offset(agent.position), 2.0)
+    total_distance += pow(curve.get_closest_offset(agent.position), SELECTION_EXPONENT)
   while _genomes.size() < ceil(agents.size() / 2.0):
     for agent in agents:
       offset = curve.get_closest_offset(agent.position)
       # var selection_probability = pow(agent.global_position.x, 2.0) / total_distance
-      var selection_probability = pow(offset, 2.0) / total_distance
+      var selection_probability = pow(offset, SELECTION_EXPONENT) / total_distance
       if random.randf() < selection_probability:
         agent.genome["fitness"] = offset
         _genomes.append(agent.genome.duplicate())
@@ -180,7 +189,7 @@ func speciate():
         if compatibility_distance < dt:
           is_different_species = false
           sp["members"].append(genome)
-          break
+          break # we don't want a genome to belong to 2 different species
       if is_different_species || species.empty():
         add_species(genome)
 
