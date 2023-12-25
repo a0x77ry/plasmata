@@ -135,6 +135,7 @@ func mutate(parent_genomes):
 
 
 func speciate():
+    species = []
     for genome in genomes:
       var gen_all_nodes = genome["input_nodes"] + genome["hidden_nodes_1"] \
           + genome["output_nodes"] + genome["links"];
@@ -143,47 +144,45 @@ func speciate():
         gen_all_ids.append(node["id"])
       var gen_max_id = gen_all_ids.max()
 
-      if !species.empty():
-        var is_different_species := true
-        for sp in species:
-          var N = max(genome.size(), sp["prototype"].size()) # find N
+      var is_different_species := true
+      for sp in species:
+        var N = max(genome.size(), sp["prototype"].size()) # find N
 
-          var prot = sp["prototype"]
-          var prot_all_nodes = prot["input_nodes"] + prot["hidden_nodes_1"] \
-              + prot["output_nodes"] + prot["links"]
-          var prot_all_ids = []
-          for node in prot_all_nodes:
-            prot_all_ids.append(node["id"])
-          var prot_max_id = prot_all_ids.max()
-          var excess_genes_num = abs(gen_max_id - prot_max_id) # find excess genes
+        var prot = sp["prototype"]
+        var prot_all_nodes = prot["input_nodes"] + prot["hidden_nodes_1"] \
+            + prot["output_nodes"] + prot["links"]
+        var prot_all_ids = []
+        for node in prot_all_nodes:
+          prot_all_ids.append(node["id"])
+        var prot_max_id = prot_all_ids.max()
+        var excess_genes_num = abs(gen_max_id - prot_max_id) # find excess genes
 
-          var min_id = min(gen_max_id, prot_max_id)
-          var disjoined_genes_num = 0
-          var weight_diffs = []
-          for gen_n in gen_all_nodes:
-            if !prot_all_ids.has(gen_n["id"]) and gen_n["id"] <= min_id:
-              disjoined_genes_num += 1 #find disjoined genes
+        var min_id = min(gen_max_id, prot_max_id)
+        var disjoined_genes_num = 0
+        var weight_diffs = []
+        for gen_n in gen_all_nodes:
+          if !prot_all_ids.has(gen_n["id"]) and gen_n["id"] <= min_id:
+            disjoined_genes_num += 1 #find disjoined genes
 
-            for prot_n in prot_all_nodes:
-              if prot_n.has("weight") && prot_n["id"] == gen_n["id"]:
-                assert(gen_n.has("weight"), "Error in change_generation(). pron_n is a link while gen_n isn't")
-                weight_diffs.append(abs(prot_n["weight"] - gen_n["weight"]))
-          var weight_diffs_sum = 0.0
-          for weight_diff in weight_diffs:
-            weight_diffs_sum += weight_diff
-          var avg_weight_diff = weight_diffs_sum / weight_diffs.size() # find average weight differences
+          for prot_n in prot_all_nodes:
+            if prot_n.has("weight") && prot_n["id"] == gen_n["id"]:
+              assert(gen_n.has("weight"), "Error in change_generation(). pron_n is a link while gen_n isn't")
+              weight_diffs.append(abs(prot_n["weight"] - gen_n["weight"]))
+        var weight_diffs_sum = 0.0
+        for weight_diff in weight_diffs:
+          weight_diffs_sum += weight_diff
+        var avg_weight_diff = weight_diffs_sum / weight_diffs.size() # find average weight differences
 
-          var compatibility_distance = ((C1 * excess_genes_num) / N) \
-              + ((C2 * disjoined_genes_num) / N) \
-              + (C3 * avg_weight_diff)
-          print("Compatibility distance: %s" % compatibility_distance)
-          if compatibility_distance < dt:
-            is_different_species = false
-            # TODO: add genome as member of sp
-        if is_different_species:
-          add_species(genome)
-      else: # species are empty
-          add_species(genome)
+        var compatibility_distance = ((C1 * excess_genes_num) / N) \
+            + ((C2 * disjoined_genes_num) / N) \
+            + (C3 * avg_weight_diff)
+        print("Compatibility distance: %s" % compatibility_distance)
+        if compatibility_distance < dt:
+          is_different_species = false
+          sp["members"].append(genome)
+          break
+      if is_different_species || species.empty():
+        add_species(genome)
 
 
 func add_species(genome):

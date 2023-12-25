@@ -30,20 +30,15 @@ func _process(_delta):
 
 
 func change_generation():
+    Main.speciate()
     # var parent_genomes = Main.select_naive(agents)
     var parent_genomes = Main.select_roulette(curve, agents)
     var crossovered_genomes = Main.crossover_sbx(parent_genomes, TARGET_POPULATION)
     Main.genomes = Main.mutate(crossovered_genomes)
-    Main.speciate()
     # breakpoint
     var err = get_tree().change_scene("res://level1.tscn")
     if err:
       print("Failed to load scene with error: %s" % err)
-
-
-func add_species(genome):
-  var sp = {"prototype": genome, "members": [genome], "avg_fitness": []}
-  Main.species.append(sp)
 
 
 func generate_population():
@@ -55,7 +50,9 @@ func generate_population():
         spawning_area.get_position().x + area_extents.x)
     var pos_y = rand_range(spawning_area.get_position().y - area_extents.y,
         spawning_area.get_position().y + area_extents.y)
-    if !Main.genomes.empty() && i < number_of_agents: 
+    # if !Main.genomes.empty() && i < number_of_agents: 
+    if Main.genomes.size() - 1 >= i && i < number_of_agents: 
+    # if !Main.generation > 0 && i < number_of_agents: 
       agent.set_genome(Main.genomes[i])
     agent.set_position(Vector2(pos_x, pos_y))
     # agent.rotation = Main.init_rot

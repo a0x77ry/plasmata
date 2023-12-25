@@ -69,6 +69,8 @@ func _ready():
       i += 1
     genome = {"input_nodes": nn_inputs, "hidden_nodes_1": nn_h1,
         "output_nodes": nn_outputs, "fitness": 0}
+    print("New genome")
+    Main.genomes.append(genome)
 
   nn = NN.new(genome)
 
