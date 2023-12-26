@@ -30,10 +30,11 @@ func _process(_delta):
 
 
 func change_generation():
-    Main.speciate()
-    # var parent_genomes = Main.select_naive(agents)
-    var parent_genomes = Main.select_roulette(curve, agents)
-    var crossovered_genomes = Main.crossover_sbx(parent_genomes, TARGET_POPULATION)
+    Main.calculate_fitness(curve, agents) # gives each of Main.genomes a fitness value
+    Main.speciate() # populates Main.species with Main.genomes
+    Main.share_fitness() # creates an adjusted_fitness in each species
+    Main.select_in_species(agents.size() * Main.SELECTION_RATE) # populates avg_fitness and parent_genomes for each species
+    var crossovered_genomes = Main.crossover()
     Main.genomes = Main.mutate(crossovered_genomes)
     # breakpoint
     var err = get_tree().change_scene("res://level1.tscn")

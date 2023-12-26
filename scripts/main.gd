@@ -10,6 +10,7 @@ const C1 := 1.0
 const C2 := 1.0
 const C3 := 0.4
 const dt := 0.3
+const SELECTION_RATE = 0.5
 
 
 var random = RandomNumberGenerator.new()
@@ -24,41 +25,39 @@ func _ready():
   random.randomize()
 
 
-func calculate_fitness(curve: Curve2D, agents: Array) -> Array:
+func calculate_fitness(curve: Curve2D, agents: Array):
   var _genomes = []
   for agent in agents:
     agent.genome["fitness"] = curve.get_closest_offset(agent.position)
-    _genomes.append(agent.genome)
-  return _genomes
-
-
-func select_naive(agents):
-  agents.sort_custom(AgentSorter, "sort_ascenting")
-  var fittest_agents = agents.slice(-NUMBER_OF_SELECTED, -1)
-  # print("fittest_agents length is %s" % fittest_agents.size())
-  var _genomes = []
-  for agent in fittest_agents:
-    # print("agent's position.x is: %s" % agent.position.x)
     _genomes.append(agent.genome.duplicate())
-    return _genomes
+  genomes = _genomes
+
+
+func share_fitness():
+  for sp in species:
+    for member_genome in sp["members"]:
+      member_genome["adjusted_fitness"] = member_genome["fitness"] / sp.size()
 
 
 func select_in_species(number_of_expected_parents):
-  random.randomize()
+  # random.randomize()
   # calculate the avg_fitness for each species
-  var total_species_fitness = 0.0
+  var all_species_adj_fitness = 0.0
   for sp in species:
+    var total_adjusted_fitness = 0.0
     var total_fitness = 0.0
     for member_genome in sp["members"]:
       total_fitness += member_genome["fitness"]
+      total_adjusted_fitness += member_genome["adjusted_fitness"]
     sp["avg_fitness"] = total_fitness / float(sp["members"].size())
-    total_species_fitness += sp["avg_fitness"]
+    sp["total_adjusted_fitness"] = total_adjusted_fitness
+    all_species_adj_fitness += sp["adjusted_fitness"]
 
-  # calculate the number of offspring for each species
+  # calculate the number of parents for each species
   for sp in species:
     sp.sort_custom(GenomeSorter, "sort_ascenting")
-    var parents_number = round((sp["avg_fitness"] / total_species_fitness) 
-        * number_of_expected_parents)
+    var parents_number = round(sp["total_adjusted_fitness"] / all_species_adj_fitness) \
+        * number_of_expected_parents
     # add the last (best performing) genomes of the species
     for i in range(1, parents_number):
       sp["parent_genomes"].append(sp["members"][-i])
@@ -84,7 +83,7 @@ func select_roulette(curve, agents):
   return _genomes
 
 
-func crossover_sbx(parent_genomes_original, target_polutation: int):
+func crossover_sbx(parent_genomes_original, target_poputation: int):
   random.randomize()
   var parent_genomes = parent_genomes_original.duplicate()
   var original_genomes_size = parent_genomes.size()
@@ -99,10 +98,64 @@ func crossover_sbx(parent_genomes_original, target_polutation: int):
     var couple := [parent_genomes[random.randi_range(0, parent_genomes.size() - 1)],
         parent_genomes[random.randi_range(0, parent_genomes.size() - 1)]]
 
-    offspring_genomes.append_array(couple_crossover_sbx(couple, (target_polutation / original_genomes_size) * 2))
+    offspring_genomes.append_array(couple_crossover_sbx(couple, (target_poputation / original_genomes_size) * 2))
   #   print("Number of offspring: %s" % ((target_polutation / original_genomes_size) * 2))
   # print("Offspring genomes size after crossover: %s" % offspring_genomes.size())
   return offspring_genomes
+
+func crossover():
+  # random.randomize()
+  var crossovered_genomes := []
+  for sp in species:
+    if sp["parent_genomes"].size() % 2 != 0:
+      sp["parent_genomes"].append(sp["parent_genomes"][0]) # add a genome to become even
+    for i in range(0, floor((sp["parent_genomes"].size() - 1) * SELECTION_RATE), 2):
+      var couple_genomes = [sp["parent_genomes"][i], sp["parent_genomes"][i+1]]
+      crossovered_genomes.append(couple_crossover(couple_genomes, int(round((1.0 / SELECTION_RATE) * 2.0))))
+  return crossovered_genomes
+
+func couple_crossover(couple_genomes: Array, offspring_number: int) -> Array:
+  random.randomize()
+  var crossovered_genomes := []
+  var fittest_parent
+  var weakest_parent
+  if couple_genomes[0]["fitness"] > couple_genomes[1]["fitness"]:
+    fittest_parent = couple_genomes[0]
+    weakest_parent = couple_genomes[1]
+  else:
+    fittest_parent = couple_genomes[1]
+    weakest_parent = couple_genomes[0]
+
+  for _i in offspring_number:
+    var crossed_genome := {}
+
+    # inherit nodes inherit from the fittest parent
+    crossed_genome["input_nodes"] = [] 
+    for input_node in fittest_parent["input_nodes"]:
+      crossed_genome["input_nodes"].append(input_node)
+    crossed_genome["output_nodes"] = [] 
+    for output_node in fittest_parent["output_nodes"]:
+      crossed_genome["output_nodes"].append(output_node)
+    crossed_genome["hidden_nodes"] = [] 
+    for hidden_node in fittest_parent["hidden_nodes"]:
+      crossed_genome["hidden_nodes"].append(hidden_node)
+
+    var weakest_parent_ids = []
+    for link in weakest_parent["links"]:
+      weakest_parent_ids.append(link["id"])
+    for link in fittest_parent["links"]:
+      if link["id"] in weakest_parent_ids: # matching links, random selection
+        if random.randf() > 0.5:
+          crossed_genome["links"].append(link)
+        else:
+          for wl in weakest_parent["links"]:
+            if wl["id"] == link["id"]:
+              crossed_genome["links"].append(wl)
+      else: # excess or disjoint links, from the fittest
+        crossed_genome["links"].append(link)
+
+    crossovered_genomes.append(crossed_genome)
+  return crossovered_genomes
 
 
 func couple_crossover_sbx(couple_genomes, number_of_offspring):
@@ -227,13 +280,6 @@ func generate_UID():
   #   id = randi() % 1000
   return used_node_ids.max() + 1 
 
-
-
-class AgentSorter:
-  static func sort_ascenting(a, b):
-    if a.position.x < b.position.x:
-      return true
-    return false
 
 class GenomeSorter:
   static func sort_ascenting(a, b):
