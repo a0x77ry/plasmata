@@ -42,7 +42,7 @@ var nn_outputs = [
   {"name": "go_forward"},
   # {"name": "go_backward"},
 ]
-var nn_h1 = []
+var nn_h = []
 var genome: Dictionary = {} setget set_genome, get_genome
 
 func _ready():
@@ -54,20 +54,23 @@ func _ready():
     nn_inputs.append({"name": input})
 
   if genome.empty():
+    # create a new genome
     var i = 0
-    for dict in nn_inputs:
-      dict["id"] = i
+    for genome_input_node in nn_inputs:
+      genome_input_node["id"] = i
+      genome_input_node["outgoing_link_ids"] = []
       Main.used_node_ids.append(i)
       i += 1
-    for _i_hidden in range(number_of_hidden_nodes):
+    # for _i_hidden in range(number_of_hidden_nodes):
+    #   Main.used_node_ids.append(i)
+    #   nn_h.append({"id": i})
+    #   i += 1
+    for genome_output_node in nn_outputs:
+      genome_output_node["id"] = i
+      genome_output_node["incoming_link_ids"] = []
       Main.used_node_ids.append(i)
-      nn_h1.append({"id": i})
       i += 1
-    for dict in nn_outputs:
-      dict["id"] = i
-      Main.used_node_ids.append(i)
-      i += 1
-    genome = {"input_nodes": nn_inputs, "hidden_nodes_1": nn_h1,
+    genome = {"input_nodes": nn_inputs, "hidden_nodes": nn_h,
         "output_nodes": nn_outputs, "fitness": 0}
     print("New genome")
     Main.genomes.append(genome)

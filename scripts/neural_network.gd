@@ -8,8 +8,7 @@ const E = 2.7182
 var random = RandomNumberGenerator.new()
 var input_layer = [] 
 var output_layer = [] 
-var hidden_layer_1 = [] 
-var hidden_layer_2 = [] 
+var hidden_layer = [] 
 var links = []
 
 var genome
@@ -24,15 +23,15 @@ func _init(_genome):
     var i_node = InputNode.new(input_node_gene["id"], input_node_gene["name"])
     input_layer.append(i_node)
 
-  for hidden_node_1_gene in genome["hidden_nodes_1"]:
-    var h1_node = HiddenNode.new(hidden_node_1_gene["id"])
-    hidden_layer_1.append(h1_node)
+  for hidden_node_gene in genome["hidden_nodes"]:
+    var h_node = HiddenNode.new(hidden_node_gene["id"])
+    hidden_layer.append(h_node)
 
   for output_node_gene in genome["output_nodes"]:
     var o_node = OutputNode.new(output_node_gene["id"], output_node_gene["name"])
     output_layer.append(o_node)
 
-  var all_nodes = input_layer + hidden_layer_1 + output_layer
+  var all_nodes = input_layer + hidden_layer + output_layer
 
   # Create the links between the nodes
   if !genome.has("links"):
@@ -45,23 +44,37 @@ func _init(_genome):
       var target_node
       for node in all_nodes:
         var nid = node.id
-        if nid == link["from_id"]:
+        if nid == link["source_id"]:
           source_node = node
-        elif nid == link["to_id"]:
+        elif nid == link["target_id"]:
           target_node = node
       if (source_node != null) && (target_node != null):
-        var link_instance = Link.new(link["id"], source_node, target_node, link["weight"], link["bias"])
+        var link_instance = Link.new(link["id"], source_node, target_node,
+            link["weight"], link["bias"], link["source_id"],
+            link["target_id"])
         links.append(link_instance)
 
 
 func connect_nn_layers(source_layer, target_layer):
   for s_node in source_layer:
     for t_node in target_layer:
-      var new_link = Link.new(NO_ID, s_node, t_node, random.randf_range(-1.0, 1.0), random.randf_range(-1.0, 1.0))
+      var new_link = Link.new(NO_ID, s_node, t_node,
+          random.randf_range(-1.0, 1.0), random.randf_range(-1.0, 1.0),
+          s_node.id, t_node.id)
       links.append(new_link)
       genome["links"].append({"id": new_link.id,"bias": new_link.bias,
-          "weight": new_link.weight, "from_id": new_link.source_node.id,
-          "to_id": new_link.target_node.id})
+          "weight": new_link.weight, "source_id": new_link.source_node.id,
+          "target_id": new_link.target_node.id})
+      # add incoming_link_ids and outgoing_link_ids to the nodes involved
+      var all_genome_nodes = Main.genome["input_nodes"] \
+          + Main.genome["hidden_nodes"] \
+          + Main.genome["output_nodes"]
+      for _genome_node in all_genome_nodes:
+        if _genome_node["id"] == new_link.source_node.id:
+          _genome_node["outgoing_link_ids"].append(new_link.id)
+        elif _genome_node["id"] == new_link.target_node.id:
+          _genome_node["incoming_link_ids"].append(new_link.id)
+
 
 
 func set_input(input_dict: Dictionary):
@@ -192,9 +205,12 @@ class Link:
   var target_node: NNNode
   var weight: float
   var bias: float
+  var source_id: int
+  var target_id: int
 
 
-  func _init(_id, _source_node: NNNode, _target_node: NNNode, _weight, _bias):
+  func _init(_id, _source_node: NNNode, _target_node: NNNode, _weight, _bias,
+      _source_id, _target_id):
     if _id < 0:
       id = Main.generate_UID()
     else:
@@ -203,6 +219,8 @@ class Link:
     target_node = _target_node
     weight = _weight
     bias = _bias
+    source_id = _source_id
+    target_id = _target_id
 
     source_node.add_outgoing_link(self)
     target_node.add_incoming_link(self)

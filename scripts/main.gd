@@ -188,23 +188,54 @@ func couple_crossover_sbx(couple_genomes, number_of_offspring):
   return crossovered_genomes
 
 
+func choose_target_node(genome_source_node, _genome):
+  var candidate_nodes = _genome["hidden_nodes"] + _genome["output_nodes"]
+  var unlinked_nodes = []
+  for node in candidate_nodes:
+    var is_node_linked := false
+    for link_id in node["incoming_link_ids"]:
+      if link_id == genome_source_node["id"]:
+        is_node_linked = true
+    if !is_node_linked:
+      unlinked_nodes.append(node)
+  if !unlinked_nodes.empty():
+    var target_node
+    while target_node == null:
+      for node in unlinked_nodes:
+        if random.randf() < 1 / unlinked_nodes.size():
+          target_node = node
+          break
+    return target_node
+  else:
+    return null
+
 func mutate(parent_genomes):
   random.randomize()
   var check := false
   var mutated_genomes = parent_genomes.duplicate(true)
-  for genome in mutated_genomes:
+  for _genome in mutated_genomes:
+    var genes_number = float(_genome["links"].size()) \
+        + float(_genome["input_nodes"].size()) \
+        + float(_genome["output_nodes"].size()) \
+        + float(_genome["hidden_nodes"].size())
     if random.randf() < MUTATION_RATE:
       check = false
-      for link in genome["links"]:
-        if random.randf() < EXPECTED_MUTATED_GENES / float(genome["links"].size()):
-          # print("Weight Mutated")
-          # print("Original: %s" % link["weight"])
+      for link in _genome["links"]:
+        if random.randf() < EXPECTED_MUTATED_GENES / genes_number:
           link["weight"] = random.randfn(link["weight"], MUTATION_STANDARD_DEVIATION)
-          # link["weight"] = -link["weight"]
-          # print("Mutated: %s" % link["weight"])
-        if random.randf() < EXPECTED_MUTATED_GENES / float(genome["links"].size()):
+        if random.randf() < EXPECTED_MUTATED_GENES / genes_number:
           link["bias"] = random.randfn(link["bias"], MUTATION_STANDARD_DEVIATION)
-
+      # add a link
+      for genome_source_node in (_genome["input_nodes"] + _genome["hidden_nodes"]):
+        if random.randf() < EXPECTED_MUTATED_GENES / genes_number:
+          var genome_target_node = choose_target_node(genome_source_node, _genome)
+          var new_id = generate_UID()
+          used_node_ids.append(new_id)
+          var new_link = {"id": new_id, "weight": random.randf(), "bias": random.randf(),
+              "source_id": genome_source_node["id"],
+              "target_id": genome_target_node["id"]}
+          _genome["links"].append(new_link)
+      # TODO: add a new node and break the link
 
   if check:
     for i in parent_genomes.size():
@@ -220,7 +251,7 @@ func mutate(parent_genomes):
 func speciate():
   species = []
   for genome in genomes:
-    var gen_all_nodes = genome["input_nodes"] + genome["hidden_nodes_1"] \
+    var gen_all_nodes = genome["input_nodes"] + genome["hidden_nodes"] \
         + genome["output_nodes"] + genome["links"];
     var gen_all_ids = []
     for node in gen_all_nodes:
@@ -232,7 +263,7 @@ func speciate():
       var N = max(genome.size(), sp["prototype"].size()) # find N
 
       var prot = sp["prototype"]
-      var prot_all_nodes = prot["input_nodes"] + prot["hidden_nodes_1"] \
+      var prot_all_nodes = prot["input_nodes"] + prot["hidden_nodes"] \
           + prot["output_nodes"] + prot["links"]
       var prot_all_ids = []
       for node in prot_all_nodes:
