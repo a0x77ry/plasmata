@@ -72,10 +72,10 @@ func _ready():
       i += 1
     genome = {"input_nodes": nn_inputs, "hidden_nodes": nn_h,
         "output_nodes": nn_outputs, "fitness": 0}
-    print("New genome")
     Main.genomes.append(genome)
 
-  nn = NN.new(genome)
+  var starting_link_id = nn_inputs.size() + nn_outputs.size()
+  nn = NN.new(genome, starting_link_id)
 
 
 func _physics_process(delta):

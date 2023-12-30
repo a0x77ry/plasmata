@@ -36,7 +36,7 @@ func change_generation():
     Main.select_in_species(agents.size() * Main.SELECTION_RATE) # populates avg_fitness and parent_genomes for each species
     var crossovered_genomes = Main.crossover()
     Main.genomes = Main.mutate(crossovered_genomes)
-    # breakpoint
+    breakpoint
     var err = get_tree().change_scene("res://level1.tscn")
     if err:
       print("Failed to load scene with error: %s" % err)

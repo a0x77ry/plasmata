@@ -51,16 +51,26 @@ func select_in_species(number_of_expected_parents):
       total_adjusted_fitness += member_genome["adjusted_fitness"]
     sp["avg_fitness"] = total_fitness / float(sp["members"].size())
     sp["total_adjusted_fitness"] = total_adjusted_fitness
-    all_species_adj_fitness += sp["adjusted_fitness"]
+    all_species_adj_fitness += total_adjusted_fitness
 
   # calculate the number of parents for each species
+  # var c := 0
   for sp in species:
-    sp.sort_custom(GenomeSorter, "sort_ascenting")
-    var parents_number = round(sp["total_adjusted_fitness"] / all_species_adj_fitness) \
-        * number_of_expected_parents
+    sp["parent_genomes"].sort_custom(GenomeSorter, "sort_ascenting")
+    var parents_number = round((sp["total_adjusted_fitness"] / all_species_adj_fitness) \
+        * number_of_expected_parents)
+    parents_number = max(parents_number, 2)
+    # breakpoint
+    # c += 1
+    # print("Species: %s" % c)
     # add the last (best performing) genomes of the species
     for i in range(1, parents_number):
-      sp["parent_genomes"].append(sp["members"][-i])
+      if sp["members"].size() >= i:
+        # print("Append normal member")
+        sp["parent_genomes"].append(sp["members"][-i])
+      else:
+        # print("Append random member")
+        sp["parent_genomes"].append(sp["members"][random.randi_range(0, sp["members"].size() - 1)])
 
 
 func select_roulette(curve, agents):
@@ -107,11 +117,14 @@ func crossover():
   # random.randomize()
   var crossovered_genomes := []
   for sp in species:
+    # print(sp["parent_genomes"][0])
     if sp["parent_genomes"].size() % 2 != 0:
       sp["parent_genomes"].append(sp["parent_genomes"][0]) # add a genome to become even
     for i in range(0, floor((sp["parent_genomes"].size() - 1) * SELECTION_RATE), 2):
       var couple_genomes = [sp["parent_genomes"][i], sp["parent_genomes"][i+1]]
-      crossovered_genomes.append(couple_crossover(couple_genomes, int(round((1.0 / SELECTION_RATE) * 2.0))))
+      var couple_crossovered_genomes = couple_crossover(couple_genomes, int(round((1.0 / SELECTION_RATE) * 2.0)))
+      for _genome in couple_crossovered_genomes:
+        crossovered_genomes.append(_genome)
   return crossovered_genomes
 
 func couple_crossover(couple_genomes: Array, offspring_number: int) -> Array:
@@ -139,6 +152,7 @@ func couple_crossover(couple_genomes: Array, offspring_number: int) -> Array:
     crossed_genome["hidden_nodes"] = [] 
     for hidden_node in fittest_parent["hidden_nodes"]:
       crossed_genome["hidden_nodes"].append(hidden_node)
+    crossed_genome["links"] = []
 
     var weakest_parent_ids = []
     for link in weakest_parent["links"]:
@@ -213,7 +227,9 @@ func mutate(parent_genomes):
   random.randomize()
   var check := false
   var mutated_genomes = parent_genomes.duplicate(true)
+  # var mutated_genomes = parent_genomes.duplicate()
   for _genome in mutated_genomes:
+    # breakpoint
     var genes_number = float(_genome["links"].size()) \
         + float(_genome["input_nodes"].size()) \
         + float(_genome["output_nodes"].size()) \
@@ -235,7 +251,44 @@ func mutate(parent_genomes):
               "source_id": genome_source_node["id"],
               "target_id": genome_target_node["id"]}
           _genome["links"].append(new_link)
-      # TODO: add a new node and break the link
+      # add a new node and break the link
+      var link_to_break
+      while link_to_break == null:
+        for genome_link in _genome["links"]:
+          if random.randf() < EXPECTED_MUTATED_GENES / genes_number:
+            link_to_break = genome_link
+      link_to_break.is_enabled = false # original link disabled
+      var original_source_node
+      for genome_source_node in (_genome["input_nodes"] + _genome["hidden_nodes"]):
+        if link_to_break["source_id"] == genome_source_node["id"]:
+          original_source_node = genome_source_node
+      var original_target_node
+      for genome_target_node in (_genome["output_nodes"] + _genome["hidden_nodes"]):
+        if link_to_break["target_id"] == genome_target_node["id"]:
+          original_target_node = genome_target_node
+      var new_hnode = {"id": generate_UID(),
+          "incoming_link_ids": [],
+          "outgoing_link_ids": []}
+      _genome["hidden_nodes"].append(new_hnode) # create the new hidden node
+      # create the new links
+      var link_a = {"id": generate_UID(),
+          "source_id": original_source_node["id"],
+          "target_id": new_hnode["id"],
+          "weight": random.randf_range(-1.0, 1.0), "bias": random.randf_range(-1.0, 1.0),
+          "is_enabled": true}
+      Main.used_node_ids.append(link_a["id"])
+      _genome["links"].append(link_a)
+      var link_b = {"id": generate_UID(),
+          "source_id": new_hnode["id"],
+          "target_id": original_target_node["id"],
+          "weight": random.randf_range(-1.0, 1.0), "bias": random.randf_range(-1.0, 1.0),
+          "is_enabled": true}
+      Main.used_node_ids.append(link_b["id"])
+      _genome["links"].append(link_b)
+      new_hnode["incoming_link_ids"].append(link_a)
+      new_hnode["outgoing_link_ids"].append(link_b)
+
+
 
   if check:
     for i in parent_genomes.size():
@@ -260,7 +313,7 @@ func speciate():
 
     var is_different_species := true
     for sp in species:
-      var N = max(genome.size(), sp["prototype"].size()) # find N
+      # var N = max(genome.size(), sp["prototype"].size()) # find N
 
       var prot = sp["prototype"]
       var prot_all_nodes = prot["input_nodes"] + prot["hidden_nodes"] \
@@ -269,6 +322,7 @@ func speciate():
       for node in prot_all_nodes:
         prot_all_ids.append(node["id"])
       var prot_max_id = prot_all_ids.max()
+      var N = max(gen_max_id, prot_max_id) # find N
       var excess_genes_num = abs(gen_max_id - prot_max_id) # find excess genes
 
       var min_id = min(gen_max_id, prot_max_id)
@@ -279,6 +333,8 @@ func speciate():
           disjoined_genes_num += 1 #find disjoined genes
 
         for prot_n in prot_all_nodes:
+          # if prot_n.has("weight") && gen_n.has("weight"):
+          #   print("prot id: %s, gen id: %s" % [prot_n["id"], gen_n["id"]])
           if prot_n.has("weight") && prot_n["id"] == gen_n["id"]:
             assert(gen_n.has("weight"), "Error in change_generation(). pron_n is a link while gen_n isn't")
             weight_diffs.append(abs(prot_n["weight"] - gen_n["weight"]))
@@ -290,7 +346,7 @@ func speciate():
       var compatibility_distance = ((C1 * excess_genes_num) / N) \
           + ((C2 * disjoined_genes_num) / N) \
           + (C3 * avg_weight_diff)
-      print("Compatibility distance: %s" % compatibility_distance)
+      # print("Compatibility distance: %s" % compatibility_distance)
       if compatibility_distance < dt:
         is_different_species = false
         sp["members"].append(genome)
@@ -310,6 +366,12 @@ func generate_UID():
   # while id in used_node_ids:
   #   id = randi() % 1000
   return used_node_ids.max() + 1 
+
+
+func add_UID_in_used(id):
+  if id > used_node_ids.max():
+    used_node_ids.append(id)
+
 
 
 class GenomeSorter:
