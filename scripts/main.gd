@@ -15,14 +15,21 @@ const SELECTION_RATE = 0.5
 
 var random = RandomNumberGenerator.new()
 var used_node_ids := []
+var max_id_used := 0
 var genomes := [] # A list of genomes
 var species := [] 
 var generation := 0
+var level
 # var init_rot = rand_range(-PI, PI)
 
 
 func _ready():
   random.randomize()
+  get_level()
+
+
+func get_level():
+  level = get_tree().get_nodes_in_group("level")[0]
 
 
 func calculate_fitness(curve: Curve2D, agents: Array):
@@ -56,7 +63,8 @@ func select_in_species(number_of_expected_parents):
   # calculate the number of parents for each species
   # var c := 0
   for sp in species:
-    sp["parent_genomes"].sort_custom(GenomeSorter, "sort_ascenting")
+    # sp["parent_genomes"].sort_custom(GenomeSorter, "sort_ascenting")
+    sp["members"].sort_custom(GenomeSorter, "sort_ascenting")
     var parents_number = round((sp["total_adjusted_fitness"] / all_species_adj_fitness) \
         * number_of_expected_parents)
     parents_number = max(parents_number, 2)
@@ -116,15 +124,17 @@ func crossover_sbx(parent_genomes_original, target_poputation: int):
 func crossover():
   # random.randomize()
   var crossovered_genomes := []
+  # breakpoint
   for sp in species:
-    # print(sp["parent_genomes"][0])
     if sp["parent_genomes"].size() % 2 != 0:
       sp["parent_genomes"].append(sp["parent_genomes"][0]) # add a genome to become even
-    for i in range(0, floor((sp["parent_genomes"].size() - 1) * SELECTION_RATE), 2):
+    # for i in range(0, floor((sp["parent_genomes"].size() - 1) * SELECTION_RATE), 2):
+    for i in range(0, sp["parent_genomes"].size(), 2):
       var couple_genomes = [sp["parent_genomes"][i], sp["parent_genomes"][i+1]]
-      var couple_crossovered_genomes = couple_crossover(couple_genomes, int(round((1.0 / SELECTION_RATE) * 2.0)))
-      for _genome in couple_crossovered_genomes:
-        crossovered_genomes.append(_genome)
+      var number_of_offsprint_each_couple = int(round((1.0 / SELECTION_RATE) * 2.0))
+      var couple_crossovered_genomes = couple_crossover(couple_genomes,
+          number_of_offsprint_each_couple)
+      crossovered_genomes.append_array(couple_crossovered_genomes)
   return crossovered_genomes
 
 func couple_crossover(couple_genomes: Array, offspring_number: int) -> Array:
@@ -143,13 +153,13 @@ func couple_crossover(couple_genomes: Array, offspring_number: int) -> Array:
     var crossed_genome := {}
 
     # inherit nodes inherit from the fittest parent
-    crossed_genome["input_nodes"] = [] 
+    crossed_genome["input_nodes"] = []
     for input_node in fittest_parent["input_nodes"]:
       crossed_genome["input_nodes"].append(input_node)
-    crossed_genome["output_nodes"] = [] 
+    crossed_genome["output_nodes"] = []
     for output_node in fittest_parent["output_nodes"]:
       crossed_genome["output_nodes"].append(output_node)
-    crossed_genome["hidden_nodes"] = [] 
+    crossed_genome["hidden_nodes"] = []
     for hidden_node in fittest_parent["hidden_nodes"]:
       crossed_genome["hidden_nodes"].append(hidden_node)
     crossed_genome["links"] = []
@@ -214,9 +224,10 @@ func choose_target_node(genome_source_node, _genome):
       unlinked_nodes.append(node)
   if !unlinked_nodes.empty():
     var target_node
+    # breakpoint
     while target_node == null:
       for node in unlinked_nodes:
-        if random.randf() < 1 / unlinked_nodes.size():
+        if random.randf() < float(1.0 / unlinked_nodes.size()):
           target_node = node
           break
     return target_node

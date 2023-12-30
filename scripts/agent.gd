@@ -15,7 +15,8 @@ const NN = preload("res://scripts/neural_network.gd")
 onready var ray_forward = get_node("ray_forward")
 onready var ray_f_up = get_node("ray_f_up")
 onready var ray_f_down = get_node("ray_f_down")
-onready var timer = get_parent().get_node("Timer")
+# onready var timer = get_parent().get_node("Timer")
+onready var timer = get_tree().get_root().get_node("Level1/Timer")
 onready var level_width = get_tree().get_root().size.x
 onready var level_height = get_tree().get_root().size.y
 
