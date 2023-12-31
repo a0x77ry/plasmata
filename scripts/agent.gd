@@ -60,7 +60,9 @@ func _ready():
     for genome_input_node in nn_inputs:
       genome_input_node["id"] = i
       genome_input_node["outgoing_link_ids"] = []
-      Main.used_node_ids.append(i)
+      # Main.used_node_ids.append(i)
+      if i > Main.max_id_used:
+        Main.generate_UID()
       i += 1
     # for _i_hidden in range(number_of_hidden_nodes):
     #   Main.used_node_ids.append(i)
@@ -69,7 +71,9 @@ func _ready():
     for genome_output_node in nn_outputs:
       genome_output_node["id"] = i
       genome_output_node["incoming_link_ids"] = []
-      Main.used_node_ids.append(i)
+      # Main.used_node_ids.append(i)
+      if i > Main.max_id_used:
+        Main.generate_UID()
       i += 1
     genome = {"input_nodes": nn_inputs, "hidden_nodes": nn_h,
         "output_nodes": nn_outputs, "fitness": 0}

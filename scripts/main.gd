@@ -11,10 +11,11 @@ const C2 := 1.0
 const C3 := 0.4
 const dt := 0.3
 const SELECTION_RATE = 0.5
+const TARGET_POPULATION = 32
 
 
 var random = RandomNumberGenerator.new()
-var used_node_ids := []
+# var used_node_ids := []
 var max_id_used := 0
 var genomes := [] # A list of genomes
 var species := [] 
@@ -62,23 +63,33 @@ func select_in_species(number_of_expected_parents):
 
   # calculate the number of parents for each species
   # var c := 0
+  var total_parents := 0
   for sp in species:
     # sp["parent_genomes"].sort_custom(GenomeSorter, "sort_ascenting")
     sp["members"].sort_custom(GenomeSorter, "sort_ascenting")
     var parents_number = round((sp["total_adjusted_fitness"] / all_species_adj_fitness) \
         * number_of_expected_parents)
-    parents_number = max(parents_number, 2)
+    # parents_number = max(parents_number, 1)
     # breakpoint
     # c += 1
     # print("Species: %s" % c)
     # add the last (best performing) genomes of the species
-    for i in range(1, parents_number):
-      if sp["members"].size() >= i:
-        # print("Append normal member")
-        sp["parent_genomes"].append(sp["members"][-i])
-      else:
-        # print("Append random member")
-        sp["parent_genomes"].append(sp["members"][random.randi_range(0, sp["members"].size() - 1)])
+    if parents_number > 0:
+      for i in range(1, parents_number):
+        if sp["members"].size() >= i:
+          # print("Append normal member")
+          sp["parent_genomes"].append(sp["members"][-i])
+          total_parents += 1
+        else:
+          # print("Append random member")
+          sp["parent_genomes"].append(sp["members"][random.randi_range(0, sp["members"].size() - 1)])
+          total_parents += 1
+  while total_parents * (1.0 / SELECTION_RATE) < TARGET_POPULATION:
+    for sp in species:
+      if sp["parent_genomes"].size() > 0 && random.randf() < 1.0 / species.size():
+        sp["parent_genomes"].append(sp["members"][-1])
+        total_parents += 1
+
 
 
 func select_roulette(curve, agents):
@@ -128,12 +139,22 @@ func crossover():
   for sp in species:
     if sp["parent_genomes"].size() % 2 != 0:
       sp["parent_genomes"].append(sp["parent_genomes"][0]) # add a genome to become even
+    # if sp["parent_genomes"].size() == 1:
+    #   sp["parent_genomes"].append(sp["parent_genomes"][0]) # add a genome to become even
     # for i in range(0, floor((sp["parent_genomes"].size() - 1) * SELECTION_RATE), 2):
     for i in range(0, sp["parent_genomes"].size(), 2):
-      var couple_genomes = [sp["parent_genomes"][i], sp["parent_genomes"][i+1]]
-      var number_of_offsprint_each_couple = int(round((1.0 / SELECTION_RATE) * 2.0))
+      var couple_genomes
+      if i == 0:
+        couple_genomes = [sp["parent_genomes"][i], sp["parent_genomes"][i]]
+      else:
+        couple_genomes = [sp["parent_genomes"][i], sp["parent_genomes"][i+1]]
+      # if sp["parent_genomes"].size()-1 > i:
+      #   couple_genomes = [sp["parent_genomes"][i], sp["parent_genomes"][i+1]]
+      # else:
+      #   couple_genomes = [sp["parent_genomes"][i], sp["parent_genomes"][i]]
+      var number_of_offspring_each_couple = int(round((1.0 / SELECTION_RATE) * 2.0))
       var couple_crossovered_genomes = couple_crossover(couple_genomes,
-          number_of_offsprint_each_couple)
+          number_of_offspring_each_couple)
       crossovered_genomes.append_array(couple_crossovered_genomes)
   return crossovered_genomes
 
@@ -220,11 +241,12 @@ func choose_target_node(genome_source_node, _genome):
     for link_id in node["incoming_link_ids"]:
       if link_id == genome_source_node["id"]:
         is_node_linked = true
+    if node["id"] == genome_source_node["id"]:
+      is_node_linked = true
     if !is_node_linked:
       unlinked_nodes.append(node)
   if !unlinked_nodes.empty():
     var target_node
-    # breakpoint
     while target_node == null:
       for node in unlinked_nodes:
         if random.randf() < float(1.0 / unlinked_nodes.size()):
@@ -236,7 +258,6 @@ func choose_target_node(genome_source_node, _genome):
 
 func mutate(parent_genomes):
   random.randomize()
-  var check := false
   var mutated_genomes = parent_genomes.duplicate(true)
   # var mutated_genomes = parent_genomes.duplicate()
   for _genome in mutated_genomes:
@@ -246,7 +267,6 @@ func mutate(parent_genomes):
         + float(_genome["output_nodes"].size()) \
         + float(_genome["hidden_nodes"].size())
     if random.randf() < MUTATION_RATE:
-      check = false
       for link in _genome["links"]:
         if random.randf() < EXPECTED_MUTATED_GENES / genes_number:
           link["weight"] = random.randfn(link["weight"], MUTATION_STANDARD_DEVIATION)
@@ -257,7 +277,6 @@ func mutate(parent_genomes):
         if random.randf() < EXPECTED_MUTATED_GENES / genes_number:
           var genome_target_node = choose_target_node(genome_source_node, _genome)
           var new_id = generate_UID()
-          used_node_ids.append(new_id)
           var new_link = {"id": new_id, "weight": random.randf(), "bias": random.randf(),
               "source_id": genome_source_node["id"],
               "target_id": genome_target_node["id"]}
@@ -287,27 +306,17 @@ func mutate(parent_genomes):
           "target_id": new_hnode["id"],
           "weight": random.randf_range(-1.0, 1.0), "bias": random.randf_range(-1.0, 1.0),
           "is_enabled": true}
-      Main.used_node_ids.append(link_a["id"])
+      # Main.used_node_ids.append(link_a["id"])
       _genome["links"].append(link_a)
       var link_b = {"id": generate_UID(),
           "source_id": new_hnode["id"],
           "target_id": original_target_node["id"],
           "weight": random.randf_range(-1.0, 1.0), "bias": random.randf_range(-1.0, 1.0),
           "is_enabled": true}
-      Main.used_node_ids.append(link_b["id"])
+      # Main.used_node_ids.append(link_b["id"])
       _genome["links"].append(link_b)
-      new_hnode["incoming_link_ids"].append(link_a)
-      new_hnode["outgoing_link_ids"].append(link_b)
-
-
-
-  if check:
-    for i in parent_genomes.size():
-      for link_i in parent_genomes[i]["links"].size():
-        var original_w = parent_genomes[i]["links"][link_i]["weight"]
-        var mutated_w = mutated_genomes[i]["links"][link_i]["weight"]
-        if original_w != mutated_w:
-          print("Genome %s. Original: %s. Mutated: %s" % [i, original_w, mutated_w])
+      new_hnode["incoming_link_ids"].append(link_a["id"])
+      new_hnode["outgoing_link_ids"].append(link_b["id"])
 
   return mutated_genomes
 
@@ -376,12 +385,15 @@ func generate_UID():
   # var id = randi() % 1000
   # while id in used_node_ids:
   #   id = randi() % 1000
-  return used_node_ids.max() + 1 
+  max_id_used += 1
+  # return used_node_ids.max() + 1 
+  return max_id_used
 
 
-func add_UID_in_used(id):
-  if id > used_node_ids.max():
-    used_node_ids.append(id)
+# func add_UID_in_used(id):
+#   if id > used_node_ids.max():
+#     used_node_ids.append(id)
+  # if id > 
 
 
 

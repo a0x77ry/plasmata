@@ -41,7 +41,6 @@ func _init(_genome, _starting_link_id=0):
     connect_nn_layers(input_layer, output_layer)
   else:
     # Use genome to connect the links
-    print("Using genome to connect the links")
     for link in genome["links"]:
       var source_node
       var target_node
@@ -65,7 +64,9 @@ func connect_nn_layers(source_layer, target_layer):
       var new_link = Link.new(i, s_node, t_node,
           random.randf_range(-1.0, 1.0), random.randf_range(-1.0, 1.0),
           s_node.id, t_node.id, true)
-      Main.add_UID_in_used(i)
+      # Main.add_UID_in_used(i)
+      if i > Main.max_id_used:
+        Main.generate_UID()
       i += 1
       links.append(new_link)
       genome["links"].append({"id": new_link.id,"bias": new_link.bias,
@@ -222,7 +223,7 @@ class Link:
       _source_id, _target_id, _is_enabled: bool):
     if _id == NO_ID:
       id = Main.generate_UID()
-      Main.used_node_ids.append(id)
+      # Main.used_node_ids.append(id)
     else:
       id = _id
     source_node = _source_node
