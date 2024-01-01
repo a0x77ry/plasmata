@@ -71,7 +71,7 @@ func connect_nn_layers(source_layer, target_layer):
       links.append(new_link)
       genome["links"].append({"id": new_link.id,"bias": new_link.bias,
           "weight": new_link.weight, "source_id": new_link.source_node.id,
-          "target_id": new_link.target_node.id})
+          "target_id": new_link.target_node.id, "is_enabled": true})
       # add incoming_link_ids and outgoing_link_ids to the nodes involved
       var all_genome_nodes = genome["input_nodes"] \
           + genome["hidden_nodes"] \
@@ -223,7 +223,6 @@ class Link:
       _source_id, _target_id, _is_enabled: bool):
     if _id == NO_ID:
       id = Main.generate_UID()
-      # Main.used_node_ids.append(id)
     else:
       id = _id
     source_node = _source_node

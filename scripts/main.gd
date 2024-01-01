@@ -132,6 +132,7 @@ func crossover_sbx(parent_genomes_original, target_poputation: int):
   # print("Offspring genomes size after crossover: %s" % offspring_genomes.size())
   return offspring_genomes
 
+
 func crossover():
   # random.randomize()
   var crossovered_genomes := []
@@ -233,15 +234,36 @@ func couple_crossover_sbx(couple_genomes, number_of_offspring):
   return crossovered_genomes
 
 
+# returns true if the source node is found somewhere 
+# in the backward signal path of the target node
+func is_circular_loop(_genome, source_node, target_node):
+  if target_node.has("incoming_links_ids"):
+    for link_id in target_node["incoming_link_ids"]:
+      if link_id == source_node["id"]:
+        return true
+      # find the source of the link with this id
+      var link := {}
+      for l in _genome["links"]:
+        if l["id"] == link_id:
+          link = l
+
+      var candidate_nodes = _genome["hidden_nodes"] + _genome["output_nodes"]
+      var source_of_incoming
+      for node in candidate_nodes:
+        if node["id"] == link["source_id"]:
+          source_of_incoming = node
+      if is_circular_loop(_genome, source_node, source_of_incoming):
+        return true
+  return false
+
 func choose_target_node(genome_source_node, _genome):
   var candidate_nodes = _genome["hidden_nodes"] + _genome["output_nodes"]
   var unlinked_nodes = []
   for node in candidate_nodes:
     var is_node_linked := false
-    for link_id in node["incoming_link_ids"]:
-      if link_id == genome_source_node["id"]:
-        is_node_linked = true
     if node["id"] == genome_source_node["id"]:
+      is_node_linked = true
+    elif is_circular_loop(_genome, genome_source_node, node):
       is_node_linked = true
     if !is_node_linked:
       unlinked_nodes.append(node)
