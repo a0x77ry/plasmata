@@ -94,9 +94,7 @@ func get_output() -> Dictionary:
   for node in output_layer:
     var node_name = node.get_name()
     output_dict[node_name] = node.get_value()
-    # output_dict[node_name + "_threshold"] = node.get_normalized_threshold()
 
-  # print("Output dict: %s" % output_dict)
   return output_dict
 
 
@@ -106,7 +104,7 @@ class NNNode:
   var id: int setget , get_id
 
 
-  func _init(_id, _name="", _is_enabled="true"):
+  func _init(_id, _name=""):
     name = _name
     id = _id
 
@@ -184,7 +182,7 @@ class HiddenNode:
   var incoming_links = []
   var outgoing_links = []
   var value: float
-  var is_enabled: bool
+  # var is_enabled: bool
 
 
   func _init(_id, _name="", _value=randf()).(_id, _name):

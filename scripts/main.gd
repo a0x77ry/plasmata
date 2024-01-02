@@ -148,7 +148,7 @@ func crossover():
       if i == 0:
         couple_genomes = [sp["parent_genomes"][i], sp["parent_genomes"][i]]
       else:
-        couple_genomes = [sp["parent_genomes"][i], sp["parent_genomes"][i+1]]
+        couple_genomes = [sp["parent_genomes"][i-1], sp["parent_genomes"][i]]
       # if sp["parent_genomes"].size()-1 > i:
       #   couple_genomes = [sp["parent_genomes"][i], sp["parent_genomes"][i+1]]
       # else:
@@ -234,36 +234,48 @@ func couple_crossover_sbx(couple_genomes, number_of_offspring):
   return crossovered_genomes
 
 
-# returns true if the source node is found somewhere 
-# in the backward signal path of the target node
-func is_circular_loop(_genome, source_node, target_node):
-  if target_node.has("incoming_links_ids"):
+func link_already_exists(_genome, source_node, target_node):
+  if target_node.has("incoming_link_ids"): # Because it can be an input node in the recursion
+    # This checks if the link we want to create already exists, not if it's circular
     for link_id in target_node["incoming_link_ids"]:
-      if link_id == source_node["id"]:
-        return true
       # find the source of the link with this id
       var link := {}
       for l in _genome["links"]:
         if l["id"] == link_id:
           link = l
+      if link["source_id"] == source_node["id"]:
+        return true
+  return false
 
-      var candidate_nodes = _genome["hidden_nodes"] + _genome["output_nodes"]
-      var source_of_incoming
-      for node in candidate_nodes:
-        if node["id"] == link["source_id"]:
-          source_of_incoming = node
-      if is_circular_loop(_genome, source_node, source_of_incoming):
+func is_circular_loop(_genome, source_node, target_node):
+  if target_node.has("outgoing_link_ids"): # Because it can be an output node as a candidate target
+    for outlink_id in target_node["outgoing_link_ids"]:
+      var outlink := {}
+      for l in _genome["links"]:
+        if l["id"] == outlink_id:
+          outlink = l
+      if outlink["target_id"] == source_node["id"]:
+        return true
+
+      # In order to recurse we first have to find the target node of the target_node when it is not the source node
+      var candidate_target_nodes = _genome["hidden_nodes"]
+      var target_of_the_target_node
+      for node in candidate_target_nodes:
+        if node["id"] == outlink["target_id"]:
+          target_of_the_target_node = node 
+      if target_of_the_target_node != null && is_circular_loop(_genome, source_node, target_of_the_target_node):
         return true
   return false
 
 func choose_target_node(genome_source_node, _genome):
   var candidate_nodes = _genome["hidden_nodes"] + _genome["output_nodes"]
+  # breakpoint
   var unlinked_nodes = []
   for node in candidate_nodes:
     var is_node_linked := false
     if node["id"] == genome_source_node["id"]:
       is_node_linked = true
-    elif is_circular_loop(_genome, genome_source_node, node):
+    elif is_circular_loop(_genome, genome_source_node, node) or link_already_exists(_genome, genome_source_node, node):
       is_node_linked = true
     if !is_node_linked:
       unlinked_nodes.append(node)
@@ -298,11 +310,14 @@ func mutate(parent_genomes):
       for genome_source_node in (_genome["input_nodes"] + _genome["hidden_nodes"]):
         if random.randf() < EXPECTED_MUTATED_GENES / genes_number:
           var genome_target_node = choose_target_node(genome_source_node, _genome)
-          var new_id = generate_UID()
-          var new_link = {"id": new_id, "weight": random.randf(), "bias": random.randf(),
-              "source_id": genome_source_node["id"],
-              "target_id": genome_target_node["id"]}
-          _genome["links"].append(new_link)
+          if genome_target_node != null:
+            var new_id = generate_UID()
+            # TODO: check if the target node has the source node as an outgoing connection
+            var new_link = {"id": new_id, "weight": random.randf_range(-1.0, 1.0),
+                "bias": random.randf_range(-1.0, 1.0),
+                "source_id": genome_source_node["id"],
+                "target_id": genome_target_node["id"], "is_enabled": true}
+            _genome["links"].append(new_link)
       # add a new node and break the link
       var link_to_break
       while link_to_break == null:
@@ -329,16 +344,18 @@ func mutate(parent_genomes):
           "weight": random.randf_range(-1.0, 1.0), "bias": random.randf_range(-1.0, 1.0),
           "is_enabled": true}
       # Main.used_node_ids.append(link_a["id"])
-      _genome["links"].append(link_a)
       var link_b = {"id": generate_UID(),
           "source_id": new_hnode["id"],
           "target_id": original_target_node["id"],
           "weight": random.randf_range(-1.0, 1.0), "bias": random.randf_range(-1.0, 1.0),
           "is_enabled": true}
       # Main.used_node_ids.append(link_b["id"])
+      _genome["links"].append(link_a)
       _genome["links"].append(link_b)
       new_hnode["incoming_link_ids"].append(link_a["id"])
       new_hnode["outgoing_link_ids"].append(link_b["id"])
+      original_source_node["outgoing_link_ids"].append(link_a["id"])
+      original_target_node["incoming_link_ids"].append(link_b["id"])
 
   return mutated_genomes
 
