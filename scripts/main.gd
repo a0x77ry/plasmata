@@ -48,10 +48,14 @@ func share_fitness():
 
 
 func select_in_species(number_of_expected_parents):
-  # random.randomize()
   # calculate the avg_fitness for each species
   var all_species_adj_fitness = 0.0
   for sp in species:
+    if sp["members"].size() == 0:
+      sp["avg_fitness"] = 0
+      sp["total_adjusted_fitness"] = 0
+      continue
+
     var total_adjusted_fitness = 0.0
     var total_fitness = 0.0
     for member_genome in sp["members"]:
@@ -64,7 +68,12 @@ func select_in_species(number_of_expected_parents):
   # calculate the number of parents for each species
   # var c := 0
   var total_parents := 0
+  var indices_to_remove = []
+  var counter = 0
   for sp in species:
+    if sp["members"].size() == 0:
+      sp["parent_genomes"] = []
+      # continue
     # sp["parent_genomes"].sort_custom(GenomeSorter, "sort_ascenting")
     sp["members"].sort_custom(GenomeSorter, "sort_ascenting")
     var parents_number = round((sp["total_adjusted_fitness"] / all_species_adj_fitness) \
@@ -84,12 +93,17 @@ func select_in_species(number_of_expected_parents):
           # print("Append random member")
           sp["parent_genomes"].append(sp["members"][random.randi_range(0, sp["members"].size() - 1)])
           total_parents += 1
+    else:
+      indices_to_remove.append(counter)
+    counter += 1
+  for idx in indices_to_remove:
+    species.remove(idx) # remove any species with zero members
   while total_parents * (1.0 / SELECTION_RATE) < TARGET_POPULATION:
     for sp in species:
       if sp["parent_genomes"].size() > 0 && random.randf() < 1.0 / species.size():
         sp["parent_genomes"].append(sp["members"][-1])
         total_parents += 1
-
+  # breakpoint
 
 
 func select_roulette(curve, agents):
@@ -361,8 +375,13 @@ func mutate(parent_genomes):
 
 
 func speciate():
-  species = []
+  if !species.empty():
+    for sp in species:
+      sp["members"] = []
+      sp["total_adjusted_fitness"] = 0
+      sp["parent_genomes"] = []
   for genome in genomes:
+    # get all the genome's nodes, ids and their max id
     var gen_all_nodes = genome["input_nodes"] + genome["hidden_nodes"] \
         + genome["output_nodes"] + genome["links"];
     var gen_all_ids = []
@@ -372,8 +391,8 @@ func speciate():
 
     var is_different_species := true
     for sp in species:
-      # var N = max(genome.size(), sp["prototype"].size()) # find N
 
+    # get all the prototypes's nodes, ids and their max id
       var prot = sp["prototype"]
       var prot_all_nodes = prot["input_nodes"] + prot["hidden_nodes"] \
           + prot["output_nodes"] + prot["links"]
@@ -381,6 +400,7 @@ func speciate():
       for node in prot_all_nodes:
         prot_all_ids.append(node["id"])
       var prot_max_id = prot_all_ids.max()
+
       var N = max(gen_max_id, prot_max_id) # find N
       var excess_genes_num = abs(gen_max_id - prot_max_id) # find excess genes
 
@@ -392,8 +412,6 @@ func speciate():
           disjoined_genes_num += 1 #find disjoined genes
 
         for prot_n in prot_all_nodes:
-          # if prot_n.has("weight") && gen_n.has("weight"):
-          #   print("prot id: %s, gen id: %s" % [prot_n["id"], gen_n["id"]])
           if prot_n.has("weight") && prot_n["id"] == gen_n["id"]:
             assert(gen_n.has("weight"), "Error in change_generation(). pron_n is a link while gen_n isn't")
             weight_diffs.append(abs(prot_n["weight"] - gen_n["weight"]))
@@ -405,7 +423,6 @@ func speciate():
       var compatibility_distance = ((C1 * excess_genes_num) / N) \
           + ((C2 * disjoined_genes_num) / N) \
           + (C3 * avg_weight_diff)
-      # print("Compatibility distance: %s" % compatibility_distance)
       if compatibility_distance < dt:
         is_different_species = false
         sp["members"].append(genome)
@@ -415,7 +432,7 @@ func speciate():
 
 
 func add_species(genome):
-  var sp = {"prototype": genome, "members": [genome], "avg_fitness": [],
+  var sp = {"prototype": genome, "members": [genome], "avg_fitness": 0,
       "parent_genomes": []}
   species.append(sp)
 
