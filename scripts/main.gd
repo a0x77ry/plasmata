@@ -12,6 +12,8 @@ const C3 := 0.4
 const dt := 0.3
 const SELECTION_RATE = 0.5
 const TARGET_POPULATION = 32
+const STALE_GENS_BEFORE_DEATH = 20
+const REQUIRED_SPECIES_IMPROVEMENT = 50
 
 
 var random = RandomNumberGenerator.new()
@@ -52,7 +54,7 @@ func select_in_species(number_of_expected_parents):
   var all_species_adj_fitness = 0.0
   for sp in species:
     if sp["members"].size() == 0:
-      sp["avg_fitness"] = 0
+      sp["avg_fitness"] = []
       sp["total_adjusted_fitness"] = 0
       continue
 
@@ -61,27 +63,28 @@ func select_in_species(number_of_expected_parents):
     for member_genome in sp["members"]:
       total_fitness += member_genome["fitness"]
       total_adjusted_fitness += member_genome["adjusted_fitness"]
-    sp["avg_fitness"] = total_fitness / float(sp["members"].size())
+    if sp["avg_fitness"].size() < STALE_GENS_BEFORE_DEATH:
+      sp["avg_fitness"].append(total_fitness / float(sp["members"].size()))
+    else:
+      sp["avg_fitness"].remove(0)
+      sp["avg_fitness"].push_back(total_fitness / float(sp["members"].size())) # same as append
+      if sp["avg_fitness"][-1] - sp["avg_fitness"][0] < REQUIRED_SPECIES_IMPROVEMENT:
+        sp["members"] = [] # if there is no improvement after some generations kill the species
     sp["total_adjusted_fitness"] = total_adjusted_fitness
     all_species_adj_fitness += total_adjusted_fitness
+    
 
   # calculate the number of parents for each species
   # var c := 0
   var total_parents := 0
-  var indices_to_remove = []
-  var counter = 0
+  var species_to_remove = []
   for sp in species:
-    if sp["members"].size() == 0:
-      sp["parent_genomes"] = []
-      # continue
-    # sp["parent_genomes"].sort_custom(GenomeSorter, "sort_ascenting")
     sp["members"].sort_custom(GenomeSorter, "sort_ascenting")
     var parents_number = round((sp["total_adjusted_fitness"] / all_species_adj_fitness) \
         * number_of_expected_parents)
-    # parents_number = max(parents_number, 1)
-    # breakpoint
-    # c += 1
-    # print("Species: %s" % c)
+    if sp["members"].size() == 0:
+      # sp["parent_genomes"] = []
+      parents_number = 0
     # add the last (best performing) genomes of the species
     if parents_number > 0:
       for i in range(1, parents_number):
@@ -94,10 +97,17 @@ func select_in_species(number_of_expected_parents):
           sp["parent_genomes"].append(sp["members"][random.randi_range(0, sp["members"].size() - 1)])
           total_parents += 1
     else:
-      indices_to_remove.append(counter)
-    counter += 1
-  for idx in indices_to_remove:
-    species.remove(idx) # remove any species with zero members
+      species_to_remove.append(sp)
+  for sp_to_remove in species_to_remove:
+    if species.size() > 0:
+      species.erase(sp_to_remove) # remove any species with zero members or parent members
+  var species_with_parent_genomes_left := false
+  for sp in species:
+    if sp["parent_genomes"].size() > 0:
+      species_with_parent_genomes_left = true
+      break
+  if !species_with_parent_genomes_left:
+    return
   while total_parents * (1.0 / SELECTION_RATE) < TARGET_POPULATION:
     for sp in species:
       if sp["parent_genomes"].size() > 0 && random.randf() < 1.0 / species.size():
@@ -148,6 +158,13 @@ func crossover_sbx(parent_genomes_original, target_poputation: int):
 
 
 func crossover():
+  var are_parents_exist := false
+  for sp in species:
+    if sp["parent_genomes"].size() > 0:
+      are_parents_exist = true
+      break
+  if !are_parents_exist:
+    return []
   # random.randomize()
   var crossovered_genomes := []
   # breakpoint
@@ -305,6 +322,9 @@ func choose_target_node(genome_source_node, _genome):
     return null
 
 func mutate(parent_genomes):
+  if parent_genomes.size() == 0:
+    print("No parents. Starting over...")
+    return []
   random.randomize()
   var mutated_genomes = parent_genomes.duplicate(true)
   # var mutated_genomes = parent_genomes.duplicate()
@@ -326,7 +346,10 @@ func mutate(parent_genomes):
           var genome_target_node = choose_target_node(genome_source_node, _genome)
           if genome_target_node != null:
             var new_id = generate_UID()
-            # TODO: check if the target node has the source node as an outgoing connection
+            # check if there is a link with source and target the other way around
+            for link in _genome["links"]:
+              if link["source_id"] == genome_target_node["id"] && link["target_id"] == genome_source_node["id"]:
+                continue
             var new_link = {"id": new_id, "weight": random.randf_range(-1.0, 1.0),
                 "bias": random.randf_range(-1.0, 1.0),
                 "source_id": genome_source_node["id"],
@@ -432,7 +455,7 @@ func speciate():
 
 
 func add_species(genome):
-  var sp = {"prototype": genome, "members": [genome], "avg_fitness": 0,
+  var sp = {"prototype": genome, "members": [genome], "avg_fitness": [],
       "parent_genomes": []}
   species.append(sp)
 
