@@ -11,7 +11,7 @@ const C2 := 1.0
 const C3 := 0.4
 const dt := 0.3
 const SELECTION_RATE = 0.5
-const TARGET_POPULATION = 32
+const TARGET_POPULATION = 52
 const STALE_GENS_BEFORE_DEATH = 20
 const REQUIRED_SPECIES_IMPROVEMENT = 50
 

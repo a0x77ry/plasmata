@@ -19,6 +19,7 @@ onready var ray_f_down = get_node("ray_f_down")
 onready var timer = get_tree().get_root().get_node("Level1/Timer")
 onready var level_width = get_tree().get_root().size.x
 onready var level_height = get_tree().get_root().size.y
+onready var curve = get_parent().get_node("Path2D").curve
 
 var nn_rotation := 0.0
 var nn_speed := 0.0
@@ -35,6 +36,7 @@ var nn_activated_inputs = [
   "ray_f_distance",
   "ray_f_up_distance",
   "ray_f_down_distance",
+  "fitness"
 ]
 var nn_inputs = []
 var nn_outputs = [
@@ -129,11 +131,15 @@ func get_sensor_input():
     # ray_f_down_distance = distance / ray_length
     ray_f_down_distance = (ray_length - distance) / ray_length
 
+  var fitness = curve.get_closest_offset(position) / curve.get_baked_length()
+
   var inp_dict = {"rotation": newrot,
       "inverse_rotation": invrot,
       "time_since_birth": time_since_birth, "pos_x": norm_pos_x,
       "pos_y": norm_pos_y, "ray_f_distance": ray_f_distance,
-      "ray_f_up_distance": ray_f_up_distance, "ray_f_down_distance": ray_f_down_distance}
+      "ray_f_up_distance": ray_f_up_distance,
+      "ray_f_down_distance": ray_f_down_distance,
+      "fitness": fitness}
 
   var activated_input_dict := {}
   for input in nn_activated_inputs:

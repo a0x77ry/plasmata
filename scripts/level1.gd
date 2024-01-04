@@ -1,6 +1,6 @@
 extends Node2D
 
-const TARGET_POPULATION := 32
+const TARGET_POPULATION := 52
 
 onready var spawning_area = get_node("SpawningArea")
 onready var timer = get_node("Timer")
