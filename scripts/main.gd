@@ -1,9 +1,12 @@
 extends Node2D
 
 const NUMBER_OF_SELECTED := 10
-const MUTATION_RATE = 0.1
+const MUTATION_RATE = 0.3
 const MUTATION_STANDARD_DEVIATION = 2.0
+const ORIGINAL_WEIGHT_VALUE_LIMIT = 2.0
+const ORIGINAL_BIAS_VALUE_LIMIT = 2.0
 const EXPECTED_MUTATED_GENES = 1.0
+const EXPECTED_MUTATED_GENE_RATE = 0.1
 const DEVIATION_FROM_PARENTS = 0.1
 const SELECTION_EXPONENT = 2.0
 const C1 := 1.0
@@ -331,19 +334,30 @@ func mutate(parent_genomes):
   var mutated_genomes = parent_genomes.duplicate(true)
   # var mutated_genomes = parent_genomes.duplicate()
   for _genome in mutated_genomes:
-    var genes_number = float(_genome["links"].size()) \
-        + float(_genome["input_nodes"].size()) \
-        + float(_genome["output_nodes"].size()) \
-        + float(_genome["hidden_nodes"].size())
+    # var genes_number = float(_genome["links"].size()) \
+    #     + float(_genome["input_nodes"].size()) \
+    #     + float(_genome["output_nodes"].size()) \
+    #     + float(_genome["hidden_nodes"].size())
     if random.randf() < MUTATION_RATE:
       for link in _genome["links"]:
-        if random.randf() < EXPECTED_MUTATED_GENES / genes_number:
-          link["weight"] = random.randfn(link["weight"], MUTATION_STANDARD_DEVIATION)
-        if random.randf() < EXPECTED_MUTATED_GENES / genes_number:
-          link["bias"] = random.randfn(link["bias"], MUTATION_STANDARD_DEVIATION)
-      # add a link
+        # Shift weights and biases
+        if random.randf() < 0.5:
+          # if random.randf() < EXPECTED_MUTATED_GENES / genes_number:
+          if random.randf() < EXPECTED_MUTATED_GENE_RATE:
+            link["weight"] = random.randfn(link["weight"], MUTATION_STANDARD_DEVIATION)
+          if random.randf() < EXPECTED_MUTATED_GENE_RATE:
+            link["bias"] = random.randfn(link["bias"], MUTATION_STANDARD_DEVIATION)
+        # Change weights and biases randomly
+        else:
+          if random.randf() < EXPECTED_MUTATED_GENE_RATE:
+            link["weight"] = random.randf_range(-ORIGINAL_WEIGHT_VALUE_LIMIT, ORIGINAL_WEIGHT_VALUE_LIMIT)
+          if random.randf() < EXPECTED_MUTATED_GENE_RATE:
+            link["bias"] = random.randfn(-ORIGINAL_BIAS_VALUE_LIMIT, ORIGINAL_BIAS_VALUE_LIMIT)
+        if random.randf() < EXPECTED_MUTATED_GENE_RATE:
+          link["is_enabled"] = !link["is_enabled"]
+      # Add a link
       for genome_source_node in (_genome["input_nodes"] + _genome["hidden_nodes"]):
-        if random.randf() < EXPECTED_MUTATED_GENES / genes_number:
+        if random.randf() < EXPECTED_MUTATED_GENE_RATE:
           var genome_target_node = choose_target_node(genome_source_node, _genome)
           if genome_target_node != null:
             var new_id = generate_UID()
@@ -356,13 +370,15 @@ func mutate(parent_genomes):
                 "source_id": genome_source_node["id"],
                 "target_id": genome_target_node["id"], "is_enabled": true}
             _genome["links"].append(new_link)
+            genome_source_node["outgoing_link_ids"].append(new_link["id"])
+            genome_target_node["incoming_link_ids"].append(new_link["id"])
       # add a new node and break the link
       if _genome["links"].size() == 0:
-        continue
+        continue # cannot break a link if there isn't one
       var link_to_break
       while link_to_break == null:
         for genome_link in _genome["links"]:
-          if random.randf() < EXPECTED_MUTATED_GENES / genes_number:
+          if random.randf() < EXPECTED_MUTATED_GENE_RATE:
             link_to_break = genome_link
       link_to_break.is_enabled = false # original link disabled
       var original_source_node
@@ -377,17 +393,18 @@ func mutate(parent_genomes):
           "incoming_link_ids": [],
           "outgoing_link_ids": []}
       _genome["hidden_nodes"].append(new_hnode) # create the new hidden node
-      # create the new links
+      # create the new links for the new hidden node
       var link_a = {"id": generate_UID(),
           "source_id": original_source_node["id"],
           "target_id": new_hnode["id"],
-          "weight": random.randf_range(-1.0, 1.0), "bias": random.randf_range(-1.0, 1.0),
+          # "weight": random.randf_range(-1.0, 1.0), "bias": random.randf_range(-1.0, 1.0),
+          "weight": 1.0, "bias":0.0,
           "is_enabled": true}
       # Main.used_node_ids.append(link_a["id"])
       var link_b = {"id": generate_UID(),
           "source_id": new_hnode["id"],
           "target_id": original_target_node["id"],
-          "weight": random.randf_range(-1.0, 1.0), "bias": random.randf_range(-1.0, 1.0),
+          "weight": link_to_break["weight"], "bias": link_to_break["bias"],
           "is_enabled": true}
       # Main.used_node_ids.append(link_b["id"])
       _genome["links"].append(link_a)

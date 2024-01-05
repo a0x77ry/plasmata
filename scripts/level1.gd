@@ -11,6 +11,7 @@ onready var curve = get_node("Path2D").curve
 var number_of_agents = TARGET_POPULATION
 var number_of_extra_agents = 0
 var agents = []
+var agents_alive = []
 
 
 func _ready():
@@ -30,6 +31,8 @@ func _process(_delta):
 
 
 func change_generation():
+    # agents_alive = get_tree().get_nodes_in_group("agents")
+
     Main.calculate_fitness(curve, agents) # gives each of Main.genomes a fitness value
     Main.speciate() # populates Main.species with Main.genomes
     Main.share_fitness() # creates an adjusted_fitness in each species

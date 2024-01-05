@@ -92,7 +92,6 @@ func _physics_process(delta):
   rotation += nn_rotation * rotation_speed * delta
   velocity = move_and_slide(velocity)
 
-
 func set_genome(_genome):
    genome = _genome
 
