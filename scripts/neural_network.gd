@@ -38,7 +38,7 @@ func _init(_genome, _starting_link_id=0):
   # Create the links between the nodes
   if !genome.has("links"):
     genome["links"] = []
-    connect_nn_layers(input_layer, output_layer)
+    # connect_nn_layers(input_layer, output_layer)
   else:
     # Use genome to connect the links
     for link in genome["links"]:

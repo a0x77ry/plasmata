@@ -23,7 +23,7 @@ var genomes := [] # A list of genomes
 var species := [] 
 var generation := 0
 var level
-# var init_rot = rand_range(-PI, PI)
+var init_rot = rand_range(-PI, PI)
 
 
 func _ready():
@@ -113,7 +113,6 @@ func select_in_species(number_of_expected_parents):
       if sp["parent_genomes"].size() > 0 && random.randf() < 1.0 / species.size():
         sp["parent_genomes"].append(sp["members"][-1])
         total_parents += 1
-  # breakpoint
 
 
 func select_roulette(curve, agents):
@@ -167,7 +166,6 @@ func crossover():
     return []
   # random.randomize()
   var crossovered_genomes := []
-  # breakpoint
   for sp in species:
     if sp["parent_genomes"].size() % 2 != 0:
       sp["parent_genomes"].append(sp["parent_genomes"][0]) # add a genome to become even
@@ -279,21 +277,25 @@ func link_already_exists(_genome, source_node, target_node):
   return false
 
 func is_circular_loop(_genome, source_node, target_node):
+  for link in _genome["links"]:
+    if link["source_id"] == target_node["id"] && link["target_id"] == source_node["id"]:
+      return true
+    
   if target_node.has("outgoing_link_ids"): # Because it can be an output node as a candidate target
     for outlink_id in target_node["outgoing_link_ids"]:
       var outlink := {}
       for l in _genome["links"]:
         if l["id"] == outlink_id:
           outlink = l
-      if outlink["target_id"] == source_node["id"]:
-        return true
+      # if outlink["target_id"] == source_node["id"]:
+      #   return true
 
       # In order to recurse we first have to find the target node of the target_node when it is not the source node
       var candidate_target_nodes = _genome["hidden_nodes"]
       var target_of_the_target_node
       for node in candidate_target_nodes:
         if node["id"] == outlink["target_id"]:
-          target_of_the_target_node = node 
+          target_of_the_target_node = node # this can be null because the target of the link is an output node
       if target_of_the_target_node != null && is_circular_loop(_genome, source_node, target_of_the_target_node):
         return true
   return false
@@ -329,7 +331,6 @@ func mutate(parent_genomes):
   var mutated_genomes = parent_genomes.duplicate(true)
   # var mutated_genomes = parent_genomes.duplicate()
   for _genome in mutated_genomes:
-    # breakpoint
     var genes_number = float(_genome["links"].size()) \
         + float(_genome["input_nodes"].size()) \
         + float(_genome["output_nodes"].size()) \
@@ -347,15 +348,17 @@ func mutate(parent_genomes):
           if genome_target_node != null:
             var new_id = generate_UID()
             # check if there is a link with source and target the other way around
-            for link in _genome["links"]:
-              if link["source_id"] == genome_target_node["id"] && link["target_id"] == genome_source_node["id"]:
-                continue
+            # for link in _genome["links"]:
+            #   if link["source_id"] == genome_target_node["id"] && link["target_id"] == genome_source_node["id"]:
+            #     continue
             var new_link = {"id": new_id, "weight": random.randf_range(-1.0, 1.0),
                 "bias": random.randf_range(-1.0, 1.0),
                 "source_id": genome_source_node["id"],
                 "target_id": genome_target_node["id"], "is_enabled": true}
             _genome["links"].append(new_link)
       # add a new node and break the link
+      if _genome["links"].size() == 0:
+        continue
       var link_to_break
       while link_to_break == null:
         for genome_link in _genome["links"]:
@@ -439,9 +442,11 @@ func speciate():
             assert(gen_n.has("weight"), "Error in change_generation(). pron_n is a link while gen_n isn't")
             weight_diffs.append(abs(prot_n["weight"] - gen_n["weight"]))
       var weight_diffs_sum = 0.0
-      for weight_diff in weight_diffs:
-        weight_diffs_sum += weight_diff
-      var avg_weight_diff = weight_diffs_sum / weight_diffs.size() # find average weight differences
+      var avg_weight_diff := 0.0
+      if weight_diffs.size() != 0:
+        for weight_diff in weight_diffs:
+          weight_diffs_sum += weight_diff
+        avg_weight_diff = weight_diffs_sum / weight_diffs.size() # find average weight differences
 
       var compatibility_distance = ((C1 * excess_genes_num) / N) \
           + ((C2 * disjoined_genes_num) / N) \

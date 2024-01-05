@@ -155,21 +155,16 @@ func get_nn_controls(_nn: NN, sensor_input: Dictionary):
   var nn_output = _nn.get_output() # a dict
 
   # nn_rotation = clamp(nn_output["go_right"] - nn_output["go_left"], -4.0, 4.0)
-  nn_rotation = clamp(nn_output["go_right"], -rotation_speed_limit, rotation_speed_limit)
+  # Apply a threshold in rotations
+  var input_rotation = nn_output["go_right"]
+  # nn_rotation = clamp(nn_output["go_right"], -rotation_speed_limit, rotation_speed_limit)
+  nn_rotation = clamp(input_rotation, -rotation_speed_limit, rotation_speed_limit)
+
+
   # nn_rotation = 4.0 if nn_output["go_right"] > 0 else -4.0
   # nn_speed = nn_output["go_forward"] - nn_output["go_backward"]
   nn_speed = nn_output["go_forward"]
   var real_speed = clamp(nn_speed * speed, 0.0, speed_limit)
   # var real_speed = 200.0 if nn_speed > 0 else 0.0
   velocity = Vector2(real_speed, 0).rotated(rotation)
-
-
-
-func _on_Timer_timeout():
-  pass
-  # var nn_output = nn.get_output()
-  #
-  # print("Thresholds: right : %s, left : %s, forward : %s, backward : %s"
-  #     % [nn_output["go_right_threshold"], nn_output["go_left_threshold"],
-  #     nn_output["go_forward_threshold"], nn_output["go_backward_threshold"]])
 

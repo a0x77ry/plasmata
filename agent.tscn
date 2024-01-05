@@ -21,9 +21,6 @@ texture = ExtResource( 1 )
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource( 1 )
 
-[node name="Timer" type="Timer" parent="."]
-autostart = true
-
 [node name="ray_forward" type="RayCast2D" parent="."]
 enabled = true
 cast_to = Vector2( 300, 0 )
