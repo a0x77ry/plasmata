@@ -160,27 +160,29 @@ func crossover_sbx(parent_genomes_original, target_poputation: int):
 
 
 func crossover():
-  var are_parents_exist := false
+  var do_parents_exist := false
   for sp in species:
     if sp["parent_genomes"].size() > 0:
-      are_parents_exist = true
+      do_parents_exist = true
       break
-  if !are_parents_exist:
+  if !do_parents_exist:
     return []
   # random.randomize()
   var crossovered_genomes := []
   for sp in species:
-    if sp["parent_genomes"].size() % 2 != 0:
+    if sp["parent_genomes"].size() == 0:
+      continue
+    elif sp["parent_genomes"].size() % 2 != 0:
       sp["parent_genomes"].append(sp["parent_genomes"][0]) # add a genome to become even
     # if sp["parent_genomes"].size() == 1:
     #   sp["parent_genomes"].append(sp["parent_genomes"][0]) # add a genome to become even
     # for i in range(0, floor((sp["parent_genomes"].size() - 1) * SELECTION_RATE), 2):
-    for i in range(0, sp["parent_genomes"].size(), 2):
+    for i in range(0, sp["parent_genomes"].size()-1, 2):
       var couple_genomes
       if i == 0:
         couple_genomes = [sp["parent_genomes"][i], sp["parent_genomes"][i]]
       else:
-        couple_genomes = [sp["parent_genomes"][i-1], sp["parent_genomes"][i]]
+        couple_genomes = [sp["parent_genomes"][i-2], sp["parent_genomes"][i-1]]
       # if sp["parent_genomes"].size()-1 > i:
       #   couple_genomes = [sp["parent_genomes"][i], sp["parent_genomes"][i+1]]
       # else:
