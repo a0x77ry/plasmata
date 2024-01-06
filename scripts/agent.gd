@@ -47,6 +47,8 @@ var nn_outputs = [
 ]
 var nn_h = []
 var genome: Dictionary = {} setget set_genome, get_genome
+var reached_the_end := false
+var time_left_when_finished := 0.0
 
 func _ready():
   randomize()
@@ -86,11 +88,15 @@ func _ready():
 
 
 func _physics_process(delta):
-  # get_player_input()
-  get_nn_controls(nn, get_sensor_input())
-  # rotation += rotation_dir * rotation_speed * delta
-  rotation += nn_rotation * rotation_speed * delta
-  velocity = move_and_slide(velocity)
+  if !reached_the_end:
+    # get_player_input()
+    get_nn_controls(nn, get_sensor_input())
+    # rotation += rotation_dir * rotation_speed * delta
+    rotation += nn_rotation * rotation_speed * delta
+    velocity = move_and_slide(velocity)
+  else:
+    rotation = 0.0
+    velocity = 0.0
 
 func set_genome(_genome):
    genome = _genome
@@ -167,3 +173,6 @@ func get_nn_controls(_nn: NN, sensor_input: Dictionary):
   # var real_speed = 200.0 if nn_speed > 0 else 0.0
   velocity = Vector2(real_speed, 0).rotated(rotation)
 
+func finish(time_left: float):
+  reached_the_end = true
+  time_left_when_finished = time_left

@@ -26,47 +26,56 @@ _data = {
 position = Vector2( 0, 131 )
 script = ExtResource( 3 )
 
-[node name="Wall" parent="." instance=ExtResource( 2 )]
+[node name="Walls" type="Node2D" parent="."]
+
+[node name="Wall" parent="Walls" instance=ExtResource( 2 )]
 position = Vector2( 477, 438 )
-scale = Vector2( -59.7816, 0.802072 )
+rotation = 3.14159
+scale = Vector2( 59.7816, -0.802072 )
 collision_layer = 3
 
-[node name="Area2D" type="Area2D" parent="Wall"]
+[node name="Area2D" type="Area2D" parent="Walls/Wall"]
 
-[node name="Wall2" parent="." instance=ExtResource( 2 )]
+[node name="Wall2" parent="Walls" instance=ExtResource( 2 )]
 position = Vector2( 511, 92 )
-scale = Vector2( -59.7816, 0.802072 )
+rotation = 3.14159
+scale = Vector2( 59.7816, -0.802072 )
 collision_layer = 3
 
-[node name="Wall3" parent="." instance=ExtResource( 2 )]
-position = Vector2( 488, 334 )
+[node name="Wall3" parent="Walls" instance=ExtResource( 2 )]
+position = Vector2( 486, 330 )
 rotation = 1.5708
 scale = Vector2( 6.88, 11.122 )
 collision_layer = 3
 
-[node name="Wall6" parent="." instance=ExtResource( 2 )]
-position = Vector2( 757, 232 )
+[node name="Wall6" parent="Walls" instance=ExtResource( 2 )]
+position = Vector2( 757, 227 )
 rotation = 1.5708
 scale = Vector2( 8.36, 11.482 )
 collision_layer = 3
 
-[node name="Wall7" parent="." instance=ExtResource( 2 )]
-position = Vector2( 1059, 316 )
+[node name="Wall7" parent="Walls" instance=ExtResource( 2 )]
+position = Vector2( 1057, 309 )
 rotation = 1.5708
 scale = Vector2( 8.28, 12.602 )
 collision_layer = 3
 
-[node name="Wall4" parent="." instance=ExtResource( 2 )]
+[node name="Wall4" parent="Walls" instance=ExtResource( 2 )]
 position = Vector2( 2, 273 )
-rotation = 1.5708
-scale = Vector2( -59.7816, 0.802072 )
+rotation = -1.57079
+scale = Vector2( 59.7816, -0.802072 )
 collision_layer = 3
 
-[node name="Wall5" parent="." instance=ExtResource( 2 )]
+[node name="Wall5" parent="Walls" instance=ExtResource( 2 )]
 position = Vector2( 2, 273 )
-rotation = 1.5708
-scale = Vector2( -59.7816, 0.802072 )
+rotation = -1.57079
+scale = Vector2( 59.7816, -0.802072 )
 collision_layer = 3
+
+[node name="Wall8" parent="Walls" instance=ExtResource( 2 )]
+position = Vector2( 1298, 273 )
+rotation = 1.5708
+scale = Vector2( 11.8, 1 )
 
 [node name="SpawningArea" type="Area2D" parent="."]
 position = Vector2( 72, 266 )

@@ -17,6 +17,7 @@ const SELECTION_RATE = 0.5
 const TARGET_POPULATION = 52
 const STALE_GENS_BEFORE_DEATH = 20
 const REQUIRED_SPECIES_IMPROVEMENT = 50
+const TIME_TO_FITNESS_MULTIPLICATOR = 70
 
 
 var random = RandomNumberGenerator.new()
@@ -41,7 +42,10 @@ func get_level():
 func calculate_fitness(curve: Curve2D, agents: Array):
   var _genomes = []
   for agent in agents:
-    agent.genome["fitness"] = curve.get_closest_offset(agent.position)
+    agent.genome["fitness"] = curve.get_closest_offset(agent.position) \
+        + agent.time_left_when_finished * TIME_TO_FITNESS_MULTIPLICATOR
+    # if agent.time_left_when_finished > 0.0:
+      # breakpoint
     _genomes.append(agent.genome.duplicate())
   genomes = _genomes
 

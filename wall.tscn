@@ -19,11 +19,13 @@ color = Color( 0.113725, 0.105882, 0.105882, 1 )
 polygon = PoolVector2Array( -16, -7, 16, -7, 16, 7, -16, 7 )
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+visible = false
 shape = SubResource( 1 )
 
 [node name="Area2D" type="Area2D" parent="."]
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+visible = false
 scale = Vector2( 1.03, 1.03 )
 shape = SubResource( 2 )
 

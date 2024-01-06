@@ -1,14 +1,12 @@
 extends Node2D
 
-const TARGET_POPULATION := 52
-
 onready var spawning_area = get_node("SpawningArea")
 onready var timer = get_node("Timer")
 onready var countdown = get_node("Countdown/Time")
 onready var gen_counter = get_node("GenCounter/GenNumber")
 onready var curve = get_node("Path2D").curve
 
-var number_of_agents = TARGET_POPULATION
+var number_of_agents = Main.TARGET_POPULATION
 var number_of_extra_agents = 0
 var agents = []
 var agents_alive = []
@@ -72,7 +70,8 @@ func generate_population():
 
 func _on_FinishLine_body_entered(body:Node):
   if body.is_in_group("agents"):
-    change_generation()
+    var agent = body as Node2D
+    agent.finished(timer.time_left)
 
 
 func _on_Timer_timeout():
