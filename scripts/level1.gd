@@ -29,9 +29,9 @@ func _process(_delta):
 
 
 func change_generation():
-    # agents_alive = get_tree().get_nodes_in_group("agents")
+    agents_alive = get_tree().get_nodes_in_group("agents")
 
-    Main.calculate_fitness(curve, agents) # gives each of Main.genomes a fitness value
+    Main.calculate_fitness(curve, agents_alive) # gives each of Main.genomes a fitness value
     Main.speciate() # populates Main.species with Main.genomes
     Main.share_fitness() # creates an adjusted_fitness in each species
     # populates avg_fitness and parent_genomes for each species

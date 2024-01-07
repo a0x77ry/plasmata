@@ -122,47 +122,6 @@ func select_in_species(number_of_expected_parents):
         total_parents += 1
 
 
-func select_roulette(curve, agents):
-  random.randomize()
-  var total_distance := 0.0
-  var _genomes = []
-
-  var offset = 0.0
-  for agent in agents:
-  #   total_distance += pow(agent.global_position.x, 2.0)
-    total_distance += pow(curve.get_closest_offset(agent.position), SELECTION_EXPONENT)
-  while _genomes.size() < ceil(agents.size() / 2.0):
-    for agent in agents:
-      offset = curve.get_closest_offset(agent.position)
-      # var selection_probability = pow(agent.global_position.x, 2.0) / total_distance
-      var selection_probability = pow(offset, SELECTION_EXPONENT) / total_distance
-      if random.randf() < selection_probability:
-        agent.genome["fitness"] = offset
-        _genomes.append(agent.genome.duplicate())
-  return _genomes
-
-
-func crossover_sbx(parent_genomes_original, target_poputation: int):
-  random.randomize()
-  var parent_genomes = parent_genomes_original.duplicate()
-  var original_genomes_size = parent_genomes.size()
-  var offspring_genomes := []
-  # while parent_genomes.size() >= 2:
-  #   var couple := [parent_genomes.pop_at(random.randi_range(0, parent_genomes.size() - 1)),
-  #       parent_genomes.pop_at(random.randi_range(0, parent_genomes.size() - 1))]
-  #
-  #   offspring_genomes.append_array(couple_crossover_sbx(couple, (target_polutation / original_genomes_size) * 2))
-  #   print("Number of offspring: %s" % ((target_polutation / original_genomes_size) * 2))
-  for _i in range(parent_genomes.size() / 2):
-    var couple := [parent_genomes[random.randi_range(0, parent_genomes.size() - 1)],
-        parent_genomes[random.randi_range(0, parent_genomes.size() - 1)]]
-
-    offspring_genomes.append_array(couple_crossover_sbx(couple, (target_poputation / original_genomes_size) * 2))
-  #   print("Number of offspring: %s" % ((target_polutation / original_genomes_size) * 2))
-  # print("Offspring genomes size after crossover: %s" % offspring_genomes.size())
-  return offspring_genomes
-
-
 func crossover():
   var do_parents_exist := false
   for sp in species:
@@ -239,36 +198,6 @@ func couple_crossover(couple_genomes: Array, offspring_number: int) -> Array:
         crossed_genome["links"].append(link)
 
     crossovered_genomes.append(crossed_genome)
-  return crossovered_genomes
-
-
-func couple_crossover_sbx(couple_genomes, number_of_offspring):
-  random.randomize()
-  var crossovered_genomes := []
-  var crossovered_genome = couple_genomes[0].duplicate()
-  for _i in range(number_of_offspring):
-    for i in range(crossovered_genome["links"].size()):
-      var b = random.randfn(1.0, DEVIATION_FROM_PARENTS)
-      var offspring_link_weight_1: float
-      var offspring_link_weight_2: float
-      var offspring_link_bias_1: float
-      var offspring_link_bias_2: float
-
-      var p0_w = couple_genomes[0]["links"][i]["weight"]
-      var p1_w = couple_genomes[1]["links"][i]["weight"]
-      var p0_b = couple_genomes[0]["links"][i]["bias"]
-      var p1_b = couple_genomes[1]["links"][i]["bias"]
-      offspring_link_weight_1 = ((1.0 + b) * p0_w + (1.0 - b) * p1_w) / 2.0
-      offspring_link_weight_2 = ((1.0 - b) * p0_w + (1.0 + b) * p1_w) / 2.0
-      offspring_link_bias_1 = ((1.0 + b) * p0_b + (1.0 - b) * p1_b) / 2.0
-      offspring_link_bias_2 = ((1.0 - b) * p0_b + (1.0 + b) * p1_b) / 2.0
-
-      crossovered_genome["links"][i]["weight"] = offspring_link_weight_1
-      crossovered_genome["links"][i]["weight"] = offspring_link_weight_2
-      crossovered_genome["links"][i]["bias"] = offspring_link_bias_1
-      crossovered_genome["links"][i]["bias"] = offspring_link_bias_2
-    crossovered_genomes.append(crossovered_genome)
-  # print("Couple crossover returning %s offspring" % crossovered_genomes.size())
   return crossovered_genomes
 
 
@@ -491,18 +420,8 @@ func add_species(genome):
 
 
 func generate_UID():
-  # var id = randi() % 1000
-  # while id in used_node_ids:
-  #   id = randi() % 1000
   max_id_used += 1
-  # return used_node_ids.max() + 1 
   return max_id_used
-
-
-# func add_UID_in_used(id):
-#   if id > used_node_ids.max():
-#     used_node_ids.append(id)
-  # if id > 
 
 
 
