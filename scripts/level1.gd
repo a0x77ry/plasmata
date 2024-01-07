@@ -71,7 +71,7 @@ func generate_population():
 func _on_FinishLine_body_entered(body:Node):
   if body.is_in_group("agents"):
     var agent = body as Node2D
-    agent.finished(timer.time_left)
+    agent.finish(timer.time_left)
 
 
 func _on_Timer_timeout():

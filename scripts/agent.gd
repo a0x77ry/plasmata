@@ -2,9 +2,9 @@ extends KinematicBody2D
 
 # export (int) var speed = 200
 # export (float) var rotation_speed = 3.0
-export (float) var speed = 70.0
+export (float) var speed = 50.0
 export (float) var rotation_speed = 1.5
-export (float) var speed_limit = 400.0
+export (float) var speed_limit = 300.0
 export (float) var rotation_speed_limit = 8.0
 export (int) var number_of_hidden_nodes = 8
 # export (int) var level_width = 1300

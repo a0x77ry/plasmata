@@ -5,7 +5,7 @@ const MUTATION_RATE = 0.3
 const MUTATION_STANDARD_DEVIATION = 2.0
 const ORIGINAL_WEIGHT_VALUE_LIMIT = 2.0
 const ORIGINAL_BIAS_VALUE_LIMIT = 2.0
-const EXPECTED_MUTATED_GENES = 1.0
+# const EXPECTED_MUTATED_GENES = 1.0
 const EXPECTED_MUTATED_GENE_RATE = 0.1
 const DEVIATION_FROM_PARENTS = 0.1
 const SELECTION_EXPONENT = 2.0
@@ -381,44 +381,46 @@ func mutate(parent_genomes):
       # add a new node and break the link
       if _genome["links"].size() == 0:
         continue # cannot break a link if there isn't one
-      var link_to_break
-      while link_to_break == null:
-        for genome_link in _genome["links"]:
-          if random.randf() < EXPECTED_MUTATED_GENE_RATE:
-            link_to_break = genome_link
-      link_to_break.is_enabled = false # original link disabled
-      var original_source_node
-      for genome_source_node in (_genome["input_nodes"] + _genome["hidden_nodes"]):
-        if link_to_break["source_id"] == genome_source_node["id"]:
-          original_source_node = genome_source_node
-      var original_target_node
-      for genome_target_node in (_genome["output_nodes"] + _genome["hidden_nodes"]):
-        if link_to_break["target_id"] == genome_target_node["id"]:
-          original_target_node = genome_target_node
-      var new_hnode = {"id": generate_UID(),
-          "incoming_link_ids": [],
-          "outgoing_link_ids": []}
-      _genome["hidden_nodes"].append(new_hnode) # create the new hidden node
-      # create the new links for the new hidden node
-      var link_a = {"id": generate_UID(),
-          "source_id": original_source_node["id"],
-          "target_id": new_hnode["id"],
-          # "weight": random.randf_range(-1.0, 1.0), "bias": random.randf_range(-1.0, 1.0),
-          "weight": 1.0, "bias":0.0,
-          "is_enabled": true}
-      # Main.used_node_ids.append(link_a["id"])
-      var link_b = {"id": generate_UID(),
-          "source_id": new_hnode["id"],
-          "target_id": original_target_node["id"],
-          "weight": link_to_break["weight"], "bias": link_to_break["bias"],
-          "is_enabled": true}
-      # Main.used_node_ids.append(link_b["id"])
-      _genome["links"].append(link_a)
-      _genome["links"].append(link_b)
-      new_hnode["incoming_link_ids"].append(link_a["id"])
-      new_hnode["outgoing_link_ids"].append(link_b["id"])
-      original_source_node["outgoing_link_ids"].append(link_a["id"])
-      original_target_node["incoming_link_ids"].append(link_b["id"])
+      if random.randf() < EXPECTED_MUTATED_GENE_RATE * 3:
+        var link_to_break
+        while link_to_break == null:
+          for genome_link in _genome["links"]:
+            if random.randf() < _genome["links"].size():
+              link_to_break = genome_link
+              break
+        link_to_break.is_enabled = false # original link disabled
+        var original_source_node
+        for genome_source_node in (_genome["input_nodes"] + _genome["hidden_nodes"]):
+          if link_to_break["source_id"] == genome_source_node["id"]:
+            original_source_node = genome_source_node
+        var original_target_node
+        for genome_target_node in (_genome["output_nodes"] + _genome["hidden_nodes"]):
+          if link_to_break["target_id"] == genome_target_node["id"]:
+            original_target_node = genome_target_node
+        var new_hnode = {"id": generate_UID(),
+            "incoming_link_ids": [],
+            "outgoing_link_ids": []}
+        _genome["hidden_nodes"].append(new_hnode) # create the new hidden node
+        # create the new links for the new hidden node
+        var link_a = {"id": generate_UID(),
+            "source_id": original_source_node["id"],
+            "target_id": new_hnode["id"],
+            # "weight": random.randf_range(-1.0, 1.0), "bias": random.randf_range(-1.0, 1.0),
+            "weight": 1.0, "bias":0.0,
+            "is_enabled": true}
+        # Main.used_node_ids.append(link_a["id"])
+        var link_b = {"id": generate_UID(),
+            "source_id": new_hnode["id"],
+            "target_id": original_target_node["id"],
+            "weight": link_to_break["weight"], "bias": link_to_break["bias"],
+            "is_enabled": true}
+        # Main.used_node_ids.append(link_b["id"])
+        _genome["links"].append(link_a)
+        _genome["links"].append(link_b)
+        new_hnode["incoming_link_ids"].append(link_a["id"])
+        new_hnode["outgoing_link_ids"].append(link_b["id"])
+        original_source_node["outgoing_link_ids"].append(link_a["id"])
+        original_target_node["incoming_link_ids"].append(link_b["id"])
 
   return mutated_genomes
 
