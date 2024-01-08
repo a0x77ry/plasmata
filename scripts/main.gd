@@ -1,23 +1,28 @@
 extends Node2D
 
 const NUMBER_OF_SELECTED := 10
-const MUTATION_RATE = 0.3
+const MUTATION_RATE = 0.8
 const MUTATION_STANDARD_DEVIATION = 2.0
 const ORIGINAL_WEIGHT_VALUE_LIMIT = 2.0
 const ORIGINAL_BIAS_VALUE_LIMIT = 2.0
 # const EXPECTED_MUTATED_GENES = 1.0
 const EXPECTED_MUTATED_GENE_RATE = 0.1
-const DEVIATION_FROM_PARENTS = 0.1
+const WEIGHT_SHIFT_RATE = 0.9
+const ADD_LINK_RATE = 0.3
+const ADD_NODE_RATE = 0.25
+# const DEVIATION_FROM_PARENTS = 0.1
 const SELECTION_EXPONENT = 2.0
 const C1 := 1.0
 const C2 := 1.0
 const C3 := 0.4
 const dt := 0.3
-const SELECTION_RATE = 0.5
+const SELECTION_RATE = 0.3
 const TARGET_POPULATION = 52
 const STALE_GENS_BEFORE_DEATH = 20
 const REQUIRED_SPECIES_IMPROVEMENT = 50
 const TIME_TO_FITNESS_MULTIPLICATOR = 70
+const CROSSOVER_RATE = 0.75
+const DISABLED_LINK_SELECTION_RATE = 0.75
 
 
 var random = RandomNumberGenerator.new()
@@ -123,6 +128,7 @@ func select_in_species(number_of_expected_parents):
 
 
 func crossover():
+  random.randomize()
   var do_parents_exist := false
   for sp in species:
     if sp["parent_genomes"].size() > 0:
@@ -130,29 +136,26 @@ func crossover():
       break
   if !do_parents_exist:
     return []
-  # random.randomize()
   var crossovered_genomes := []
   for sp in species:
     if sp["parent_genomes"].size() == 0:
       continue
     elif sp["parent_genomes"].size() % 2 != 0:
       sp["parent_genomes"].append(sp["parent_genomes"][0]) # add a genome to become even
-    # if sp["parent_genomes"].size() == 1:
-    #   sp["parent_genomes"].append(sp["parent_genomes"][0]) # add a genome to become even
-    # for i in range(0, floor((sp["parent_genomes"].size() - 1) * SELECTION_RATE), 2):
     for i in range(0, sp["parent_genomes"].size()-1, 2):
       var couple_genomes
       if i == 0:
         couple_genomes = [sp["parent_genomes"][i], sp["parent_genomes"][i]]
       else:
         couple_genomes = [sp["parent_genomes"][i-2], sp["parent_genomes"][i-1]]
-      # if sp["parent_genomes"].size()-1 > i:
-      #   couple_genomes = [sp["parent_genomes"][i], sp["parent_genomes"][i+1]]
-      # else:
-      #   couple_genomes = [sp["parent_genomes"][i], sp["parent_genomes"][i]]
       var number_of_offspring_each_couple = int(round((1.0 / SELECTION_RATE) * 2.0))
-      var couple_crossovered_genomes = couple_crossover(couple_genomes,
-          number_of_offspring_each_couple)
+      var couple_crossovered_genomes = [] 
+      if random.randf() < CROSSOVER_RATE:
+        couple_crossovered_genomes = couple_crossover(couple_genomes,
+            number_of_offspring_each_couple)
+      else:
+        for c in number_of_offspring_each_couple - 1:
+          couple_crossovered_genomes.append(couple_genomes[c % 2])
       crossovered_genomes.append_array(couple_crossovered_genomes)
   return crossovered_genomes
 
@@ -171,7 +174,7 @@ func couple_crossover(couple_genomes: Array, offspring_number: int) -> Array:
   for _i in offspring_number:
     var crossed_genome := {}
 
-    # inherit nodes inherit from the fittest parent
+    # inherit nodes from the fittest parent
     crossed_genome["input_nodes"] = []
     for input_node in fittest_parent["input_nodes"]:
       crossed_genome["input_nodes"].append(input_node)
@@ -188,12 +191,25 @@ func couple_crossover(couple_genomes: Array, offspring_number: int) -> Array:
       weakest_parent_ids.append(link["id"])
     for link in fittest_parent["links"]:
       if link["id"] in weakest_parent_ids: # matching links, random selection
-        if random.randf() > 0.5:
+        var weak_link
+        for wl in weakest_parent["links"]:
+          if wl["id"] == link["id"]:
+            weak_link = wl
+            break
+        if link["is_enabled"] == false:
+          if random.randf() < DISABLED_LINK_SELECTION_RATE:
+            crossed_genome["links"].append(link)
+          else:
+            crossed_genome["links"].append(weak_link)
+        elif weak_link["is_enabled"] == false:
+          if random.randf() < 1 - DISABLED_LINK_SELECTION_RATE:
+            crossed_genome["links"].append(link)
+          else:
+            crossed_genome["links"].append(weak_link)
+        elif random.randf() > 0.5:
           crossed_genome["links"].append(link)
         else:
-          for wl in weakest_parent["links"]:
-            if wl["id"] == link["id"]:
-              crossed_genome["links"].append(wl)
+          crossed_genome["links"].append(weak_link)
       else: # excess or disjoint links, from the fittest
         crossed_genome["links"].append(link)
 
@@ -225,8 +241,6 @@ func is_circular_loop(_genome, source_node, target_node):
       for l in _genome["links"]:
         if l["id"] == outlink_id:
           outlink = l
-      # if outlink["target_id"] == source_node["id"]:
-      #   return true
 
       # In order to recurse we first have to find the target node of the target_node when it is not the source node
       var candidate_target_nodes = _genome["hidden_nodes"]
@@ -269,14 +283,10 @@ func mutate(parent_genomes):
   var mutated_genomes = parent_genomes.duplicate(true)
   # var mutated_genomes = parent_genomes.duplicate()
   for _genome in mutated_genomes:
-    # var genes_number = float(_genome["links"].size()) \
-    #     + float(_genome["input_nodes"].size()) \
-    #     + float(_genome["output_nodes"].size()) \
-    #     + float(_genome["hidden_nodes"].size())
     if random.randf() < MUTATION_RATE:
       for link in _genome["links"]:
         # Shift weights and biases
-        if random.randf() < 0.5:
+        if random.randf() < WEIGHT_SHIFT_RATE:
           # if random.randf() < EXPECTED_MUTATED_GENES / genes_number:
           if random.randf() < EXPECTED_MUTATED_GENE_RATE:
             link["weight"] = random.randfn(link["weight"], MUTATION_STANDARD_DEVIATION)
@@ -291,26 +301,23 @@ func mutate(parent_genomes):
         if random.randf() < EXPECTED_MUTATED_GENE_RATE:
           link["is_enabled"] = !link["is_enabled"]
       # Add a link
-      for genome_source_node in (_genome["input_nodes"] + _genome["hidden_nodes"]):
-        if random.randf() < EXPECTED_MUTATED_GENE_RATE:
-          var genome_target_node = choose_target_node(genome_source_node, _genome)
-          if genome_target_node != null:
-            var new_id = generate_UID()
-            # check if there is a link with source and target the other way around
-            # for link in _genome["links"]:
-            #   if link["source_id"] == genome_target_node["id"] && link["target_id"] == genome_source_node["id"]:
-            #     continue
-            var new_link = {"id": new_id, "weight": random.randf_range(-1.0, 1.0),
-                "bias": random.randf_range(-1.0, 1.0),
-                "source_id": genome_source_node["id"],
-                "target_id": genome_target_node["id"], "is_enabled": true}
-            _genome["links"].append(new_link)
-            genome_source_node["outgoing_link_ids"].append(new_link["id"])
-            genome_target_node["incoming_link_ids"].append(new_link["id"])
+      if random.randf() < ADD_LINK_RATE:
+        var source_nodes = _genome["input_nodes"] + _genome["hidden_nodes"]
+        var genome_source_node = source_nodes[random.randi_range(0, source_nodes.size() - 1)]
+        var genome_target_node = choose_target_node(genome_source_node, _genome)
+        if genome_target_node != null:
+          var new_id = generate_UID()
+          var new_link = {"id": new_id, "weight": random.randf_range(-1.0, 1.0),
+              "bias": random.randf_range(-1.0, 1.0),
+              "source_id": genome_source_node["id"],
+              "target_id": genome_target_node["id"], "is_enabled": true}
+          _genome["links"].append(new_link)
+          genome_source_node["outgoing_link_ids"].append(new_link["id"])
+          genome_target_node["incoming_link_ids"].append(new_link["id"])
       # add a new node and break the link
       if _genome["links"].size() == 0:
         continue # cannot break a link if there isn't one
-      if random.randf() < EXPECTED_MUTATED_GENE_RATE * 3:
+      if random.randf() < ADD_NODE_RATE:
         var link_to_break
         while link_to_break == null:
           for genome_link in _genome["links"]:
