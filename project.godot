@@ -10,11 +10,17 @@ config_version=4
 
 _global_script_classes=[ {
 "base": "Reference",
+"class": "Genome",
+"language": "GDScript",
+"path": "res://scripts/genome.gd"
+}, {
+"base": "Reference",
 "class": "NeuralNetwork",
 "language": "GDScript",
 "path": "res://scripts/neural_network.gd"
 } ]
 _global_script_class_icons={
+"Genome": "",
 "NeuralNetwork": ""
 }
 

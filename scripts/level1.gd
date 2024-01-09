@@ -39,7 +39,6 @@ func change_generation():
     Main.select_in_species(agents.size() * Main.SELECTION_RATE)
     var crossovered_genomes = Main.crossover()
     Main.genomes = Main.mutate(crossovered_genomes)
-    # breakpoint
     var err = get_tree().change_scene("res://level1.tscn")
     if err:
       print("Failed to load scene with error: %s" % err)
@@ -57,7 +56,6 @@ func generate_population():
         spawning_area.get_position().y + area_extents.y)
     # if !Main.genomes.empty() && i < number_of_agents: 
     if Main.genomes.size() - 1 >= i && i < number_of_agents: 
-    # if !Main.generation > 0 && i < number_of_agents: 
       agent.set_genome(Main.genomes[i])
     agent.set_position(Vector2(pos_x, pos_y))
     # agent.rotation = Main.init_rot

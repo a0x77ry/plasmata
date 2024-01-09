@@ -25,7 +25,6 @@ var nn_rotation := 0.0
 var nn_speed := 0.0
 var velocity = Vector2()
 var rotation_dir = 0
-var rot
 var nn: NN
 var nn_activated_inputs = [
   "rotation",
@@ -52,9 +51,6 @@ var time_left_when_finished := 0.0
 
 func _ready():
   randomize()
-  rot = 0
-  # var number_of_hidden_nodes = ceil((float(nn_inputs.size()) * 2.0) / 3.0) + nn_outputs.size()
-  # var number_of_hidden_nodes = 8
   for input in nn_activated_inputs:
     nn_inputs.append({"name": input})
 
@@ -64,18 +60,12 @@ func _ready():
     for genome_input_node in nn_inputs:
       genome_input_node["id"] = i
       genome_input_node["outgoing_link_ids"] = []
-      # Main.used_node_ids.append(i)
       if i > Main.max_id_used:
         Main.generate_UID()
       i += 1
-    # for _i_hidden in range(number_of_hidden_nodes):
-    #   Main.used_node_ids.append(i)
-    #   nn_h.append({"id": i})
-    #   i += 1
     for genome_output_node in nn_outputs:
       genome_output_node["id"] = i
       genome_output_node["incoming_link_ids"] = []
-      # Main.used_node_ids.append(i)
       if i > Main.max_id_used:
         Main.generate_UID()
       i += 1
