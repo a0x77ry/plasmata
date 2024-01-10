@@ -4,6 +4,7 @@ const INPUT_INCREMENT := 0.01
 const NO_ID := -1
 const THRESHOLD := 1.0
 const E = 2.7182
+const ORIGINAL_WEIGHT_VALUE_LIMIT = 2.0
 
 var random = RandomNumberGenerator.new()
 var input_layer = [] 
@@ -52,7 +53,8 @@ func _init(_genome, _starting_link_id=0):
           target_node = node
       if (source_node != null) && (target_node != null):
         var link_instance = Link.new(link["id"], source_node, target_node,
-            link["weight"], link["bias"], link["source_id"],
+            link["weight"],
+            link["source_id"],
             link["target_id"], true)
         links.append(link_instance)
 
@@ -62,14 +64,14 @@ func connect_nn_layers(source_layer, target_layer):
   for s_node in source_layer:
     for t_node in target_layer:
       var new_link = Link.new(i, s_node, t_node,
-          random.randf_range(-1.0, 1.0), random.randf_range(-1.0, 1.0),
+          random.randf_range(-ORIGINAL_WEIGHT_VALUE_LIMIT, ORIGINAL_WEIGHT_VALUE_LIMIT),
           s_node.id, t_node.id, true)
       # Main.add_UID_in_used(i)
       if i > Main.max_id_used:
         Main.generate_UID()
       i += 1
       links.append(new_link)
-      genome["links"].append({"id": new_link.id,"bias": new_link.bias,
+      genome["links"].append({"id": new_link.id,
           "weight": new_link.weight, "source_id": new_link.source_node.id,
           "target_id": new_link.target_node.id, "is_enabled": true})
       # add incoming_link_ids and outgoing_link_ids to the nodes involved
@@ -211,13 +213,12 @@ class Link:
   var source_node: NNNode
   var target_node: NNNode
   var weight: float
-  var bias: float
   var source_id: int
   var target_id: int
   var is_enabled: bool
 
 
-  func _init(_id, _source_node: NNNode, _target_node: NNNode, _weight, _bias,
+  func _init(_id, _source_node: NNNode, _target_node: NNNode, _weight,
       _source_id, _target_id, _is_enabled: bool):
     if _id == NO_ID:
       id = Main.generate_UID()
@@ -226,7 +227,6 @@ class Link:
     source_node = _source_node
     target_node = _target_node
     weight = _weight
-    bias = _bias
     source_id = _source_id
     target_id = _target_id
     is_enabled = _is_enabled
@@ -237,7 +237,5 @@ class Link:
 
   func get_value():
     var val = source_node.get_value()
-    # print("Val: %s, Weight: %s, Bias: %s" % [val, weight, bias])
-    # return (val * weight) + bias
     return val * weight
 

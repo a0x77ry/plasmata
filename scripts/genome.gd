@@ -6,6 +6,7 @@ const EXPECTED_MUTATED_GENE_RATE = 0.1
 const MUTATION_STANDARD_DEVIATION = 2.0
 const ORIGINAL_WEIGHT_VALUE_LIMIT = 2.0
 const ADD_LINK_RATE = 0.3
+const ADD_NODE_RATE = 0.25
 
 var input_nodes
 var hidden_nodes
@@ -24,6 +25,53 @@ func _init(_input_nodes=[], _hidden_nodes=[], _output_nodes=[],
   links = _links
   fitness = _fitness
 
+
+func link_already_exists(source_node, target_node):
+  if target_node.incoming_links != null: # Because it can be an input node in the recursion
+    for link in target_node.incoming_links:
+      if link.source_id == source_node.id:
+        return true
+  return false
+
+func is_circular_loop(source_node, target_node):
+  for link in links:
+    if link.source_id == target_node.id && link.target_id == source_node.id:
+      return true
+    
+  if target_node.outgoing_links != null: # Because it can be an output node as a candidate target
+    for outlink in target_node.outgoing_links:
+
+      # In order to recurse we first have to find the target node of the target_node when it is not the source node
+      var candidate_target_nodes = hidden_nodes
+      var target_of_the_target_node
+      for node in candidate_target_nodes:
+        if node.id == outlink.target_id:
+          target_of_the_target_node = node # this can be null because the target of the link is an output node
+      if target_of_the_target_node != null && is_circular_loop(source_node, target_of_the_target_node):
+        return true
+  return false
+
+func choose_target_node(source_node): # Needed for mutate()
+  var candidate_nodes = hidden_nodes + output_nodes
+  var unlinked_nodes = []
+  for target_node in candidate_nodes:
+    var is_node_linked := false
+    if target_node.id == source_node.id || \
+        is_circular_loop(source_node, target_node) || \
+        link_already_exists(source_node, target_node):
+      is_node_linked = true
+    if !is_node_linked:
+      unlinked_nodes.append(target_node)
+  if !unlinked_nodes.empty():
+    var final_target_node
+    while final_target_node == null:
+      for unlinked_node in unlinked_nodes:
+        if random.randf() < float(1.0 / unlinked_nodes.size()):
+          final_target_node = unlinked_node
+          break
+    return final_target_node
+  else:
+    return null
 
 func mutate():
   random.randomize()
@@ -46,13 +94,66 @@ func mutate():
       var source_node = source_nodes[random.randi_range(0, source_nodes.size() - 1)]
       var target_node = choose_target_node(source_node)
       if target_node != null:
-        var new_id = generate_UID()
+        var new_id = Main.generate_UID()
         var new_link = Link.new(new_id, source_node, target_node,
             random.randf_range(-ORIGINAL_WEIGHT_VALUE_LIMIT, ORIGINAL_WEIGHT_VALUE_LIMIT),
             source_node.id, target_node.id, true)
         links.append(new_link)
         source_node.add_outgoing_link(new_link)
         target_node.add_incoming_link(new_link)
+
+    # Add a new node and break the link
+    if links.size() == 0:
+      return # cannot break a link if there isn't one
+    if random.randf() < ADD_NODE_RATE:
+      # find a random link to break
+      var link_to_break
+      while link_to_break == null:
+        for genome_link in links:
+          if random.randf() < links.size():
+            link_to_break = genome_link
+            break
+      link_to_break.is_enabled = false # original link disabled
+      # find the source and target nodes of the original link that is about to break
+      var original_source_node
+      for genome_source_node in input_nodes + hidden_nodes:
+        if link_to_break.source_id == genome_source_node.id:
+          original_source_node = genome_source_node
+      var original_target_node
+      for genome_target_node in output_nodes + hidden_nodes:
+        if link_to_break.target_id == genome_target_node.id:
+          original_target_node = genome_target_node
+      # create the new links for the new hidden node
+      var new_hidden_node = HiddenNode.new(Main.generate_UID(), [], [])
+      # var new_hnode = {"id": generate_UID(),
+      #     "incoming_link_ids": [],
+      #     "outgoing_link_ids": []}
+      # _genome["hidden_nodes"].append(new_hnode) # create the new hidden node
+      hidden_nodes.append(new_hidden_node)
+      var link_a = Link.new(Main.generate_UID(),
+          original_source_node.id,
+          new_hidden_node.id,
+          1.0, original_source_node, new_hidden_node, true)
+      var link_b = Link.new(Main.generate_UID(),
+          new_hidden_node.id,
+          original_target_node.id,
+          1.0, new_hidden_node, original_target_node, true)
+      # var link_a = {"id": generate_UID(),
+      #     "source_id": original_source_node["id"],
+      #     "target_id": new_hnode["id"],
+      #     "weight": 1.0,
+      #     "is_enabled": true}
+      # var link_b = {"id": generate_UID(),
+      #     "source_id": new_hnode["id"],
+      #     "target_id": original_target_node["id"],
+      #     "weight": link_to_break["weight"],
+      #     "is_enabled": true}
+      links.append(link_a)
+      links.append(link_b)
+      new_hidden_node.add_incoming_link(link_a)
+      new_hidden_node.add_outgoing_link(link_b)
+      original_source_node.add_outgoing_link(link_a)
+      original_target_node.add_incoming_link(link_b)
 
 
 
