@@ -238,5 +238,6 @@ class Link:
   func get_value():
     var val = source_node.get_value()
     # print("Val: %s, Weight: %s, Bias: %s" % [val, weight, bias])
-    return (val * weight) + bias
+    # return (val * weight) + bias
+    return val * weight
 
