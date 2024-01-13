@@ -10,13 +10,13 @@ const ADD_LINK_RATE = 0.3
 const ADD_NODE_RATE = 0.25
 # const DEVIATION_FROM_PARENTS = 0.1
 const SELECTION_EXPONENT = 2.0
-const C1 := 1.0
-const C2 := 1.0
+const C1 := 0.5
+const C2 := 0.5
 const C3 := 0.4
-const dt := 0.3
+const dt := 0.22 # distance
 const SELECTION_RATE = 0.3
 const TARGET_POPULATION = 52
-const STALE_GENS_BEFORE_DEATH = 20
+const STALE_GENS_BEFORE_DEATH = 15
 const REQUIRED_SPECIES_IMPROVEMENT = 50
 const TIME_TO_FITNESS_MULTIPLICATOR = 70
 const CROSSOVER_RATE = 0.75
@@ -56,7 +56,8 @@ func calculate_fitness(curve: Curve2D, agents: Array):
 func share_fitness():
   for sp in species:
     for member_genome in sp["members"]:
-      member_genome["adjusted_fitness"] = member_genome["fitness"] / sp.size()
+      # It's the size of the new species, but this keeps daring attemps
+      member_genome["adjusted_fitness"] = member_genome["fitness"] / sp["members"].size()
 
 
 func select_in_species(number_of_expected_parents):
@@ -65,7 +66,7 @@ func select_in_species(number_of_expected_parents):
   for sp in species:
     if sp["members"].size() == 0:
       sp["avg_fitness"] = []
-      sp["total_adjusted_fitness"] = 0
+      sp["total_adjusted_fitness"] = 0.0
       continue
 
     var total_adjusted_fitness = 0.0
@@ -174,6 +175,7 @@ func couple_crossover(couple_genomes: Array, offspring_number: int) -> Array:
 
     # inherit nodes from the fittest parent
     crossed_genome["input_nodes"] = []
+    # ?? Simplify those
     for input_node in fittest_parent["input_nodes"]:
       crossed_genome["input_nodes"].append(input_node)
     crossed_genome["output_nodes"] = []
@@ -353,16 +355,17 @@ func mutate(parent_genomes):
 func speciate():
   if !species.empty():
     for sp in species:
+      sp["members_num"] = sp["members"].size()
       sp["members"] = []
-      sp["total_adjusted_fitness"] = 0
+      sp["total_adjusted_fitness"] = 0.0
       sp["parent_genomes"] = []
   for genome in genomes:
     # get all the genome's nodes, ids and their max id
-    var gen_all_nodes = genome["input_nodes"] + genome["hidden_nodes"] \
-        + genome["output_nodes"] + genome["links"];
+    var gen_all_genes = genome["input_nodes"] + genome["hidden_nodes"] \
+        + genome["output_nodes"] + genome["links"]
     var gen_all_ids = []
-    for node in gen_all_nodes:
-      gen_all_ids.append(node["id"])
+    for gene in gen_all_genes:
+      gen_all_ids.append(gene["id"])
     var gen_max_id = gen_all_ids.max()
 
     var is_different_species := true
@@ -370,24 +373,28 @@ func speciate():
 
     # get all the prototypes's nodes, ids and their max id
       var prot = sp["prototype"]
-      var prot_all_nodes = prot["input_nodes"] + prot["hidden_nodes"] \
+      var prot_all_genes = prot["input_nodes"] + prot["hidden_nodes"] \
           + prot["output_nodes"] + prot["links"]
       var prot_all_ids = []
-      for node in prot_all_nodes:
-        prot_all_ids.append(node["id"])
+      for gene in prot_all_genes:
+        prot_all_ids.append(gene["id"])
       var prot_max_id = prot_all_ids.max()
 
-      var N = max(gen_max_id, prot_max_id) # find N
-      var excess_genes_num = abs(gen_max_id - prot_max_id) # find excess genes
+      # var N = max(gen_max_id, prot_max_id) # find N
+      var N = max(gen_all_genes.size(), prot_all_genes.size()) # find N
+      # var excess_genes_num = abs(gen_max_id - prot_max_id) # find excess genes
 
       var min_id = min(gen_max_id, prot_max_id)
       var disjoined_genes_num = 0
+      var excess_genes_num = 0
       var weight_diffs = []
-      for gen_n in gen_all_nodes:
+      for gen_n in gen_all_genes:
         if !prot_all_ids.has(gen_n["id"]) and gen_n["id"] <= min_id:
           disjoined_genes_num += 1 #find disjoined genes
+        elif !prot_all_ids.has(gen_n["id"]) and gen_n["id"] > min_id:
+          excess_genes_num += 1 # find excess genes
 
-        for prot_n in prot_all_nodes:
+        for prot_n in prot_all_genes:
           if prot_n.has("weight") && prot_n["id"] == gen_n["id"]:
             assert(gen_n.has("weight"), "Error in change_generation(). pron_n is a link while gen_n isn't")
             weight_diffs.append(abs(prot_n["weight"] - gen_n["weight"]))
@@ -401,7 +408,13 @@ func speciate():
       var compatibility_distance = ((C1 * excess_genes_num) / N) \
           + ((C2 * disjoined_genes_num) / N) \
           + (C3 * avg_weight_diff)
-      if compatibility_distance < dt:
+      # if compatibility_distance < dt || generation < 10:
+      # var sp_percentage = float(sp["members"].size()) / float(genomes.size())
+      var added_distance = 0.0
+      # if sp_percentage > 0.33:
+      #   added_distance = 0.01 + (sp_percentage - 0.33) * 0.1
+      # print(compatibility_distance)
+      if compatibility_distance < dt - added_distance:
         is_different_species = false
         sp["members"].append(genome)
         break # we don't want a genome to belong to 2 different species
@@ -411,7 +424,7 @@ func speciate():
 
 func add_species(genome):
   var sp = {"prototype": genome, "members": [genome], "avg_fitness": [],
-      "parent_genomes": []}
+      "parent_genomes": [], "members_num": 1}
   species.append(sp)
 
 

@@ -95,6 +95,11 @@ func get_genome():
   return genome
 
 
+func get_fitness():
+  genome.fitness = curve.get_closest_offset(position) \
+      + time_left_when_finished * Main.TIME_TO_FITNESS_MULTIPLICATOR
+
+
 func get_sensor_input():
   var current_rot = get_rotation()
   # Normalized rotation in positive radians
