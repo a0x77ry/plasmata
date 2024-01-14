@@ -8,16 +8,19 @@ const DISABLED_LINK_SELECTION_RATE = 0.75
 
 const Genome = preload("res://scripts/genome.gd")
 
+var random = RandomNumberGenerator.new()
+
 var prototype
 var members
 var parent_genomes
 var avg_fitness
 var total_adjusted_fitness
-var random = RandomNumberGenerator.new()
+var population
 
 
-func _init(_prototype, _members=[], _parent_genomes=[], _avg_fitness=[],
+func _init(_population, _prototype, _members=[], _parent_genomes=[], _avg_fitness=[],
     _total_adjusted_fitness=0):
+  population = _population
   prototype = _prototype
   members = _members
   parent_genomes = _parent_genomes
@@ -112,7 +115,7 @@ func couple_crossover(couple_genomes: Array, offspring_number: int) -> Array:
     weakest_parent = couple_genomes[0]
 
   for _i in offspring_number:
-    var crossed_genome := Genome.new()
+    var crossed_genome := Genome.new(population)
 
     # inherit nodes from the fittest parent
     crossed_genome.input_nodes = fittest_parent.input_nodes

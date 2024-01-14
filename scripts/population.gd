@@ -14,6 +14,7 @@ var selection_rate
 var target_population
 
 var random = RandomNumberGenerator.new()
+var max_id_used := 0
 
 
 func _init(_genomes=[], _species=[], _selection_rate=0.3, _target_population=52):
@@ -163,6 +164,11 @@ func speciate():
       add_species(genome)
 
 func add_species(genome):
-  var sp = Species.new(genome, [genome])
+  var sp = Species.new(self, genome, [genome])
   species.append(sp)
+
+
+func generate_UID():
+  max_id_used += 1
+  return max_id_used
 

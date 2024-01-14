@@ -13,12 +13,14 @@ var hidden_nodes
 var output_nodes
 var links
 var fitness
+var population
 
 var random = RandomNumberGenerator.new()
 
 
-func _init(_input_nodes=[], _hidden_nodes=[], _output_nodes=[],
+func _init(_population, _input_nodes=[], _hidden_nodes=[], _output_nodes=[],
     _links=[], _fitness=0):
+  population = _population
   input_nodes = _input_nodes
   hidden_nodes = _hidden_nodes
   output_nodes = _output_nodes
@@ -95,7 +97,7 @@ func mutate():
       var source_node = source_nodes[random.randi_range(0, source_nodes.size() - 1)]
       var target_node = choose_target_node(source_node)
       if target_node != null:
-        var new_id = Main.generate_UID()
+        var new_id = population.generate_UID()
         var new_link = Link.new(new_id, source_node, target_node,
             random.randf_range(-ORIGINAL_WEIGHT_VALUE_LIMIT, ORIGINAL_WEIGHT_VALUE_LIMIT),
             source_node.id, target_node.id, true)
@@ -125,14 +127,14 @@ func mutate():
         if link_to_break.target_id == genome_target_node.id:
           original_target_node = genome_target_node
       # construct the new hidden node and append it to hidden_nodes
-      var new_hidden_node = HiddenNode.new(Main.generate_UID(), [], [])
+      var new_hidden_node = HiddenNode.new(population.generate_UID(), [], [])
       hidden_nodes.append(new_hidden_node)
       # create the new links for the new hidden node
-      var link_a = Link.new(Main.generate_UID(),
+      var link_a = Link.new(population.generate_UID(),
           original_source_node.id,
           new_hidden_node.id,
           1.0, original_source_node, new_hidden_node, true)
-      var link_b = Link.new(Main.generate_UID(),
+      var link_b = Link.new(population.generate_UID(),
           new_hidden_node.id,
           original_target_node.id,
           1.0, new_hidden_node, original_target_node, true)
