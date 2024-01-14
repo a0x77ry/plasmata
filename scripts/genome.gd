@@ -73,6 +73,7 @@ func choose_target_node(source_node): # Needed for mutate()
   else:
     return null
 
+# Mutate this specific genome
 func mutate():
   random.randomize()
   if random.randf() < MUTATION_RATE:
@@ -80,13 +81,13 @@ func mutate():
       # Shift weights
       if random.randf() < WEIGHT_SHIFT_RATE:
         if random.randf() < EXPECTED_MUTATED_GENE_RATE:
-          link.weight = random.randfn(link["weight"], MUTATION_STANDARD_DEVIATION)
+          link.weight = random.randfn(link.weight, MUTATION_STANDARD_DEVIATION)
       # Change weights randomly
       else:
         if random.randf() < EXPECTED_MUTATED_GENE_RATE:
           link.weight = random.randf_range(-ORIGINAL_WEIGHT_VALUE_LIMIT, ORIGINAL_WEIGHT_VALUE_LIMIT)
       # Disable link
-      if random.randf() < EXPECTED_MUTATED_GENE_RATE / 2:
+      if random.randf() < EXPECTED_MUTATED_GENE_RATE / 3:
         link["is_enabled"] = !link["is_enabled"]
     # Add a link
     if random.randf() < ADD_LINK_RATE:
@@ -123,13 +124,10 @@ func mutate():
       for genome_target_node in output_nodes + hidden_nodes:
         if link_to_break.target_id == genome_target_node.id:
           original_target_node = genome_target_node
-      # create the new links for the new hidden node
+      # construct the new hidden node and append it to hidden_nodes
       var new_hidden_node = HiddenNode.new(Main.generate_UID(), [], [])
-      # var new_hnode = {"id": generate_UID(),
-      #     "incoming_link_ids": [],
-      #     "outgoing_link_ids": []}
-      # _genome["hidden_nodes"].append(new_hnode) # create the new hidden node
       hidden_nodes.append(new_hidden_node)
+      # create the new links for the new hidden node
       var link_a = Link.new(Main.generate_UID(),
           original_source_node.id,
           new_hidden_node.id,
@@ -138,16 +136,6 @@ func mutate():
           new_hidden_node.id,
           original_target_node.id,
           1.0, new_hidden_node, original_target_node, true)
-      # var link_a = {"id": generate_UID(),
-      #     "source_id": original_source_node["id"],
-      #     "target_id": new_hnode["id"],
-      #     "weight": 1.0,
-      #     "is_enabled": true}
-      # var link_b = {"id": generate_UID(),
-      #     "source_id": new_hnode["id"],
-      #     "target_id": original_target_node["id"],
-      #     "weight": link_to_break["weight"],
-      #     "is_enabled": true}
       links.append(link_a)
       links.append(link_b)
       new_hidden_node.add_incoming_link(link_a)

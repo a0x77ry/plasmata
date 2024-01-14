@@ -32,6 +32,28 @@ func share_fitness():
     member_genome.adjusted_fitness = member_genome.fitness / members.size()
 
 
+func select_in_species(number_of_expected_parents):
+  # Calculate the avg_fitness and append it to the array
+  calculate_avg_fitness()
+  # If no improvement in x generations then members = []
+  empty_stale_spieces()
+
+  # Calculate the number of parents for each species
+  members.sort_custom(GenomeSorter, "sort_ascenting")
+  var parents_number = round((total_adjusted_fitness / Main.population.all_species_adj_fitness) \
+      * number_of_expected_parents)
+  if members.size() == 0:
+    parents_number = 0
+  # Add the last (best performing) genomes of the species or random
+  if parents_number > 0:
+    for i in range(1, parents_number):
+      if members.size() >= i:
+        # Append normal member
+        parent_genomes.append(members[-i])
+      else:
+        # Append random member
+        parent_genomes.append(members[random.randi_range(0, members.size() - 1)])
+
 func calculate_avg_fitness():
   if members.size() == 0:
     avg_fitness = []
@@ -53,27 +75,30 @@ func empty_stale_spieces():
     if avg_fitness[-1] - avg_fitness[0] < REQUIRED_SPECIES_IMPROVEMENT:
       members = [] # if there is no improvement after some generations kill the species
 
-func select_in_species(number_of_expected_parents):
-  # calculate the avg_fitness
-  calculate_avg_fitness()
-  empty_stale_spieces()
 
-  # calculate the number of parents for each species
-  members.sort_custom(GenomeSorter, "sort_ascenting")
-  var parents_number = round((total_adjusted_fitness / Main.population.all_species_adj_fitness) \
-      * number_of_expected_parents)
-  if members.size() == 0:
-    parents_number = 0
-  # Add the last (best performing) genomes of the species or random
-  if parents_number > 0:
-    for i in range(1, parents_number):
-      if members.size() >= i:
-        # Append normal member
-        parent_genomes.append(members[-i])
-      else:
-        # Append random member
-        parent_genomes.append(members[random.randi_range(0, members.size() - 1)])
-
+func crossover():
+  var crossovered_genomes = []
+  if parent_genomes.size() == 0:
+    return []
+  elif parent_genomes.size() % 2 != 0:
+    parent_genomes.append(parent_genomes[0]) # add a genome to become even
+  # Crossover couples of parent_genomes in crossovered_genomes
+  for i in range(0, parent_genomes.size()-1, 2):
+    var couple_genomes
+    if i == 0:
+      couple_genomes = [parent_genomes[i], parent_genomes[i]]
+    else:
+      couple_genomes = [parent_genomes[i-2], parent_genomes[i-1]]
+    var number_of_offspring_each_couple = int(round((1.0 / SELECTION_RATE) * 2.0))
+    var couple_crossovered_genomes = [] 
+    if random.randf() < CROSSOVER_RATE:
+      couple_crossovered_genomes = couple_crossover(couple_genomes,
+          number_of_offspring_each_couple)
+    else:
+      for c in number_of_offspring_each_couple - 1:
+        couple_crossovered_genomes.append(couple_genomes[c % 2])
+    crossovered_genomes.append_array(couple_crossovered_genomes)
+  return crossovered_genomes
 
 func couple_crossover(couple_genomes: Array, offspring_number: int) -> Array:
   var crossovered_genomes := []
@@ -126,37 +151,13 @@ func couple_crossover(couple_genomes: Array, offspring_number: int) -> Array:
     crossovered_genomes.append(crossed_genome)
   return crossovered_genomes
 
-func crossover():
-  var crossovered_genomes = []
-  if parent_genomes.size() == 0:
-    return []
-  elif parent_genomes.size() % 2 != 0:
-    parent_genomes.append(parent_genomes[0]) # add a genome to become even
-  # Crossover couples of parent_genomes in crossovered_genomes
-  for i in range(0, parent_genomes.size()-1, 2):
-    var couple_genomes
-    if i == 0:
-      couple_genomes = [parent_genomes[i], parent_genomes[i]]
-    else:
-      couple_genomes = [parent_genomes[i-2], parent_genomes[i-1]]
-    var number_of_offspring_each_couple = int(round((1.0 / SELECTION_RATE) * 2.0))
-    var couple_crossovered_genomes = [] 
-    if random.randf() < CROSSOVER_RATE:
-      couple_crossovered_genomes = couple_crossover(couple_genomes,
-          number_of_offspring_each_couple)
-    else:
-      for c in number_of_offspring_each_couple - 1:
-        couple_crossovered_genomes.append(couple_genomes[c % 2])
-    crossovered_genomes.append_array(couple_crossovered_genomes)
-  return crossovered_genomes
-
 
 # Reset everything except the prototype
 func reset_species():
   members = []
   parent_genomes = []
-  avg_fitness = []
   total_adjusted_fitness = 0.0
+
 
 
 class GenomeSorter:

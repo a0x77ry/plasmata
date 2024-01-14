@@ -93,8 +93,8 @@ func select_in_species(number_of_expected_parents):
     sp["members"].sort_custom(GenomeSorter, "sort_ascenting")
     var parents_number = round((sp["total_adjusted_fitness"] / all_species_adj_fitness) \
         * number_of_expected_parents)
+    # if sp["members"].size() == 0:
     if sp["members"].size() == 0:
-      # sp["parent_genomes"] = []
       parents_number = 0
     # add the last (best performing) genomes of the species
     if parents_number > 0:
@@ -274,13 +274,12 @@ func choose_target_node(genome_source_node, _genome):
   else:
     return null
 
-func mutate(parent_genomes):
-  if parent_genomes.size() == 0:
-    print("No parents. Starting over...")
+func mutate(_genomes):
+  if _genomes.size() == 0:
+    # print("No parents. Starting over...")
     return []
   random.randomize()
-  var mutated_genomes = parent_genomes.duplicate(true)
-  # var mutated_genomes = parent_genomes.duplicate()
+  var mutated_genomes = _genomes.duplicate(true)
   for _genome in mutated_genomes:
     if random.randf() < MUTATION_RATE:
       for link in _genome["links"]:
@@ -355,7 +354,6 @@ func mutate(parent_genomes):
 func speciate():
   if !species.empty():
     for sp in species:
-      sp["members_num"] = sp["members"].size()
       sp["members"] = []
       sp["total_adjusted_fitness"] = 0.0
       sp["parent_genomes"] = []
@@ -370,7 +368,6 @@ func speciate():
 
     var is_different_species := true
     for sp in species:
-
     # get all the prototypes's nodes, ids and their max id
       var prot = sp["prototype"]
       var prot_all_genes = prot["input_nodes"] + prot["hidden_nodes"] \
@@ -380,24 +377,26 @@ func speciate():
         prot_all_ids.append(gene["id"])
       var prot_max_id = prot_all_ids.max()
 
-      # var N = max(gen_max_id, prot_max_id) # find N
       var N = max(gen_all_genes.size(), prot_all_genes.size()) # find N
-      # var excess_genes_num = abs(gen_max_id - prot_max_id) # find excess genes
+      # TRY
+      # if N < 20:
+      #   N = 1
 
+      # Find disjoint and excess genes
       var min_id = min(gen_max_id, prot_max_id)
-      var disjoined_genes_num = 0
+      var disjoint_genes_num = 0
       var excess_genes_num = 0
       var weight_diffs = []
-      for gen_n in gen_all_genes:
-        if !prot_all_ids.has(gen_n["id"]) and gen_n["id"] <= min_id:
-          disjoined_genes_num += 1 #find disjoined genes
-        elif !prot_all_ids.has(gen_n["id"]) and gen_n["id"] > min_id:
+      for genome_n in gen_all_genes:
+        if !prot_all_ids.has(genome_n["id"]) and genome_n["id"] <= min_id:
+          disjoint_genes_num += 1 #find disjoint genes
+        elif !prot_all_ids.has(genome_n["id"]) and genome_n["id"] > min_id:
           excess_genes_num += 1 # find excess genes
 
         for prot_n in prot_all_genes:
-          if prot_n.has("weight") && prot_n["id"] == gen_n["id"]:
-            assert(gen_n.has("weight"), "Error in change_generation(). pron_n is a link while gen_n isn't")
-            weight_diffs.append(abs(prot_n["weight"] - gen_n["weight"]))
+          if prot_n.has("weight") && prot_n["id"] == genome_n["id"]:
+            assert(genome_n.has("weight"), "Error in change_generation(). pron_n is a link while gen_n isn't")
+            weight_diffs.append(abs(prot_n["weight"] - genome_n["weight"]))
       var weight_diffs_sum = 0.0
       var avg_weight_diff := 0.0
       if weight_diffs.size() != 0:
@@ -406,15 +405,9 @@ func speciate():
         avg_weight_diff = weight_diffs_sum / weight_diffs.size() # find average weight differences
 
       var compatibility_distance = ((C1 * excess_genes_num) / N) \
-          + ((C2 * disjoined_genes_num) / N) \
+          + ((C2 * disjoint_genes_num) / N) \
           + (C3 * avg_weight_diff)
-      # if compatibility_distance < dt || generation < 10:
-      # var sp_percentage = float(sp["members"].size()) / float(genomes.size())
-      var added_distance = 0.0
-      # if sp_percentage > 0.33:
-      #   added_distance = 0.01 + (sp_percentage - 0.33) * 0.1
-      # print(compatibility_distance)
-      if compatibility_distance < dt - added_distance:
+      if compatibility_distance < dt:
         is_different_species = false
         sp["members"].append(genome)
         break # we don't want a genome to belong to 2 different species
@@ -424,7 +417,7 @@ func speciate():
 
 func add_species(genome):
   var sp = {"prototype": genome, "members": [genome], "avg_fitness": [],
-      "parent_genomes": [], "members_num": 1}
+      "parent_genomes": []}
   species.append(sp)
 
 
