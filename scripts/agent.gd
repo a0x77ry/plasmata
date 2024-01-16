@@ -2,8 +2,8 @@ extends KinematicBody2D
 
 # export (int) var speed = 200
 # export (float) var rotation_speed = 3.0
-export (float) var speed = 50.0
-export (float) var rotation_speed = 1.5
+export (float) var speed = 30.0 # waa 50.0
+export (float) var rotation_speed = 1.0 # was 1.5
 export (float) var speed_limit = 300.0
 export (float) var rotation_speed_limit = 8.0
 export (int) var number_of_hidden_nodes = 8
@@ -11,6 +11,7 @@ export (int) var number_of_hidden_nodes = 8
 # export (int) var level_height = 350
 
 const NN = preload("res://scripts/neural_network.gd")
+const TIME_TO_FITNESS_MULTIPLICATOR = 120
 
 onready var ray_forward = get_node("ray_forward")
 onready var ray_f_up = get_node("ray_f_up")
@@ -61,7 +62,7 @@ func get_genome():
 
 func get_fitness():
   genome.fitness = curve.get_closest_offset(position) \
-      + time_left_when_finished * Main.TIME_TO_FITNESS_MULTIPLICATOR
+      + time_left_when_finished * TIME_TO_FITNESS_MULTIPLICATOR
 
 
 func get_sensor_input():

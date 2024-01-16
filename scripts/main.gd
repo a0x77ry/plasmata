@@ -1,7 +1,5 @@
 extends Node2D
 
-const TIME_TO_FITNESS_MULTIPLICATOR = 70
-
 const Population = preload("res://scripts/population.gd")
 
 var random = RandomNumberGenerator.new()
