@@ -1,7 +1,7 @@
 class_name NeuralNetwork
 
 const INPUT_INCREMENT := 0.01
-const NO_ID := -1
+const NO_IN := -1
 const THRESHOLD := 1.0
 const E = 2.7182
 const ORIGINAL_WEIGHT_VALUE_LIMIT = 2.0
@@ -13,77 +13,70 @@ var hidden_layer = []
 var links = []
 
 var genome
-var starting_link_id: int
+# var starting_link_id: int
 
-func _init(_genome, _starting_link_id=0):
-  # Warning: passed by reference
+func _init(_genome):
   genome = _genome
-  starting_link_id = _starting_link_id
+  # starting_link_id = _starting_link_id
   random.randomize()
 
-  # Create nodes according to the genome (made in agent.gd)
-  for input_node_gene in genome["input_nodes"]:
-    var i_node = InputNode.new(input_node_gene["id"], input_node_gene["name"])
+  # Create nodes according to the genome (set in agent.gd)
+  for input_node_gene in genome.input_nodes:
+    var i_node = InputNode.new(input_node_gene.inno_num, input_node_gene.name)
     input_layer.append(i_node)
 
-  for hidden_node_gene in genome["hidden_nodes"]:
-    var h_node = HiddenNode.new(hidden_node_gene["id"])
+  for hidden_node_gene in genome.hidden_nodes:
+    var h_node = HiddenNode.new(hidden_node_gene.inno_num)
     hidden_layer.append(h_node)
 
-  for output_node_gene in genome["output_nodes"]:
-    var o_node = OutputNode.new(output_node_gene["id"], output_node_gene["name"])
+  for output_node_gene in genome.output_nodes:
+    var o_node = OutputNode.new(output_node_gene.inno_num, output_node_gene.name)
     output_layer.append(o_node)
 
   var all_nodes = input_layer + hidden_layer + output_layer
 
-  # Create the links between the nodes
-  if !genome.has("links"):
-    genome["links"] = []
-    # connect_nn_layers(input_layer, output_layer)
-  else:
-    # Use genome to connect the links
-    for link in genome["links"]:
-      var source_node
-      var target_node
-      for node in all_nodes:
-        var nid = node.id
-        if nid == link["source_id"]:
-          source_node = node
-        elif nid == link["target_id"]:
-          target_node = node
-      if (source_node != null) && (target_node != null):
-        var link_instance = Link.new(link["id"], source_node, target_node,
-            link["weight"],
-            link["source_id"],
-            link["target_id"], true)
-        links.append(link_instance)
+  # Create the links between the nodes using genome
+  for link in genome.links:
+    var source_node
+    var target_node
+    for node in all_nodes:
+      var nin = node.inno_num
+      if nin == link.source_inno_num:
+        source_node = node
+      elif nin == link.target_inno_num:
+        target_node = node
+    if (source_node != null) && (target_node != null):
+      var link_instance = Link.new(link.inno_num, source_node, target_node,
+          link.weight,
+          link.source_inno_num,
+          link.target_inno_num, true)
+      links.append(link_instance)
 
 
-func connect_nn_layers(source_layer, target_layer):
-  var i := starting_link_id
-  for s_node in source_layer:
-    for t_node in target_layer:
-      var new_link = Link.new(i, s_node, t_node,
-          random.randf_range(-ORIGINAL_WEIGHT_VALUE_LIMIT, ORIGINAL_WEIGHT_VALUE_LIMIT),
-          s_node.id, t_node.id, true)
-      # Main.add_UID_in_used(i)
-      if i > Main.max_id_used:
-        Main.generate_UID()
-      i += 1
-      links.append(new_link)
-      genome["links"].append({"id": new_link.id,
-          "weight": new_link.weight, "source_id": new_link.source_node.id,
-          "target_id": new_link.target_node.id, "is_enabled": true})
-      # add incoming_link_ids and outgoing_link_ids to the nodes involved
-      var all_genome_nodes = genome["input_nodes"] \
-          + genome["hidden_nodes"] \
-          + genome["output_nodes"]
-      for _genome_node in all_genome_nodes:
-        if _genome_node["id"] == new_link.source_node.id:
-          _genome_node["outgoing_link_ids"].append(new_link.id)
-        elif _genome_node["id"] == new_link.target_node.id:
-          _genome_node["incoming_link_ids"].append(new_link.id)
-
+# func connect_nn_layers(source_layer, target_layer):
+#   var i := starting_link_id
+#   for s_node in source_layer:
+#     for t_node in target_layer:
+#       var new_link = Link.new(i, s_node, t_node,
+#           random.randf_range(-ORIGINAL_WEIGHT_VALUE_LIMIT, ORIGINAL_WEIGHT_VALUE_LIMIT),
+#           s_node.id, t_node.id, true)
+#       # Main.add_UID_in_used(i)
+#       if i > Main.max_id_used:
+#         Main.generate_UID()
+#       i += 1
+#       links.append(new_link)
+#       genome["links"].append({"id": new_link.id,
+#           "weight": new_link.weight, "source_id": new_link.source_node.id,
+#           "target_id": new_link.target_node.id, "is_enabled": true})
+#       # add incoming_link_ids and outgoing_link_ids to the nodes involved
+#       var all_genome_nodes = genome["input_nodes"] \
+#           + genome["hidden_nodes"] \
+#           + genome["output_nodes"]
+#       for _genome_node in all_genome_nodes:
+#         if _genome_node["id"] == new_link.source_node.id:
+#           _genome_node["outgoing_link_ids"].append(new_link.id)
+#         elif _genome_node["id"] == new_link.target_node.id:
+#           _genome_node["incoming_link_ids"].append(new_link.id)
 
 
 func set_input(input_dict: Dictionary):
@@ -103,19 +96,19 @@ func get_output() -> Dictionary:
 
 class NNNode:
   var name: String setget ,get_name
-  var id: int setget , get_id
+  var inno_num: int setget , get_inno_num
 
 
-  func _init(_id, _name=""):
+  func _init(_inno_num, _name=""):
     name = _name
-    id = _id
+    inno_num = _inno_num
 
 
   func get_name():
     return name
 
-  func get_id():
-    return id
+  func get_inno_num():
+    return inno_num
 
   func _relu(val):
     return 0 if val <= 0 else val
@@ -134,7 +127,7 @@ class InputNode:
   var value: float setget set_value, get_value
   var outgoing_links = []
 
-  func _init(_id, _name, _value=randf()).(_id, _name):
+  func _init(_inno_num, _name, _value=randf()).(_inno_num, _name):
     value = _value 
 
   func set_value(_value):
@@ -155,7 +148,7 @@ class OutputNode:
   var value: float
 
 
-  func _init(_id, _name="", _value=randf()).(_id, _name):
+  func _init(_inno_num, _name="", _value=randf()).(_inno_num, _name):
     name = _name
     value = _value
 
@@ -187,7 +180,7 @@ class HiddenNode:
   # var is_enabled: bool
 
 
-  func _init(_id, _name="", _value=randf()).(_id, _name):
+  func _init(_inno_num, _name="", _value=randf()).(_inno_num, _name):
     value = _value
     name = _name
 
@@ -209,26 +202,27 @@ class HiddenNode:
 
 
 class Link:
-  var id: int
+  var inno_num: int
   var source_node: NNNode
   var target_node: NNNode
   var weight: float
-  var source_id: int
-  var target_id: int
+  var source_inno_num: int
+  var target_inno_num: int
   var is_enabled: bool
 
 
-  func _init(_id, _source_node: NNNode, _target_node: NNNode, _weight,
-      _source_id, _target_id, _is_enabled: bool):
-    if _id == NO_ID:
-      id = Main.generate_UID()
+  func _init(_inno_num, _source_node: NNNode, _target_node: NNNode, _weight,
+      _source_inno_num, _target_inno_num, _is_enabled: bool):
+    if _inno_num == NO_IN:
+      print("Error in NN: no IN in link")
+      # inno_num = population.generate_UID()
     else:
-      id = _id
+      inno_num = _inno_num
     source_node = _source_node
     target_node = _target_node
     weight = _weight
-    source_id = _source_id
-    target_id = _target_id
+    source_inno_num = _source_inno_num
+    target_inno_num = _target_inno_num
     is_enabled = _is_enabled
 
     source_node.add_outgoing_link(self)

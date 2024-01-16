@@ -26,55 +26,18 @@ var nn_speed := 0.0
 var velocity = Vector2()
 var rotation_dir = 0
 var nn: NN
-var nn_activated_inputs = [
-  "rotation",
-  # "inverse_rotation",
-  "time_since_birth",
-  "pos_x",
-  "pos_y",
-  "ray_f_distance",
-  "ray_f_up_distance",
-  "ray_f_down_distance",
-  "fitness"
-]
-var nn_inputs = []
-var nn_outputs = [
-  {"name": "go_right"},
-  # {"name": "go_left"},
-  {"name": "go_forward"},
-  # {"name": "go_backward"},
-]
-var nn_h = []
-var genome: Dictionary = {} setget set_genome, get_genome
+var nn_activated_inputs := [] # set by the level
+var genome setget set_genome, get_genome
 var reached_the_end := false
 var time_left_when_finished := 0.0
 
 func _ready():
   randomize()
-  for input in nn_activated_inputs:
-    nn_inputs.append({"name": input})
 
-  if genome.empty():
-    # create a new genome
-    var i = 0
-    for genome_input_node in nn_inputs:
-      genome_input_node["id"] = i
-      genome_input_node["outgoing_link_ids"] = []
-      if i > Main.max_id_used:
-        Main.generate_UID()
-      i += 1
-    for genome_output_node in nn_outputs:
-      genome_output_node["id"] = i
-      genome_output_node["incoming_link_ids"] = []
-      if i > Main.max_id_used:
-        Main.generate_UID()
-      i += 1
-    genome = {"input_nodes": nn_inputs, "hidden_nodes": nn_h,
-        "output_nodes": nn_outputs, "fitness": 0}
-    Main.genomes.append(genome)
+  assert(genome != null)
 
-  var starting_link_id = nn_inputs.size() + nn_outputs.size()
-  nn = NN.new(genome, starting_link_id)
+  # var starting_link_id = nn_inputs.size() + nn_outputs.size()
+  nn = NN.new(genome)
 
 
 func _physics_process(delta):
@@ -87,6 +50,7 @@ func _physics_process(delta):
   else:
     rotation = 0.0
     velocity = 0.0
+
 
 func set_genome(_genome):
    genome = _genome
