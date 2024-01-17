@@ -51,6 +51,8 @@ func select_in_species(number_of_expected_parents):
 
   # Calculate the number of parents for each species
   members.sort_custom(GenomeSorter, "sort_ascenting")
+  if number_of_expected_parents > members.size():
+    number_of_expected_parents = members.size()
   var parents_number = round((total_adjusted_fitness / population.all_species_adj_fitness) \
       * number_of_expected_parents)
   parent_genomes = []

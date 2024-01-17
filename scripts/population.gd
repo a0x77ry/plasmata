@@ -3,7 +3,7 @@ class_name Population
 const C1 := 0.5
 const C2 := 0.5
 const C3 := 0.4
-const dt := 0.3 # distance
+const dt := 0.4 # distance
 
 const Species = preload("res://scripts/species.gd")
 const Genome = preload("res://scripts/genome.gd")
@@ -29,6 +29,7 @@ func _init(_genomes=[], _species=[], _selection_rate=0.3, _target_population=80)
   random.randomize()
 
 
+# Creates and initializes all genomes with input and output nodes
 func init_genomes(input_names: Array, output_names: Array, number_of_genomes: int):
   for i in number_of_genomes:
     var new_genome = Genome.new(self)
@@ -37,17 +38,14 @@ func init_genomes(input_names: Array, output_names: Array, number_of_genomes: in
 
 
 # Changes genomes to the next generation
-func next_generation(agents: Array):
+func next_generation(agents: Array, original_agents_num: int):
   initialize_genomes_with_fitness(agents) # Initializes genomes array with fitness values only
-  # breakpoint
   speciate() # Categorizes genomes into species
   share_fitness_all_species() # Fills the adjusted_fitness in all genomes
-  select_in_all_species(agents.size()) # Fills the parent_genomes in all species, calcs avg_fitness
-  # breakpoint
+  select_in_all_species(original_agents_num) # Fills the parent_genomes in all species, calcs avg_fitness
+  # select_in_all_species(agents.size()) # Fills the parent_genomes in all species, calcs avg_fitness
   genomes = crossover_all_species()
-  # breakpoint
   mutate_all_genomes()
-  # breakpoint
   increment_generation()
 
 
@@ -82,8 +80,10 @@ func select_in_all_species(agents_size):
     # Calculate the avg_fitness and append it to the array
     sp.calculate_avg_fitness()
   calculate_all_species_adj_fitness()
+  # print("All species adjsted fitness: %s" % all_species_adj_fitness)
   for sp in species:
     sp.select_in_species(agents_size * selection_rate)
+    # print("sp members: %s total_adjusted_fitness: %s, parents: %s" % [sp.members.size(), sp.total_adjusted_fitness, sp.parent_genomes.size()])
   kill_empty_species()
   fill_parent_genomes()
 

@@ -34,20 +34,21 @@ func _ready():
   init_population()
 
 
-func init_population():
-  population = Population.new()
-  number_of_agents = population.target_population
-  population.init_genomes(input_names, output_names, number_of_agents)
-  generate_agent_population()
-  population.increment_generation()
-  gen_counter.text = str(population.generation)
-
-
 func _process(_delta):
   # if Input.is_action_just_pressed("ui_accept"):
   #   change_generation()
 
   countdown.text = String("%.1f" % timer.time_left)
+
+
+func init_population():
+  population = Population.new()
+  number_of_agents = population.target_population
+  population.init_genomes(input_names, output_names, number_of_agents)
+  generate_agent_population()
+  change_generation()
+  # population.increment_generation()
+  # gen_counter.text = str(population.generation)
 
 
 func change_generation():
@@ -56,7 +57,8 @@ func change_generation():
       print("Agents 0: Restart")
       init_population()
       return
-    population.next_generation(agents_alive)
+    # population.next_generation(agents_alive)
+    population.next_generation(agents_alive, agents.size())
     number_of_agents = population.genomes.size()
     for agent in agents_alive:
       agent.queue_free()
