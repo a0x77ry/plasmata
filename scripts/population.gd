@@ -3,7 +3,7 @@ class_name Population
 const C1 := 0.5
 const C2 := 0.5
 const C3 := 0.4
-const dt := 0.4 # distance
+const dt := 0.35 # distance
 
 const Species = preload("res://scripts/species.gd")
 const Genome = preload("res://scripts/genome.gd")
@@ -169,11 +169,16 @@ func speciate():
       var disjoint_genes_num = 0
       var excess_genes_num = 0
       var weight_diffs = []
+      var disjoint_gene_INs = []
+      var excess_gene_INs = []
+      # What about inno_nums that exist is prot but not in genome_n?
       for genome_n in gen_all_genes:
         if !prot_all_inno_nums.has(genome_n.inno_num) and genome_n.inno_num <= min_inno_num:
+          disjoint_gene_INs.append(genome_n.inno_num)
           disjoint_genes_num += 1 #find disjoint genes
         elif !prot_all_inno_nums.has(genome_n.inno_num) and genome_n.inno_num > min_inno_num:
           excess_genes_num += 1 # find excess genes
+          excess_gene_INs.append(genome_n.inno_num)
 
         for prot_n in prot_all_genes:
           # if prot_n.weight != null && prot_n.id == genome_n.id:
@@ -184,6 +189,23 @@ func speciate():
             assert(genome_n.weight != null,
                 "Error in change_generation(). pron_n is a link while genome_n isn't")
             weight_diffs.append(abs(prot_n.weight - genome_n.weight))
+      
+      # print("Before: disjoints: %s, excess: %s" % [disjoint_genes_num, excess_genes_num])
+      var befdis = disjoint_genes_num
+      var befex = excess_genes_num
+      for prot_n in prot_all_genes:
+        if !gen_all_inno_nums.has(prot_n.inno_num) and prot_n.inno_num <= min_inno_num and !(prot_n.inno_num in disjoint_gene_INs):
+          disjoint_gene_INs.append(prot_n.inno_num)
+          disjoint_genes_num += 1 #find disjoint genes
+        elif !gen_all_inno_nums.has(prot_n.inno_num) and prot_n.inno_num > min_inno_num and !(prot_n.inno_num in disjoint_gene_INs): 
+          excess_genes_num += 1 # find excess genes
+          excess_gene_INs.append(prot_n.inno_num)
+      # print("After: disjoints: %s, excess: %s" % [disjoint_genes_num, excess_genes_num])
+      if befdis != disjoint_genes_num || befex != excess_genes_num:
+        print("It's happening!")
+        print("Before: disjoints: %s, excess: %s" % [befdis, befex])
+        print("After: disjoints: %s, excess: %s" % [disjoint_genes_num, excess_genes_num])
+      
       var weight_diffs_sum := 0.0
       var avg_weight_diff := 0.0
       if weight_diffs.size() > 0:

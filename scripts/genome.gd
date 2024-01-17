@@ -1,13 +1,13 @@
 class_name Genome
 
-const MUTATION_RATE = 0.8
+const MUTATION_RATE = 0.8 # original: 0.8
 const WEIGHT_SHIFT_RATE = 0.9
 const EXPECTED_MUTATED_GENE_RATE = 0.1
 const EXPECTED_DISABLING_RATE = EXPECTED_MUTATED_GENE_RATE / 2
 const MUTATION_STANDARD_DEVIATION = 2.0
 const ORIGINAL_WEIGHT_VALUE_LIMIT = 2.0
 const ADD_LINK_RATE = 0.3
-const ADD_NODE_RATE = 0.2 # original : 0.25
+const ADD_NODE_RATE = 0.15 # original : 0.25
 
 var input_nodes
 var hidden_nodes
