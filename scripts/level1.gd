@@ -5,7 +5,9 @@ const TIME = 20
 onready var spawning_area = get_node("SpawningArea")
 onready var timer = get_node("Timer")
 onready var countdown = get_node("Countdown/Time")
-onready var gen_counter = get_node("GenCounter/GenNumber")
+onready var gen_counter = get_node("Statistics/GenCounter/GenNumber")
+onready var genome_counter = get_node("Statistics/Genomes/GenomesNumber")
+onready var species_counter = get_node("Statistics/Species/SpeciesNum")
 onready var curve = get_node("Path2D").curve
 onready var solved_message_box = get_node("SolvedMessage")
 onready var solved_best_time = get_node("SolvedMessage/HBox/BestTime/HBox/Time")
@@ -69,6 +71,8 @@ func change_generation():
     generate_agent_population()
     timer.start(TIME)
     gen_counter.text = str(population.generation)
+    genome_counter.text = str(population.genomes.size())
+    species_counter.text = str(population.species.size())
 
     # Main.calculate_fitness(curve, agents_alive) # gives each of Main.genomes a fitness value
     # Main.speciate() # populates Main.species with Main.genomes

@@ -157,28 +157,74 @@ text = "20"
 align = 1
 valign = 1
 
-[node name="GenCounter" type="HBoxContainer" parent="."]
-margin_left = 54.0
-margin_top = 464.0
-margin_right = 268.0
-margin_bottom = 515.0
+[node name="Statistics" type="VBoxContainer" parent="."]
+margin_left = 41.0
+margin_top = 472.0
+margin_right = 310.0
+margin_bottom = 688.0
 
-[node name="Generation" type="Label" parent="GenCounter"]
-margin_top = 8.0
+[node name="GenCounter" type="HBoxContainer" parent="Statistics"]
+margin_right = 269.0
+margin_bottom = 35.0
+
+[node name="Generation" type="Label" parent="Statistics/GenCounter"]
 margin_right = 156.0
-margin_bottom = 43.0
+margin_bottom = 35.0
 custom_fonts/font = SubResource( 3 )
 text = "Generation: "
 align = 1
 valign = 1
 
-[node name="GenNumber" type="Label" parent="GenCounter"]
+[node name="GenNumber" type="Label" parent="Statistics/GenCounter"]
 margin_left = 160.0
-margin_top = 8.0
-margin_right = 208.0
-margin_bottom = 43.0
+margin_right = 176.0
+margin_bottom = 35.0
 custom_fonts/font = SubResource( 3 )
-text = "666"
+text = "0"
+align = 1
+valign = 1
+
+[node name="Genomes" type="HBoxContainer" parent="Statistics"]
+margin_top = 39.0
+margin_right = 269.0
+margin_bottom = 74.0
+
+[node name="GenomesText" type="Label" parent="Statistics/Genomes"]
+margin_right = 136.0
+margin_bottom = 35.0
+custom_fonts/font = SubResource( 3 )
+text = "Genomes: "
+align = 1
+valign = 1
+
+[node name="GenomesNumber" type="Label" parent="Statistics/Genomes"]
+margin_left = 140.0
+margin_right = 169.0
+margin_bottom = 35.0
+custom_fonts/font = SubResource( 3 )
+text = "70"
+align = 1
+valign = 1
+
+[node name="Species" type="HBoxContainer" parent="Statistics"]
+margin_top = 78.0
+margin_right = 269.0
+margin_bottom = 113.0
+
+[node name="SpeciesText" type="Label" parent="Statistics/Species"]
+margin_right = 118.0
+margin_bottom = 35.0
+custom_fonts/font = SubResource( 3 )
+text = "Species: "
+align = 1
+valign = 1
+
+[node name="SpeciesNum" type="Label" parent="Statistics/Species"]
+margin_left = 122.0
+margin_right = 137.0
+margin_bottom = 35.0
+custom_fonts/font = SubResource( 3 )
+text = "4"
 align = 1
 valign = 1
 
