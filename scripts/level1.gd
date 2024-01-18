@@ -8,7 +8,8 @@ onready var countdown = get_node("Countdown/Time")
 onready var gen_counter = get_node("GenCounter/GenNumber")
 onready var curve = get_node("Path2D").curve
 onready var solved_message_box = get_node("SolvedMessage")
-onready var solved_best_time = get_node("SolvedMessage/HBox/BestTime/Time")
+onready var solved_best_time = get_node("SolvedMessage/HBox/BestTime/HBox/Time")
+onready var winning_color = get_node("SolvedMessage/HBox/BestTime/HBox/WinningColor").get_stylebox("panel").bg_color
 
 var population
 var number_of_agents
@@ -118,6 +119,7 @@ func _on_FinishLine_body_entered(body:Node):
     if time < best_time:
       best_time = time
       solved_best_time.text = String("%.2f" % time)
+      winning_color = agent.modulate
 
 
 func _on_Timer_timeout():

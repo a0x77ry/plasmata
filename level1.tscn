@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://fonts/Jura-Light.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://wall.tscn" type="PackedScene" id=2]
@@ -39,6 +39,18 @@ size = 35
 outline_size = 1
 outline_color = Color( 0.0352941, 0, 0, 1 )
 font_data = ExtResource( 1 )
+
+[sub_resource type="StyleBoxFlat" id=8]
+bg_color = Color( 0.215686, 0.0745098, 0.0745098, 1 )
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color( 0.027451, 0.0235294, 0.0235294, 1 )
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
 
 [node name="Level1" type="Node2D" groups=["level"]]
 position = Vector2( -1, 100 )
@@ -214,13 +226,25 @@ custom_colors/font_color = Color( 0.843137, 0.772549, 0.764706, 1 )
 custom_fonts/font = SubResource( 6 )
 text = "Best time:"
 
-[node name="Time" type="Label" parent="SolvedMessage/HBox/BestTime"]
+[node name="HBox" type="HBoxContainer" parent="SolvedMessage/HBox/BestTime"]
 margin_top = 54.0
 margin_right = 113.0
 margin_bottom = 96.0
+
+[node name="Time" type="Label" parent="SolvedMessage/HBox/BestTime/HBox"]
+margin_right = 79.0
+margin_bottom = 42.0
 custom_colors/font_color = Color( 0.843137, 0.772549, 0.764706, 1 )
 custom_fonts/font = SubResource( 7 )
-text = "15.2"
+text = "15.22"
+
+[node name="WinningColor" type="Panel" parent="SolvedMessage/HBox/BestTime/HBox"]
+margin_left = 83.0
+margin_right = 113.0
+margin_bottom = 42.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_styles/panel = SubResource( 8 )
 
 [connection signal="body_entered" from="FinishLine" to="." method="_on_FinishLine_body_entered"]
 [connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]
