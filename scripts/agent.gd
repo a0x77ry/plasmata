@@ -34,10 +34,9 @@ var time_left_when_finished := 0.0
 
 func _ready():
   randomize()
-
   assert(genome != null)
-
   # var starting_link_id = nn_inputs.size() + nn_outputs.size()
+  # modulate = genome.tint
   nn = NN.new(genome)
 
 

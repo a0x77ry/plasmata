@@ -15,6 +15,7 @@ var output_nodes
 var links
 var fitness
 var population
+var tint: Color = Color(1.0, 1.0, 1.0)
 
 var adjusted_fitness
 var random = RandomNumberGenerator.new()

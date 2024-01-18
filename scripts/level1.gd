@@ -7,11 +7,14 @@ onready var timer = get_node("Timer")
 onready var countdown = get_node("Countdown/Time")
 onready var gen_counter = get_node("GenCounter/GenNumber")
 onready var curve = get_node("Path2D").curve
+onready var solved_message_box = get_node("SolvedMessage")
+onready var solved_best_time = get_node("SolvedMessage/HBox/BestTime/Time")
 
 var population
 var number_of_agents
 var agents = []
 var agents_alive = []
+var best_time = INF
 
 var input_names = [
   "rotation",
@@ -98,6 +101,7 @@ func generate_agent_population():
     # if population.genomes.size() >= i && i <= number_of_agents: 
     assert(population.genomes[i] != null)
     agent.set_genome(population.genomes[i])
+    agent.modulate = agent.genome.tint
 
     agent.timer = get_node("Timer")
     agents.append(agent)
@@ -109,6 +113,11 @@ func _on_FinishLine_body_entered(body:Node):
   if body.is_in_group("agents"):
     var agent = body as Node2D
     agent.finish(timer.time_left)
+    solved_message_box.visible = true
+    var time = TIME - timer.time_left
+    if time < best_time:
+      best_time = time
+      solved_best_time.text = String("%.2f" % time)
 
 
 func _on_Timer_timeout():

@@ -20,6 +20,7 @@ var parent_genomes
 var avg_fitness
 var total_adjusted_fitness
 var population
+var tint: Color
 
 
 func _init(_population, _prototype, _members=[], _parent_genomes=[], _avg_fitness=[],
@@ -32,6 +33,7 @@ func _init(_population, _prototype, _members=[], _parent_genomes=[], _avg_fitnes
   total_adjusted_fitness = _total_adjusted_fitness
   
   random.randomize()
+  tint = Color(random.randf(), random.randf(), random.randf())
 
 
 func share_fitness():
@@ -119,7 +121,6 @@ func crossover():
         genome_to_append.fitness = 0.0
         couple_crossovered_genomes.append(genome_to_append)
     crossovered_genomes.append_array(couple_crossovered_genomes)
-    # breakpoint
   return crossovered_genomes
 
 func couple_crossover(couple_genomes: Array, offspring_number: int) -> Array:
@@ -135,6 +136,8 @@ func couple_crossover(couple_genomes: Array, offspring_number: int) -> Array:
 
   for _i in offspring_number:
     var crossed_genome = Genome.new(population)
+
+    crossed_genome.tint = fittest_parent.tint
 
     # inherit nodes from the fittest parent
     # Complicated thing needed to make independent copies of each input_node etc.

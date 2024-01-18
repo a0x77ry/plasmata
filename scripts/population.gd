@@ -31,7 +31,7 @@ func _init(_genomes=[], _species=[], _selection_rate=0.3, _target_population=80)
 
 # Creates and initializes all genomes with input and output nodes
 func init_genomes(input_names: Array, output_names: Array, number_of_genomes: int):
-  for i in number_of_genomes:
+  for _i in range(0, number_of_genomes):
     var new_genome = Genome.new(self)
     new_genome.init_io_nodes(input_names, output_names)
     genomes.append(new_genome)
@@ -171,7 +171,6 @@ func speciate():
       var weight_diffs = []
       var disjoint_gene_INs = []
       var excess_gene_INs = []
-      # What about inno_nums that exist is prot but not in genome_n?
       for genome_n in gen_all_genes:
         if !prot_all_inno_nums.has(genome_n.inno_num) and genome_n.inno_num <= min_inno_num:
           disjoint_gene_INs.append(genome_n.inno_num)
@@ -189,10 +188,7 @@ func speciate():
             assert(genome_n.weight != null,
                 "Error in change_generation(). pron_n is a link while genome_n isn't")
             weight_diffs.append(abs(prot_n.weight - genome_n.weight))
-      
-      # print("Before: disjoints: %s, excess: %s" % [disjoint_genes_num, excess_genes_num])
-      var befdis = disjoint_genes_num
-      var befex = excess_genes_num
+
       for prot_n in prot_all_genes:
         if !gen_all_inno_nums.has(prot_n.inno_num) and prot_n.inno_num <= min_inno_num and !(prot_n.inno_num in disjoint_gene_INs):
           disjoint_gene_INs.append(prot_n.inno_num)
@@ -200,12 +196,7 @@ func speciate():
         elif !gen_all_inno_nums.has(prot_n.inno_num) and prot_n.inno_num > min_inno_num and !(prot_n.inno_num in disjoint_gene_INs): 
           excess_genes_num += 1 # find excess genes
           excess_gene_INs.append(prot_n.inno_num)
-      # print("After: disjoints: %s, excess: %s" % [disjoint_genes_num, excess_genes_num])
-      if befdis != disjoint_genes_num || befex != excess_genes_num:
-        print("It's happening!")
-        print("Before: disjoints: %s, excess: %s" % [befdis, befex])
-        print("After: disjoints: %s, excess: %s" % [disjoint_genes_num, excess_genes_num])
-      
+
       var weight_diffs_sum := 0.0
       var avg_weight_diff := 0.0
       if weight_diffs.size() > 0:
@@ -218,14 +209,19 @@ func speciate():
           + (C3 * avg_weight_diff)
       if compatibility_distance < dt:
         is_different_species = false
-        sp.members.append(genome)
+        add_member_to_species(sp, genome)
         break # we don't want a genome to belong to 2 different species
     if is_different_species || species.empty():
-      add_species(genome)
+      add_new_species(genome)
 
-func add_species(genome):
+func add_new_species(genome):
   var sp = Species.new(self, genome, [genome])
+  genome.tint = sp.tint
   species.append(sp)
+
+func add_member_to_species(sp, genome):
+  sp.members.append(genome)
+  genome.tint = sp.tint
 
 
 func generate_UIN():
