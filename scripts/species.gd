@@ -76,15 +76,21 @@ func calculate_avg_fitness():
     total_adjusted_fitness = 0.0
     return
 
+  var top_members = []
+  members.sort_custom(GenomeSorter, "sort_ascenting")
+  var top_num = max(1, int(round(members.size() * 0.5)))
+  for i in range(1, top_num + 1):
+    top_members.append(members[-i])
+
   var total_fitness = 0.0
-  for member_genome in members:
+  for member_genome in top_members:
     total_fitness += member_genome.fitness
     total_adjusted_fitness += member_genome.adjusted_fitness
   if avg_fitness.size() < STALE_GENS_BEFORE_DEATH:
-    avg_fitness.append(total_fitness / float(members.size()))
+    avg_fitness.append(total_fitness / float(top_members.size()))
   else:
     avg_fitness.remove(0)
-    avg_fitness.push_back(total_fitness / float(members.size())) # same as append
+    avg_fitness.push_back(total_fitness / float(top_members.size())) # same as append
 
 func empty_stale_spieces():
   if avg_fitness.size() > STALE_GENS_BEFORE_DEATH:

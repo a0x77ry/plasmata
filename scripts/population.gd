@@ -126,7 +126,7 @@ func initialize_genomes_with_fitness(agents: Array):
   var _genomes = []
   for agent in agents:
     agent.get_fitness()
-    agent.genome.comp_distance = INF
+    # agent.genome.comp_distance = INF
     _genomes.append(agent.genome)
   genomes = _genomes.duplicate()
 
@@ -214,20 +214,20 @@ func speciate():
         closest_species = {"species": sp, "cd": compatibility_distance}
         # break # we don't want a genome to belong to 2 different species
     if !is_different_species && !species.empty():
-      add_member_to_species(closest_species["species"], genome, closest_species["cd"])
+      add_member_to_species(closest_species["species"], genome)
     elif is_different_species || species.empty():
       add_new_species(genome)
 
 func add_new_species(genome):
   var sp = Species.new(self, genome, [genome])
   genome.tint = sp.tint
-  genome.comp_distance = 0.0
+  # genome.comp_distance = 0.0
   species.append(sp)
 
-func add_member_to_species(sp, genome, cd):
+func add_member_to_species(sp, genome):
   sp.members.append(genome)
   genome.tint = sp.tint
-  genome.comp_distance = cd
+  # genome.comp_distance = cd
 
 
 func generate_UIN():
