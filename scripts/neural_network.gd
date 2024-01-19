@@ -11,6 +11,7 @@ var input_layer = []
 var output_layer = [] 
 var hidden_layer = [] 
 var links = []
+var thread = Thread.new()
 
 var genome
 # var starting_link_id: int
@@ -85,14 +86,16 @@ func set_input(input_dict: Dictionary):
 
 
 func get_output() -> Dictionary:
+  thread.start(self, "get_out")
+  return thread.wait_to_finish()
+
+func get_out() -> Dictionary:
   var output_dict = {}
   for node in output_layer:
     var node_name = node.get_name()
     output_dict[node_name] = node.get_value()
 
   return output_dict
-
-
 
 class NNNode:
   var name: String setget ,get_name

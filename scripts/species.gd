@@ -21,19 +21,20 @@ var avg_fitness
 var total_adjusted_fitness
 var population
 var tint: Color
+var creation_gen: int
 
 
 func _init(_population, _prototype, _members=[], _parent_genomes=[], _avg_fitness=[],
     _total_adjusted_fitness=0):
+  random.randomize()
   population = _population
   prototype = _prototype
   members = _members
   parent_genomes = _parent_genomes
   avg_fitness = _avg_fitness
   total_adjusted_fitness = _total_adjusted_fitness
-  
-  random.randomize()
   tint = Color(random.randf(), random.randf(), random.randf())
+  creation_gen = population.generation
 
 
 func share_fitness():

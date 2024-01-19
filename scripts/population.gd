@@ -20,7 +20,7 @@ var generation := 0
 var all_species_adj_fitness = 0.0
 
 
-func _init(_genomes=[], _species=[], _selection_rate=0.3, _target_population=80):
+func _init(_genomes=[], _species=[], _selection_rate=0.3, _target_population=100):
   genomes = _genomes
   species = _species
   selection_rate = _selection_rate
@@ -43,7 +43,6 @@ func next_generation(agents: Array, original_agents_num: int):
   speciate() # Categorizes genomes into species
   share_fitness_all_species() # Fills the adjusted_fitness in all genomes
   select_in_all_species(original_agents_num) # Fills the parent_genomes in all species, calcs avg_fitness
-  # select_in_all_species(agents.size()) # Fills the parent_genomes in all species, calcs avg_fitness
   genomes = crossover_all_species()
   mutate_all_genomes()
   increment_generation()

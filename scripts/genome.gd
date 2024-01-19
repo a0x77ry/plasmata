@@ -74,7 +74,6 @@ func mutate():
     # Add a new node and break the link
     if links.size() == 0:
       return # cannot break a link if there isn't one
-    # TRY
     if random.randf() < ADD_NODE_RATE:
       # find a random link to break
       var link_to_break

@@ -44,7 +44,6 @@ func _physics_process(delta):
   if !reached_the_end:
     # get_player_input()
     get_nn_controls(nn, get_sensor_input())
-    # rotation += rotation_dir * rotation_speed * delta
     rotation += nn_rotation * rotation_speed * delta
     velocity = move_and_slide(velocity)
   else:
