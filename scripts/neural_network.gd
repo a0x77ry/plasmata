@@ -86,8 +86,9 @@ func set_input(input_dict: Dictionary):
 
 
 func get_output() -> Dictionary:
-  thread.start(self, "get_out")
-  return thread.wait_to_finish()
+  # thread.start(self, "get_out")
+  # return thread.wait_to_finish()
+  return get_out()
 
 func get_out() -> Dictionary:
   var output_dict = {}

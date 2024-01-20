@@ -16,6 +16,7 @@ var links
 var fitness
 var population
 var tint: Color = Color(1.0, 1.0, 1.0)
+var gen_num # the gen of the species
 
 var adjusted_fitness
 var random = RandomNumberGenerator.new()
@@ -29,6 +30,8 @@ func _init(_population, _input_nodes=[], _hidden_nodes=[], _output_nodes=[],
   output_nodes = _output_nodes
   links = _links
   fitness = _fitness
+
+  gen_num = population.generation
 
 
 func init_io_nodes(input_names: Array, output_names: Array):

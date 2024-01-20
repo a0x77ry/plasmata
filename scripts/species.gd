@@ -1,6 +1,6 @@
 class_name Species
 
-const STALE_GENS_BEFORE_DEATH = 15
+const STALE_GENS_BEFORE_DEATH = 20
 const REQUIRED_SPECIES_IMPROVEMENT = 50
 const SELECTION_RATE = 0.3
 const CROSSOVER_RATE = 0.75
@@ -144,6 +144,7 @@ func couple_crossover(couple_genomes: Array, offspring_number: int) -> Array:
   for _i in offspring_number:
     var crossed_genome = Genome.new(population)
 
+    crossed_genome.gen_num = fittest_parent.gen_num
     crossed_genome.tint = fittest_parent.tint
 
     # inherit nodes from the fittest parent

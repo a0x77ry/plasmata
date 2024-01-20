@@ -34,7 +34,18 @@ func init_genomes(input_names: Array, output_names: Array, number_of_genomes: in
   for _i in range(0, number_of_genomes):
     var new_genome = Genome.new(self)
     new_genome.init_io_nodes(input_names, output_names)
+    # new_genome.gen_num = 0
     genomes.append(new_genome)
+
+
+# Initializes genomes array with fitness values only
+func initialize_genomes_with_fitness(agents: Array):
+  var _genomes = []
+  for agent in agents:
+    agent.get_fitness()
+    # agent.genome.comp_distance = INF
+    _genomes.append(agent.genome)
+  genomes = _genomes.duplicate()
 
 
 # Changes genomes to the next generation
@@ -120,16 +131,6 @@ func fill_parent_genomes():
         total_parents += 1
 
 
-# Initializes genomes array with fitness values only
-func initialize_genomes_with_fitness(agents: Array):
-  var _genomes = []
-  for agent in agents:
-    agent.get_fitness()
-    # agent.genome.comp_distance = INF
-    _genomes.append(agent.genome)
-  genomes = _genomes.duplicate()
-
-
 # Categorizes genomes into species
 func speciate():
   if !species.empty():
@@ -208,7 +209,7 @@ func speciate():
       var compatibility_distance = ((C1 * excess_genes_num) / N) \
           + ((C2 * disjoint_genes_num) / N) \
           + (C3 * avg_weight_diff)
-      if compatibility_distance < dt && compatibility_distance < closest_species["cd"]:
+      if compatibility_distance < dt && compatibility_distance < closest_species["cd"]: # && genome.gen_num == sp.creation_gen:
         is_different_species = false
         closest_species = {"species": sp, "cd": compatibility_distance}
         # break # we don't want a genome to belong to 2 different species
@@ -220,7 +221,7 @@ func speciate():
 func add_new_species(genome):
   var sp = Species.new(self, genome, [genome])
   genome.tint = sp.tint
-  # genome.comp_distance = 0.0
+  genome.gen_num = sp.creation_gen
   species.append(sp)
 
 func add_member_to_species(sp, genome):
