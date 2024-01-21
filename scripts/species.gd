@@ -5,6 +5,8 @@ const REQUIRED_SPECIES_IMPROVEMENT = 50
 const SELECTION_RATE = 0.3
 const CROSSOVER_RATE = 0.75
 const DISABLED_LINK_SELECTION_RATE = 0.75
+const TOP_GENOMES_RATE = 1
+const INSPECIES_SELECTION_BIAS = 50
 
 const Genome = preload("res://scripts/genome.gd")
 const InputNode = preload("res://scripts/genome.gd").InputNode
@@ -79,7 +81,7 @@ func calculate_avg_fitness():
 
   var top_members = []
   members.sort_custom(GenomeSorter, "sort_ascenting")
-  var top_num = max(1, int(round(members.size() * 0.5)))
+  var top_num = max(1, int(round(members.size() * TOP_GENOMES_RATE)))
   for i in range(1, top_num + 1):
     top_members.append(members[-i])
 
@@ -101,29 +103,48 @@ func empty_stale_spieces():
 
 func crossover():
   var crossovered_genomes = []
-  var one_extra_genome := false
+  # var one_extra_genome := false
   if parent_genomes.size() == 0:
     return []
   elif parent_genomes.size() % 2 != 0:
     parent_genomes.append(parent_genomes[0]) # add a genome to become even
-    one_extra_genome = true
-  var number_of_offspring_each_couple = int(round(1.0 / SELECTION_RATE) * 2.0)
-  var total_species_offspring_with_extra_genome = number_of_offspring_each_couple * (parent_genomes.size() - 1)
-  if one_extra_genome:
-    number_of_offspring_each_couple = int(round(total_species_offspring_with_extra_genome / parent_genomes.size()))
+    # one_extra_genome = true
+  # var number_of_offspring_each_couple = int(round(1.0 / SELECTION_RATE) * 2.0)
+  # var total_species_offspring_with_extra_genome = number_of_offspring_each_couple * (parent_genomes.size() - 1)
+  # if one_extra_genome:
+  #   number_of_offspring_each_couple = int(round(total_species_offspring_with_extra_genome / parent_genomes.size()))
+  # Calculate total biased fitness of parent genomes
+  var bias = INSPECIES_SELECTION_BIAS
+  var total_biased_fitness := 0
+  for parent_genome in parent_genomes:
+    total_biased_fitness += parent_genome.fitness + bias
+  var couple_size_multiplier := floor(1.0 / SELECTION_RATE)
+  var couple_size_total_remainder := 0.0
   # Crossover couples of parent_genomes in crossovered_genomes
   for i in range(0, parent_genomes.size(), 2):
-    var couple_genomes
+    var couple_genomes = []
+    var noff := 0
+    var c_indices = []
+
     if i == 0:
-      couple_genomes = [parent_genomes[i], parent_genomes[i]]
+      c_indices = [i, i]
     else:
-      couple_genomes = [parent_genomes[i-2], parent_genomes[i-1]]
+      c_indices = [i-2, i-1]
+    couple_size_total_remainder += fmod(1.0, SELECTION_RATE)
+    couple_size_multiplier += floor(couple_size_total_remainder)
+    couple_size_total_remainder -= floor(couple_size_total_remainder)
+    couple_genomes = [parent_genomes[c_indices[0]], parent_genomes[c_indices[1]]]
+    noff = int(((parent_genomes[c_indices[0]].fitness + parent_genomes[c_indices[1]].fitness + 2*bias) / total_biased_fitness) \
+        * (parent_genomes.size() * couple_size_multiplier))
     var couple_crossovered_genomes = [] 
     if random.randf() < CROSSOVER_RATE:
+      # couple_crossovered_genomes = couple_crossover(couple_genomes,
+      #     number_of_offspring_each_couple)
       couple_crossovered_genomes = couple_crossover(couple_genomes,
-          number_of_offspring_each_couple)
+          noff)
     else:
-      for c in number_of_offspring_each_couple:
+      # for c in number_of_offspring_each_couple:
+      for c in noff:
         var genome_to_append = couple_genomes[c % 2]
         genome_to_append.fitness = 0.0
         couple_crossovered_genomes.append(genome_to_append)

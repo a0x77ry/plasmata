@@ -64,7 +64,7 @@ func change_generation():
       init_population()
       return
     # population.next_generation(agents_alive)
-    population.next_generation(agents_alive, agents.size())
+    population.next_generation(agents_alive)
     number_of_agents = population.genomes.size()
     for agent in agents_alive:
       agent.queue_free()

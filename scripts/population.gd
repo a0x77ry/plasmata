@@ -3,7 +3,7 @@ class_name Population
 const C1 := 0.5
 const C2 := 0.5
 const C3 := 0.4
-const dt := 0.35 # distance
+const dt := 0.45 # distance
 
 const Species = preload("res://scripts/species.gd")
 const Genome = preload("res://scripts/genome.gd")
@@ -38,6 +38,17 @@ func init_genomes(input_names: Array, output_names: Array, number_of_genomes: in
     genomes.append(new_genome)
 
 
+# Changes genomes to the next generation
+func next_generation(agents: Array):
+  initialize_genomes_with_fitness(agents) # Initializes genomes array with fitness values only
+  speciate() # Categorizes genomes into species
+  share_fitness_all_species() # Fills the adjusted_fitness in all genomes
+  select_in_all_species(target_population) # Fills the parent_genomes in all species, calcs avg_fitness
+  genomes = crossover_all_species()
+  mutate_all_genomes()
+  increment_generation()
+
+
 # Initializes genomes array with fitness values only
 func initialize_genomes_with_fitness(agents: Array):
   var _genomes = []
@@ -46,17 +57,6 @@ func initialize_genomes_with_fitness(agents: Array):
     # agent.genome.comp_distance = INF
     _genomes.append(agent.genome)
   genomes = _genomes.duplicate()
-
-
-# Changes genomes to the next generation
-func next_generation(agents: Array, original_agents_num: int):
-  initialize_genomes_with_fitness(agents) # Initializes genomes array with fitness values only
-  speciate() # Categorizes genomes into species
-  share_fitness_all_species() # Fills the adjusted_fitness in all genomes
-  select_in_all_species(original_agents_num) # Fills the parent_genomes in all species, calcs avg_fitness
-  genomes = crossover_all_species()
-  mutate_all_genomes()
-  increment_generation()
 
 
 func mutate_all_genomes():
@@ -108,8 +108,14 @@ func kill_empty_species():
   for sp in species:
     if sp.parent_genomes.size() == 0 || sp.members.size() == 0:
       species_to_erase.append(sp)
+  if species_to_erase.size() == species.size():
+    breakpoint
+  if species_to_erase.size() > 1:
+    print("Species to erase: %s" % species_to_erase.size())
   for sp_to_erase in species_to_erase:
     if species.size() > 0:
+      for member in sp_to_erase.members:
+        member.gen_num = -1
       species.erase(sp_to_erase) # remove any species with zero members or parent members
 
 func fill_parent_genomes():
@@ -209,7 +215,14 @@ func speciate():
       var compatibility_distance = ((C1 * excess_genes_num) / N) \
           + ((C2 * disjoint_genes_num) / N) \
           + (C3 * avg_weight_diff)
-      if compatibility_distance < dt && compatibility_distance < closest_species["cd"]: # && genome.gen_num == sp.creation_gen:
+      # if compatibility_distance < dt && compatibility_distance < closest_species["cd"] && !(genome.gen_num == sp.creation_gen):
+      #   print("gen_num = %s, creation_gen = %s" % [genome.gen_num, sp.creation_gen])
+      if genome.gen_num == -1:
+        print("It's -1")
+      if species.size() > 14:
+        print("Species: more than 14")
+      if compatibility_distance < dt && compatibility_distance < closest_species["cd"] \
+            && (genome.gen_num == sp.creation_gen || genome.gen_num == -1): # -1 means these are orphaned genomes
         is_different_species = false
         closest_species = {"species": sp, "cd": compatibility_distance}
         # break # we don't want a genome to belong to 2 different species

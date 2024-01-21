@@ -7,6 +7,7 @@ var init_rot = rand_range(-PI, PI)
 
 
 func _ready():
+  Engine.time_scale = 3
   get_level()
 
 
