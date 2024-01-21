@@ -24,6 +24,7 @@ var total_adjusted_fitness
 var population
 var tint: Color
 var creation_gen: int
+var population_fraction
 
 
 func _init(_population, _prototype, _members=[], _parent_genomes=[], _avg_fitness=[],
@@ -48,7 +49,7 @@ func share_fitness():
     # print("fitness / size: %s" % float(member_genome.fitness / members.size()))
 
 
-func select_in_species(number_of_expected_parents):
+func select_in_species(parents_number):
   # Calculate the avg_fitness and append it to the array
   # calculate_avg_fitness()
   # If no improvement in x generations then members = []
@@ -56,10 +57,6 @@ func select_in_species(number_of_expected_parents):
 
   # Calculate the number of parents for each species
   members.sort_custom(GenomeSorter, "sort_ascenting")
-  if number_of_expected_parents > members.size():
-    number_of_expected_parents = members.size()
-  var parents_number = round((total_adjusted_fitness / population.all_species_adj_fitness) \
-      * number_of_expected_parents)
   parent_genomes = []
   if members.size() == 0:
     parents_number = 0
@@ -101,7 +98,7 @@ func empty_stale_spieces():
       members = [] # if there is no improvement after some generations kill the species
 
 
-func crossover():
+func crossover(noff_species):
   var crossovered_genomes = []
   # var one_extra_genome := false
   if parent_genomes.size() == 0:
@@ -109,17 +106,11 @@ func crossover():
   elif parent_genomes.size() % 2 != 0:
     parent_genomes.append(parent_genomes[0]) # add a genome to become even
     # one_extra_genome = true
-  # var number_of_offspring_each_couple = int(round(1.0 / SELECTION_RATE) * 2.0)
-  # var total_species_offspring_with_extra_genome = number_of_offspring_each_couple * (parent_genomes.size() - 1)
-  # if one_extra_genome:
-  #   number_of_offspring_each_couple = int(round(total_species_offspring_with_extra_genome / parent_genomes.size()))
   # Calculate total biased fitness of parent genomes
   var bias = INSPECIES_SELECTION_BIAS
   var total_biased_fitness := 0
   for parent_genome in parent_genomes:
     total_biased_fitness += parent_genome.fitness + bias
-  var couple_size_multiplier := floor(1.0 / SELECTION_RATE)
-  var couple_size_total_remainder := 0.0
   # Crossover couples of parent_genomes in crossovered_genomes
   for i in range(0, parent_genomes.size(), 2):
     var couple_genomes = []
@@ -130,18 +121,17 @@ func crossover():
       c_indices = [i, i]
     else:
       c_indices = [i-2, i-1]
-    couple_size_total_remainder += fmod(1.0, SELECTION_RATE)
-    couple_size_multiplier += floor(couple_size_total_remainder)
-    couple_size_total_remainder -= floor(couple_size_total_remainder)
     couple_genomes = [parent_genomes[c_indices[0]], parent_genomes[c_indices[1]]]
-    noff = int(((parent_genomes[c_indices[0]].fitness + parent_genomes[c_indices[1]].fitness + 2*bias) / total_biased_fitness) \
-        * (parent_genomes.size() * couple_size_multiplier))
+    # Couple's portion of the whole species' offspring
+    var couple_fraction = (parent_genomes[c_indices[0]].fitness + parent_genomes[c_indices[1]].fitness + 2*bias) / total_biased_fitness
+    # Number of offspring for the couple
+    noff = int(couple_fraction * noff_species)
+
     var couple_crossovered_genomes = [] 
     if random.randf() < CROSSOVER_RATE:
       # couple_crossovered_genomes = couple_crossover(couple_genomes,
       #     number_of_offspring_each_couple)
-      couple_crossovered_genomes = couple_crossover(couple_genomes,
-          noff)
+      couple_crossovered_genomes = couple_crossover(couple_genomes, noff)
     else:
       # for c in number_of_offspring_each_couple:
       for c in noff:

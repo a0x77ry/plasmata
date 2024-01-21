@@ -3,7 +3,7 @@ class_name Population
 const C1 := 0.5
 const C2 := 0.5
 const C3 := 0.4
-const dt := 0.45 # distance
+const dt := 1.0 # distance, original 0.35
 
 const Species = preload("res://scripts/species.gd")
 const Genome = preload("res://scripts/genome.gd")
@@ -54,7 +54,6 @@ func initialize_genomes_with_fitness(agents: Array):
   var _genomes = []
   for agent in agents:
     agent.get_fitness()
-    # agent.genome.comp_distance = INF
     _genomes.append(agent.genome)
   genomes = _genomes.duplicate()
 
@@ -74,7 +73,20 @@ func crossover_all_species() -> Array:
     return []
   var crossovered_genomes := []
   for sp in species:
-    crossovered_genomes.append_array(sp.crossover())
+    var noff = int(floor(sp.population_fraction * target_population))
+    crossovered_genomes.append_array(sp.crossover(noff))
+  return crossovered_genomes
+
+func cross_species(pop):
+  var crossovered_genomes := []
+  var noff_remainder := 0.0
+  for sp in species:
+    var real_noff = sp.population_fraction * pop
+    var noff = int(floor(real_noff))
+    noff_remainder += real_noff - noff
+    crossovered_genomes.append_array(sp.crossover(noff))
+  if noff_remainder >= 1.0:
+    crossovered_genomes.append_array(cross_species(int(floor(noff_remainder))))
   return crossovered_genomes
 
 
@@ -85,17 +97,25 @@ func share_fitness_all_species():
 
 
 # Fills the parent_genomes in all species
-func select_in_all_species(agents_size):
+func select_in_all_species(total_pop):
   for sp in species:
     # Calculate the avg_fitness and append it to the array
     sp.calculate_avg_fitness()
   calculate_all_species_adj_fitness()
-  # print("All species adjsted fitness: %s" % all_species_adj_fitness)
-  for sp in species:
-    sp.select_in_species(agents_size * selection_rate)
-    # print("sp members: %s total_adjusted_fitness: %s, parents: %s" % [sp.members.size(), sp.total_adjusted_fitness, sp.parent_genomes.size()])
+  distribute_parents(total_pop * selection_rate)
   kill_empty_species()
   fill_parent_genomes()
+
+func distribute_parents(total_parents):
+  # var parents_num_remainder = 0.0
+  for sp in species:
+    sp.population_fraction = sp.total_adjusted_fitness / all_species_adj_fitness
+    var real_p_num = sp.population_fraction * total_parents
+    # parents_num_remainder += real_p_num - floor(real_p_num)
+    var parents_number = int(round(real_p_num))
+    sp.select_in_species(parents_number)
+  # if parents_num_remainder > 1.0:
+  #   distribute_parents(parents_num_remainder)
 
 func calculate_all_species_adj_fitness():
   all_species_adj_fitness = 0.0
@@ -221,7 +241,12 @@ func speciate():
         print("It's -1")
       if species.size() > 14:
         print("Species: more than 14")
-      if compatibility_distance < dt && compatibility_distance < closest_species["cd"] \
+      var compatibility_distance_limit
+      if species.size() > 2:
+        compatibility_distance_limit = dt + ((species.size()-1) * 0.015) * pow(species.size()-1, 2)
+      else:
+        compatibility_distance_limit = dt
+      if compatibility_distance < compatibility_distance_limit && compatibility_distance < closest_species["cd"] \
             && (genome.gen_num == sp.creation_gen || genome.gen_num == -1): # -1 means these are orphaned genomes
         is_different_species = false
         closest_species = {"species": sp, "cd": compatibility_distance}
@@ -239,6 +264,7 @@ func add_new_species(genome):
 
 func add_member_to_species(sp, genome):
   sp.members.append(genome)
+  genome.gen_num = sp.creation_gen
   genome.tint = sp.tint
   # genome.comp_distance = cd
 
