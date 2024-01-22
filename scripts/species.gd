@@ -57,7 +57,7 @@ func select_in_species(parents_number):
 
   # Calculate the number of parents for each species
   members.sort_custom(GenomeSorter, "sort_ascenting")
-  parent_genomes = []
+  # parent_genomes = []
   if members.size() == 0:
     parents_number = 0
   # Add the last (best performing) genomes of the species or random

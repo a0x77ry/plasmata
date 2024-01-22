@@ -107,15 +107,17 @@ func select_in_all_species(total_pop):
   fill_parent_genomes()
 
 func distribute_parents(total_parents):
-  # var parents_num_remainder = 0.0
+  var parents_num_remainder = 0.0
+  for sp in species:
+    sp.parent_genomes = []
   for sp in species:
     sp.population_fraction = sp.total_adjusted_fitness / all_species_adj_fitness
     var real_p_num = sp.population_fraction * total_parents
-    # parents_num_remainder += real_p_num - floor(real_p_num)
-    var parents_number = int(round(real_p_num))
+    parents_num_remainder += real_p_num - floor(real_p_num)
+    var parents_number = int(floor(real_p_num))
     sp.select_in_species(parents_number)
-  # if parents_num_remainder > 1.0:
-  #   distribute_parents(parents_num_remainder)
+  if parents_num_remainder >= 1.0:
+    distribute_parents(parents_num_remainder)
 
 func calculate_all_species_adj_fitness():
   all_species_adj_fitness = 0.0
@@ -128,15 +130,10 @@ func kill_empty_species():
   for sp in species:
     if sp.parent_genomes.size() == 0 || sp.members.size() == 0:
       species_to_erase.append(sp)
-  if species_to_erase.size() == species.size():
-    breakpoint
-  if species_to_erase.size() > 1:
-    print("Species to erase: %s" % species_to_erase.size())
   for sp_to_erase in species_to_erase:
-    if species.size() > 0:
-      for member in sp_to_erase.members:
-        member.gen_num = -1
-      species.erase(sp_to_erase) # remove any species with zero members or parent members
+    for member in sp_to_erase.members:
+      member.gen_num = -1
+    species.erase(sp_to_erase) # remove any species with zero members or parent members
 
 func fill_parent_genomes():
   var species_with_parent_genomes_left := false

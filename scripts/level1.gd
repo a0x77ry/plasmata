@@ -4,20 +4,25 @@ const TIME = 20
 
 onready var spawning_area = get_node("SpawningArea")
 onready var timer = get_node("Timer")
-onready var countdown = get_node("Countdown/Time")
-onready var gen_counter = get_node("Statistics/GenCounter/GenNumber")
-onready var genome_counter = get_node("Statistics/Genomes/GenomesNumber")
-onready var species_counter = get_node("Statistics/Species/SpeciesNum")
+onready var countdown = get_node("UI/Countdown/Time")
+onready var gen_counter = get_node("UI/Statistics/GenCounter/GenNumber")
+onready var genome_counter = get_node("UI/Statistics/Genomes/GenomesNumber")
+onready var species_counter = get_node("UI/Statistics/Species/SpeciesNum")
 onready var curve = get_node("Path2D").curve
-onready var solved_message_box = get_node("SolvedMessage")
-onready var solved_best_time = get_node("SolvedMessage/HBox/BestTime/HBox/Time")
-onready var winning_color_panel = get_node("SolvedMessage/HBox/BestTime/HBox/WinningColor").get_stylebox("panel")
+onready var solved_message_box = get_node("UI/SolvedMessage")
+onready var solved_best_time = get_node("UI/SolvedMessage/HBox/BestTime/HBox/Time")
+onready var winning_color_panel = get_node("UI/SolvedMessage/HBox/BestTime/HBox/WinningColor").get_stylebox("panel")
+onready var pause_message = get_node("UI/Pause")
+onready var time_scale_label = get_node("UI/TimeScale/TimeScaleLabel")
+onready var FF_slider = get_node("UI/TimeScale/FFSlider")
+onready var pause_when_solved_button = get_node("UI/PauseWhenSolved/CheckButton")
 
 var population
 var number_of_agents
 var agents = []
 var agents_alive = []
 var best_time = INF
+var do_pause_when_solved
 
 var input_names = [
   "rotation",
@@ -38,6 +43,7 @@ var output_names = [
 func _ready():
   randomize()
   init_population()
+  do_pause_when_solved = pause_when_solved_button.pressed
 
 
 func _process(_delta):
@@ -114,6 +120,13 @@ func generate_agent_population():
     add_child(agent)
 
 
+func pause(is_paused):
+  if is_paused:
+    pause_message.visible = true
+  else:
+    pause_message.visible = false
+
+
 func _on_FinishLine_body_entered(body:Node):
   if body.is_in_group("agents"):
     var agent = body as Node2D
@@ -124,8 +137,19 @@ func _on_FinishLine_body_entered(body:Node):
       best_time = time
       solved_best_time.text = String("%.2f" % time)
       winning_color_panel.bg_color = agent.genome.tint
+    if do_pause_when_solved:
+      Main.pause()
 
 
 func _on_Timer_timeout():
   change_generation()
 
+
+func _on_CheckButton_toggled(button_pressed):
+  do_pause_when_solved = button_pressed 
+
+
+func _on_FFSlider_value_changed(value):
+  Main.change_time_scale(value)
+  time_scale_label.text = "Time Scale: %sx" % value
+  

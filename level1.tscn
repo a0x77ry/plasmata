@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=15 format=2]
 
 [ext_resource path="res://fonts/Jura-Light.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://wall.tscn" type="PackedScene" id=2]
@@ -16,11 +16,6 @@ outline_size = 1
 outline_color = Color( 0.0117647, 0, 0, 1 )
 use_filter = true
 font_data = ExtResource( 1 )
-
-[sub_resource type="Curve2D" id=4]
-_data = {
-"points": PoolVector2Array( 0, 0, 0, 0, 61, 253, 0, 0, 0, 0, 309, 258, 0, 0, 0, 0, 316, 159, 0, 0, 0, 0, 611, 158, 0, 0, 0, 0, 612, 402, 0, 0, 0, 0, 895, 400, 0, 0, 0, 0, 895, 138, 0, 0, 0, 0, 1207, 134, 0, 0, 0, 0, 1209, 363, 0, 0, 0, 0, 1287, 359 )
-}
 
 [sub_resource type="DynamicFont" id=5]
 size = 50
@@ -51,6 +46,24 @@ corner_radius_top_left = 2
 corner_radius_top_right = 2
 corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id=9]
+bg_color = Color( 0.184314, 0.0745098, 0.0745098, 0.168627 )
+
+[sub_resource type="DynamicFont" id=10]
+size = 40
+outline_size = 2
+outline_color = Color( 0.0823529, 0.027451, 0.027451, 1 )
+font_data = ExtResource( 1 )
+
+[sub_resource type="DynamicFont" id=11]
+size = 25
+font_data = ExtResource( 1 )
+
+[sub_resource type="Curve2D" id=4]
+_data = {
+"points": PoolVector2Array( 0, 0, 0, 0, 61, 253, 0, 0, 0, 0, 309, 258, 0, 0, 0, 0, 316, 159, 0, 0, 0, 0, 611, 158, 0, 0, 0, 0, 612, 402, 0, 0, 0, 0, 895, 400, 0, 0, 0, 0, 895, 138, 0, 0, 0, 0, 1207, 134, 0, 0, 0, 0, 1209, 363, 0, 0, 0, 0, 1287, 359 )
+}
 
 [node name="Level1" type="Node2D" groups=["level"]]
 position = Vector2( -1, 100 )
@@ -132,13 +145,17 @@ wait_time = 20.0
 one_shot = true
 autostart = true
 
-[node name="Countdown" type="HBoxContainer" parent="."]
+[node name="UI" type="Control" parent="."]
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="Countdown" type="HBoxContainer" parent="UI"]
 margin_left = 992.0
 margin_top = 470.0
 margin_right = 1238.0
 margin_bottom = 522.0
 
-[node name="TimeLeft" type="Label" parent="Countdown"]
+[node name="TimeLeft" type="Label" parent="UI/Countdown"]
 margin_top = 8.0
 margin_right = 122.0
 margin_bottom = 43.0
@@ -147,7 +164,7 @@ text = "Time left: "
 align = 1
 valign = 1
 
-[node name="Time" type="Label" parent="Countdown"]
+[node name="Time" type="Label" parent="UI/Countdown"]
 margin_left = 126.0
 margin_top = 8.0
 margin_right = 158.0
@@ -157,17 +174,17 @@ text = "20"
 align = 1
 valign = 1
 
-[node name="Statistics" type="VBoxContainer" parent="."]
+[node name="Statistics" type="VBoxContainer" parent="UI"]
 margin_left = 41.0
 margin_top = 472.0
 margin_right = 310.0
 margin_bottom = 688.0
 
-[node name="GenCounter" type="HBoxContainer" parent="Statistics"]
+[node name="GenCounter" type="HBoxContainer" parent="UI/Statistics"]
 margin_right = 269.0
 margin_bottom = 35.0
 
-[node name="Generation" type="Label" parent="Statistics/GenCounter"]
+[node name="Generation" type="Label" parent="UI/Statistics/GenCounter"]
 margin_right = 156.0
 margin_bottom = 35.0
 custom_fonts/font = SubResource( 3 )
@@ -175,7 +192,7 @@ text = "Generation: "
 align = 1
 valign = 1
 
-[node name="GenNumber" type="Label" parent="Statistics/GenCounter"]
+[node name="GenNumber" type="Label" parent="UI/Statistics/GenCounter"]
 margin_left = 160.0
 margin_right = 176.0
 margin_bottom = 35.0
@@ -184,12 +201,12 @@ text = "0"
 align = 1
 valign = 1
 
-[node name="Genomes" type="HBoxContainer" parent="Statistics"]
+[node name="Genomes" type="HBoxContainer" parent="UI/Statistics"]
 margin_top = 39.0
 margin_right = 269.0
 margin_bottom = 74.0
 
-[node name="GenomesText" type="Label" parent="Statistics/Genomes"]
+[node name="GenomesText" type="Label" parent="UI/Statistics/Genomes"]
 margin_right = 136.0
 margin_bottom = 35.0
 custom_fonts/font = SubResource( 3 )
@@ -197,7 +214,7 @@ text = "Genomes: "
 align = 1
 valign = 1
 
-[node name="GenomesNumber" type="Label" parent="Statistics/Genomes"]
+[node name="GenomesNumber" type="Label" parent="UI/Statistics/Genomes"]
 margin_left = 140.0
 margin_right = 169.0
 margin_bottom = 35.0
@@ -206,12 +223,12 @@ text = "70"
 align = 1
 valign = 1
 
-[node name="Species" type="HBoxContainer" parent="Statistics"]
+[node name="Species" type="HBoxContainer" parent="UI/Statistics"]
 margin_top = 78.0
 margin_right = 269.0
 margin_bottom = 113.0
 
-[node name="SpeciesText" type="Label" parent="Statistics/Species"]
+[node name="SpeciesText" type="Label" parent="UI/Statistics/Species"]
 margin_right = 118.0
 margin_bottom = 35.0
 custom_fonts/font = SubResource( 3 )
@@ -219,7 +236,7 @@ text = "Species: "
 align = 1
 valign = 1
 
-[node name="SpeciesNum" type="Label" parent="Statistics/Species"]
+[node name="SpeciesNum" type="Label" parent="UI/Statistics/Species"]
 margin_left = 122.0
 margin_right = 137.0
 margin_bottom = 35.0
@@ -228,15 +245,12 @@ text = "4"
 align = 1
 valign = 1
 
-[node name="Path2D" type="Path2D" parent="."]
-curve = SubResource( 4 )
-
-[node name="SolvedMessage" type="Control" parent="."]
+[node name="SolvedMessage" type="Control" parent="UI"]
 visible = false
 margin_right = 40.0
 margin_bottom = 40.0
 
-[node name="HBox" type="HBoxContainer" parent="SolvedMessage"]
+[node name="HBox" type="HBoxContainer" parent="UI/SolvedMessage"]
 margin_left = 16.0
 margin_top = -37.0
 margin_right = 1296.0
@@ -244,13 +258,13 @@ margin_bottom = 79.0
 custom_constants/separation = 40
 alignment = 1
 
-[node name="SolvedMessage" type="HBoxContainer" parent="SolvedMessage/HBox"]
+[node name="SolvedMessage" type="HBoxContainer" parent="UI/SolvedMessage/HBox"]
 margin_left = 477.0
 margin_right = 649.0
 margin_bottom = 116.0
 alignment = 2
 
-[node name="Solved" type="Label" parent="SolvedMessage/HBox/SolvedMessage"]
+[node name="Solved" type="Label" parent="UI/SolvedMessage/HBox/SolvedMessage"]
 margin_top = 28.0
 margin_right = 172.0
 margin_bottom = 88.0
@@ -258,13 +272,13 @@ custom_colors/font_color = Color( 0.843137, 0.772549, 0.764706, 1 )
 custom_fonts/font = SubResource( 5 )
 text = "Solved!"
 
-[node name="BestTime" type="VBoxContainer" parent="SolvedMessage/HBox"]
+[node name="BestTime" type="VBoxContainer" parent="UI/SolvedMessage/HBox"]
 margin_left = 689.0
 margin_right = 802.0
 margin_bottom = 116.0
 alignment = 1
 
-[node name="BestTime" type="Label" parent="SolvedMessage/HBox/BestTime"]
+[node name="BestTime" type="Label" parent="UI/SolvedMessage/HBox/BestTime"]
 margin_top = 19.0
 margin_right = 113.0
 margin_bottom = 50.0
@@ -272,19 +286,19 @@ custom_colors/font_color = Color( 0.843137, 0.772549, 0.764706, 1 )
 custom_fonts/font = SubResource( 6 )
 text = "Best time:"
 
-[node name="HBox" type="HBoxContainer" parent="SolvedMessage/HBox/BestTime"]
+[node name="HBox" type="HBoxContainer" parent="UI/SolvedMessage/HBox/BestTime"]
 margin_top = 54.0
 margin_right = 113.0
 margin_bottom = 96.0
 
-[node name="Time" type="Label" parent="SolvedMessage/HBox/BestTime/HBox"]
+[node name="Time" type="Label" parent="UI/SolvedMessage/HBox/BestTime/HBox"]
 margin_right = 79.0
 margin_bottom = 42.0
 custom_colors/font_color = Color( 0.843137, 0.772549, 0.764706, 1 )
 custom_fonts/font = SubResource( 7 )
 text = "15.22"
 
-[node name="WinningColor" type="Panel" parent="SolvedMessage/HBox/BestTime/HBox"]
+[node name="WinningColor" type="Panel" parent="UI/SolvedMessage/HBox/BestTime/HBox"]
 margin_left = 83.0
 margin_right = 113.0
 margin_bottom = 42.0
@@ -292,5 +306,74 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 custom_styles/panel = SubResource( 8 )
 
+[node name="Pause" type="Control" parent="UI"]
+visible = false
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="PausePanel" type="Panel" parent="UI/Pause"]
+margin_left = 2.0
+margin_top = -100.0
+margin_right = 1301.0
+margin_bottom = 697.0
+custom_styles/panel = SubResource( 9 )
+
+[node name="PauseMessage" type="Label" parent="UI/Pause"]
+margin_left = 5.0
+margin_top = -98.0
+margin_right = 1296.0
+margin_bottom = 702.0
+custom_colors/font_color = Color( 0.564706, 0.117647, 0.117647, 1 )
+custom_fonts/font = SubResource( 10 )
+text = "Pause
+Press space to start"
+align = 1
+valign = 1
+percent_visible = -0.0454545
+
+[node name="TimeScale" type="VBoxContainer" parent="UI"]
+margin_left = 63.0
+margin_top = -82.0
+margin_right = 281.0
+margin_bottom = 13.0
+custom_constants/separation = 8
+alignment = 1
+
+[node name="TimeScaleLabel" type="Label" parent="UI/TimeScale"]
+margin_top = 20.0
+margin_right = 218.0
+margin_bottom = 51.0
+custom_fonts/font = SubResource( 11 )
+text = "Time Scale: 3x"
+valign = 1
+
+[node name="FFSlider" type="HSlider" parent="UI/TimeScale"]
+margin_top = 59.0
+margin_right = 218.0
+margin_bottom = 75.0
+min_value = 1.0
+max_value = 4.0
+value = 3.0
+tick_count = 4
+ticks_on_borders = true
+
+[node name="PauseWhenSolved" type="HBoxContainer" parent="UI"]
+margin_left = 38.0
+margin_top = 14.0
+margin_right = 302.0
+margin_bottom = 54.0
+alignment = 1
+
+[node name="CheckButton" type="CheckButton" parent="UI/PauseWhenSolved"]
+margin_left = 31.0
+margin_right = 233.0
+margin_bottom = 40.0
+text = "Pause when solved"
+
+[node name="Path2D" type="Path2D" parent="."]
+curve = SubResource( 4 )
+
 [connection signal="body_entered" from="FinishLine" to="." method="_on_FinishLine_body_entered"]
 [connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]
+[connection signal="value_changed" from="UI/TimeScale/FFSlider" to="." method="_on_FFSlider_value_changed"]
+[connection signal="toggled" from="UI/PauseWhenSolved/CheckButton" to="." method="_on_CheckButton_toggled"]
