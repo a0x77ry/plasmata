@@ -4,7 +4,7 @@ const INPUT_INCREMENT := 0.01
 const NO_IN := -1
 const THRESHOLD := 1.0
 const E = 2.7182
-const ORIGINAL_WEIGHT_VALUE_LIMIT = 2.0
+const USE_BIAS = false
 
 var random = RandomNumberGenerator.new()
 var input_layer = [] 
@@ -20,6 +20,10 @@ func _init(_genome):
   genome = _genome
   # starting_link_id = _starting_link_id
   random.randomize()
+
+  # Create the NEAT bias node
+  if USE_BIAS:
+    input_layer.append(InputNode.new(0, "bias", 1.0))
 
   # Create nodes according to the genome (set in agent.gd)
   for input_node_gene in genome.input_nodes:
@@ -82,7 +86,8 @@ func _init(_genome):
 
 func set_input(input_dict: Dictionary):
   for node in input_layer:
-    node.set_value(input_dict[node.get_name()])
+    if node.name != "bias":
+      node.set_value(input_dict[node.get_name()])
 
 
 func get_output() -> Dictionary:

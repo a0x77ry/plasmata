@@ -36,12 +36,12 @@ enabled = true
 cast_to = Vector2( 0, 300 )
 collision_mask = 2
 
-[node name="ray_f_up" type="RayCast2D" parent="."]
+[node name="ray_f_up_right" type="RayCast2D" parent="."]
 enabled = true
 cast_to = Vector2( 200, -200 )
 collision_mask = 2
 
-[node name="ray_f_down" type="RayCast2D" parent="."]
+[node name="ray_f_down_right" type="RayCast2D" parent="."]
 enabled = true
 cast_to = Vector2( 200, 200 )
 collision_mask = 2

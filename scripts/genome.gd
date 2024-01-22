@@ -8,6 +8,7 @@ const MUTATION_STANDARD_DEVIATION = 2.0
 const ORIGINAL_WEIGHT_VALUE_LIMIT = 2.0
 const ADD_LINK_RATE = 0.3
 const ADD_NODE_RATE = 0.15 # original : 0.25
+const NEGATIVE_RATE = 0.1
 
 var input_nodes
 var hidden_nodes
@@ -30,12 +31,13 @@ func _init(_population, _input_nodes=[], _hidden_nodes=[], _output_nodes=[],
   output_nodes = _output_nodes
   links = _links
   fitness = _fitness
-
   gen_num = population.generation
+  
+  # input_nodes.append(InputNode.new(population.add_UIN(0), "bias"))
 
 
 func init_io_nodes(input_names: Array, output_names: Array):
-  var i := 0
+  var i := 1 # Because 0 is the bias node
   for i_name in input_names:
     input_nodes.append(InputNode.new(population.add_UIN(i), i_name))
     i += 1

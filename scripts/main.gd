@@ -1,6 +1,6 @@
 extends Node2D
 
-const TIME_SCALE = 3
+const TIME_SCALE = 4
 const Population = preload("res://scripts/population.gd")
 
 var level
@@ -9,7 +9,7 @@ var is_paused = false
 
 
 func _ready():
-  Engine.time_scale = 3
+  Engine.time_scale = TIME_SCALE
   get_level()
 
 
@@ -24,7 +24,7 @@ func get_level():
 
 func pause():
   if is_paused:
-    Engine.time_scale = 3
+    Engine.time_scale = TIME_SCALE
     is_paused = false
     level.pause(false)
   else:

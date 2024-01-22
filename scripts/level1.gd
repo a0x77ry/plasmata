@@ -16,6 +16,7 @@ onready var pause_message = get_node("UI/Pause")
 onready var time_scale_label = get_node("UI/TimeScale/TimeScaleLabel")
 onready var FF_slider = get_node("UI/TimeScale/FFSlider")
 onready var pause_when_solved_button = get_node("UI/PauseWhenSolved/CheckButton")
+onready var agents_node = get_node("Agents")
 
 var population
 var number_of_agents
@@ -31,8 +32,8 @@ var input_names = [
   "pos_x",
   "pos_y",
   "ray_f_distance",
-  "ray_f_up_distance",
-  "ray_f_down_distance",
+  "ray_f_up_right_distance",
+  "ray_f_down_right_distance",
   "fitness"
 ]
 var output_names = [
@@ -43,6 +44,7 @@ var output_names = [
 func _ready():
   randomize()
   init_population()
+  set_time_scale(Main.TIME_SCALE)
   do_pause_when_solved = pause_when_solved_button.pressed
 
 
@@ -117,7 +119,7 @@ func generate_agent_population():
     agent.timer = get_node("Timer")
     agents.append(agent)
     agent.add_to_group("agents")
-    add_child(agent)
+    agents_node.add_child(agent)
 
 
 func pause(is_paused):
@@ -125,6 +127,11 @@ func pause(is_paused):
     pause_message.visible = true
   else:
     pause_message.visible = false
+
+
+func set_time_scale(value):
+  Main.change_time_scale(value)
+  time_scale_label.text = "Time Scale: %sx" % value
 
 
 func _on_FinishLine_body_entered(body:Node):
@@ -150,6 +157,5 @@ func _on_CheckButton_toggled(button_pressed):
 
 
 func _on_FFSlider_value_changed(value):
-  Main.change_time_scale(value)
-  time_scale_label.text = "Time Scale: %sx" % value
+  set_time_scale(value)
   

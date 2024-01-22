@@ -14,13 +14,13 @@ const NN = preload("res://scripts/neural_network.gd")
 const TIME_TO_FITNESS_MULTIPLICATOR = 120
 
 onready var ray_forward = get_node("ray_forward")
-onready var ray_f_up = get_node("ray_f_up")
-onready var ray_f_down = get_node("ray_f_down")
+onready var ray_f_up_right = get_node("ray_f_up_right")
+onready var ray_f_down_right = get_node("ray_f_down_right")
 # onready var timer = get_parent().get_node("Timer")
 onready var timer = get_tree().get_root().get_node("Level1/Timer")
 onready var level_width = get_tree().get_root().size.x
 onready var level_height = get_tree().get_root().size.y
-onready var curve = get_parent().get_node("Path2D").curve
+onready var curve = get_parent().get_parent().get_node("Path2D").curve
 
 var nn_rotation := 0.0
 var nn_speed := 0.0
@@ -80,19 +80,21 @@ func get_sensor_input():
     # ray_f_distance = distance / ray_forward.cast_to.x
     ray_f_distance = (ray_forward.cast_to.x - distance) / ray_forward.cast_to.x
 
-  var ray_f_up_distance = 0.0
-  if ray_f_up.is_colliding():
-    var distance = global_position.distance_to(ray_f_up.get_collision_point())
-    var ray_length = Vector2.ZERO.distance_to(Vector2(ray_f_up.cast_to.x, ray_f_up.cast_to.y))
+  var ray_f_up_right_distance = 0.0
+  if ray_f_up_right.is_colliding():
+    var distance = global_position.distance_to(ray_f_up_right.get_collision_point())
+    var ray_length = Vector2.ZERO.distance_to(Vector2(ray_f_up_right.cast_to.x,
+        ray_f_up_right.cast_to.y))
     # ray_f_up_distance = distance / ray_length
-    ray_f_up_distance = (ray_length - distance) / ray_length
+    ray_f_up_right_distance = (ray_length - distance) / ray_length
 
-  var ray_f_down_distance = 0.0
-  if ray_f_down.is_colliding():
-    var distance = global_position.distance_to(ray_f_down.get_collision_point())
-    var ray_length = Vector2.ZERO.distance_to(Vector2(ray_f_down.cast_to.x, ray_f_up.cast_to.y))
+  var ray_f_down_right_distance = 0.0
+  if ray_f_down_right.is_colliding():
+    var distance = global_position.distance_to(ray_f_down_right.get_collision_point())
+    var ray_length = Vector2.ZERO.distance_to(Vector2(ray_f_down_right.cast_to.x,
+        ray_f_down_right.cast_to.y))
     # ray_f_down_distance = distance / ray_length
-    ray_f_down_distance = (ray_length - distance) / ray_length
+    ray_f_down_right_distance = (ray_length - distance) / ray_length
 
   var fitness = curve.get_closest_offset(position) / curve.get_baked_length()
 
@@ -100,8 +102,8 @@ func get_sensor_input():
       "inverse_rotation": invrot,
       "time_since_birth": time_since_birth, "pos_x": norm_pos_x,
       "pos_y": norm_pos_y, "ray_f_distance": ray_f_distance,
-      "ray_f_up_distance": ray_f_up_distance,
-      "ray_f_down_distance": ray_f_down_distance,
+      "ray_f_up_right_distance": ray_f_up_right_distance,
+      "ray_f_down_right_distance": ray_f_down_right_distance,
       "fitness": fitness}
 
   var activated_input_dict := {}
