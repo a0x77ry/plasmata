@@ -14,6 +14,8 @@ const NN = preload("res://scripts/neural_network.gd")
 const TIME_TO_FITNESS_MULTIPLICATOR = 120
 
 onready var ray_forward = get_node("ray_forward")
+onready var ray_left = get_node("ray_left")
+onready var ray_right = get_node("ray_right")
 onready var ray_f_up_right = get_node("ray_f_up_right")
 onready var ray_f_down_right = get_node("ray_f_down_right")
 # onready var timer = get_parent().get_node("Timer")
@@ -80,6 +82,16 @@ func get_sensor_input():
     # ray_f_distance = distance / ray_forward.cast_to.x
     ray_f_distance = (ray_forward.cast_to.x - distance) / ray_forward.cast_to.x
 
+  var ray_left_distance = 0.0 # is was 1.0
+  if ray_left.is_colliding():
+    var distance = global_position.distance_to(ray_left.get_collision_point())
+    ray_left_distance = (abs(ray_left.cast_to.y) - distance) / abs(ray_left.cast_to.y)
+
+  var ray_right_distance = 0.0 # is was 1.0
+  if ray_right.is_colliding():
+    var distance = global_position.distance_to(ray_right.get_collision_point())
+    ray_right_distance = (ray_right.cast_to.y - distance) / ray_right.cast_to.y
+
   var ray_f_up_right_distance = 0.0
   if ray_f_up_right.is_colliding():
     var distance = global_position.distance_to(ray_f_up_right.get_collision_point())
@@ -98,13 +110,23 @@ func get_sensor_input():
 
   var fitness = curve.get_closest_offset(position) / curve.get_baked_length()
 
+  var go_forward_input = nn_speed
+  var go_right_input = nn_rotation
+
   var inp_dict = {"rotation": newrot,
-      "inverse_rotation": invrot,
-      "time_since_birth": time_since_birth, "pos_x": norm_pos_x,
-      "pos_y": norm_pos_y, "ray_f_distance": ray_f_distance,
-      "ray_f_up_right_distance": ray_f_up_right_distance,
-      "ray_f_down_right_distance": ray_f_down_right_distance,
-      "fitness": fitness}
+        "inverse_rotation": invrot,
+        "time_since_birth": time_since_birth,
+        "pos_x": norm_pos_x,
+        "pos_y": norm_pos_y,
+        "ray_f_distance": ray_f_distance,
+        "ray_f_up_right_distance": ray_f_up_right_distance,
+        "ray_f_down_right_distance": ray_f_down_right_distance,
+        "ray_left_distance": ray_left_distance,
+        "ray_right_distance": ray_right_distance,
+        "fitness": fitness,
+        "go_right_input": go_right_input,
+        "go_forward_input": go_forward_input
+      }
 
   var activated_input_dict := {}
   for input in nn_activated_inputs:
@@ -132,6 +154,7 @@ func get_nn_controls(_nn: NN, sensor_input: Dictionary):
   var real_speed = clamp(nn_speed * speed, 0.0, speed_limit)
   # var real_speed = 200.0 if nn_speed > 0 else 0.0
   velocity = Vector2(real_speed, 0).rotated(rotation)
+
 
 func finish(time_left: float):
   reached_the_end = true

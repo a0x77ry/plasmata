@@ -3,7 +3,8 @@ class_name Population
 const C1 := 0.5
 const C2 := 0.5
 const C3 := 0.4
-const dt := 1.0 # distance, original 0.35
+const dt := 5.4 # distance, original 0.35
+# const dt := 0.3 # distance, original 0.35
 
 const Species = preload("res://scripts/species.gd")
 const Genome = preload("res://scripts/genome.gd")
@@ -102,21 +103,24 @@ func select_in_all_species(total_pop):
     # Calculate the avg_fitness and append it to the array
     sp.calculate_avg_fitness()
   calculate_all_species_adj_fitness()
+  for sp in species:
+    sp.parent_genomes = []
   distribute_parents(total_pop * selection_rate)
   kill_empty_species()
   fill_parent_genomes()
 
 func distribute_parents(total_parents):
   var parents_num_remainder = 0.0
+  var distributed = false
   for sp in species:
-    sp.parent_genomes = []
-  for sp in species:
-    sp.population_fraction = sp.total_adjusted_fitness / all_species_adj_fitness
-    var real_p_num = sp.population_fraction * total_parents
+    sp.population_fraction = float(sp.total_adjusted_fitness / all_species_adj_fitness)
+    var real_p_num = float(sp.population_fraction * total_parents)
     parents_num_remainder += real_p_num - floor(real_p_num)
     var parents_number = int(floor(real_p_num))
-    sp.select_in_species(parents_number)
-  if parents_num_remainder >= 1.0:
+    if parents_number > 0:
+      sp.select_in_species(parents_number)
+      distributed = true
+  if parents_num_remainder > 1.0 and distributed == true:
     distribute_parents(parents_num_remainder)
 
 func calculate_all_species_adj_fitness():
@@ -132,7 +136,7 @@ func kill_empty_species():
       species_to_erase.append(sp)
   for sp_to_erase in species_to_erase:
     for member in sp_to_erase.members:
-      member.gen_num = -1
+      member.species_id = -1
     species.erase(sp_to_erase) # remove any species with zero members or parent members
 
 func fill_parent_genomes():
@@ -234,8 +238,6 @@ func speciate():
           + (C3 * avg_weight_diff)
       # if compatibility_distance < dt && compatibility_distance < closest_species["cd"] && !(genome.gen_num == sp.creation_gen):
       #   print("gen_num = %s, creation_gen = %s" % [genome.gen_num, sp.creation_gen])
-      if genome.gen_num == -1:
-        print("It's -1")
       if species.size() > 14:
         print("Species: more than 14")
       var compatibility_distance_limit
@@ -243,8 +245,9 @@ func speciate():
         compatibility_distance_limit = dt + ((species.size()-1) * 0.015) * pow(species.size()-1, 2)
       else:
         compatibility_distance_limit = dt
-      if compatibility_distance < compatibility_distance_limit && compatibility_distance < closest_species["cd"] \
-            && (genome.gen_num == sp.creation_gen || genome.gen_num == -1): # -1 means these are orphaned genomes
+      if compatibility_distance < compatibility_distance_limit \
+           && compatibility_distance < closest_species["cd"] \
+           && (genome.species_id == sp.species_id || genome.species_id == -1): # -1 means these are orphaned genomes
         is_different_species = false
         closest_species = {"species": sp, "cd": compatibility_distance}
         # break # we don't want a genome to belong to 2 different species
@@ -256,12 +259,14 @@ func speciate():
 func add_new_species(genome):
   var sp = Species.new(self, genome, [genome])
   genome.tint = sp.tint
-  genome.gen_num = sp.creation_gen
+  # genome.gen_num = sp.creation_gen
+  genome.species_id = sp.species_id
   species.append(sp)
 
 func add_member_to_species(sp, genome):
   sp.members.append(genome)
-  genome.gen_num = sp.creation_gen
+  # genome.gen_num = sp.creation_gen
+  genome.species_id = sp.species_id
   genome.tint = sp.tint
   # genome.comp_distance = cd
 

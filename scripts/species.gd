@@ -1,6 +1,6 @@
 class_name Species
 
-const STALE_GENS_BEFORE_DEATH = 20
+const STALE_GENS_BEFORE_DEATH = 300
 const REQUIRED_SPECIES_IMPROVEMENT = 50
 const SELECTION_RATE = 0.3
 const CROSSOVER_RATE = 0.75
@@ -25,10 +25,11 @@ var population
 var tint: Color
 var creation_gen: int
 var population_fraction
+var species_id: int
 
 
 func _init(_population, _prototype, _members=[], _parent_genomes=[], _avg_fitness=[],
-    _total_adjusted_fitness=0):
+      _total_adjusted_fitness=0):
   random.randomize()
   population = _population
   prototype = _prototype
@@ -37,7 +38,8 @@ func _init(_population, _prototype, _members=[], _parent_genomes=[], _avg_fitnes
   avg_fitness = _avg_fitness
   total_adjusted_fitness = _total_adjusted_fitness
   tint = Color(random.randf(), random.randf(), random.randf())
-  creation_gen = population.generation
+  # creation_gen = population.generation
+  species_id = prototype.genome_id 
 
 
 func share_fitness():
@@ -93,8 +95,18 @@ func calculate_avg_fitness():
     avg_fitness.push_back(total_fitness / float(top_members.size())) # same as append
 
 func empty_stale_spieces():
-  if avg_fitness.size() > STALE_GENS_BEFORE_DEATH:
-    if avg_fitness[-1] - avg_fitness[0] < REQUIRED_SPECIES_IMPROVEMENT:
+  if avg_fitness.size() >= STALE_GENS_BEFORE_DEATH:
+    var avg_last_avg_fitness 
+    var avg_first_avg_fitness 
+    var total_last_avg_fitness = 0
+    var total_first_avg_fitness = 0
+    for i in range(0, 5):
+      total_last_avg_fitness += avg_fitness[-(i+1)]
+      total_first_avg_fitness += avg_fitness[i]
+    avg_last_avg_fitness = total_last_avg_fitness / 5
+    avg_first_avg_fitness = total_first_avg_fitness / 5
+    print("Last avg_fitness: %s, First: %s" % [avg_last_avg_fitness, avg_first_avg_fitness])
+    if avg_last_avg_fitness - avg_first_avg_fitness < REQUIRED_SPECIES_IMPROVEMENT:
       members = [] # if there is no improvement after some generations kill the species
 
 
@@ -155,7 +167,8 @@ func couple_crossover(couple_genomes: Array, offspring_number: int) -> Array:
   for _i in offspring_number:
     var crossed_genome = Genome.new(population)
 
-    crossed_genome.gen_num = fittest_parent.gen_num
+    crossed_genome.species_id = fittest_parent.species_id
+    crossed_genome.genome_id = fittest_parent.genome_id
     crossed_genome.tint = fittest_parent.tint
 
     # inherit nodes from the fittest parent

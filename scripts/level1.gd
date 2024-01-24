@@ -28,13 +28,17 @@ var do_pause_when_solved
 var input_names = [
   "rotation",
   # "inverse_rotation",
-  "time_since_birth",
-  "pos_x",
-  "pos_y",
+  # "time_since_birth",
+  # "pos_x",
+  # "pos_y",
   "ray_f_distance",
   "ray_f_up_right_distance",
   "ray_f_down_right_distance",
-  "fitness"
+  "ray_left_distance",
+  "ray_right_distance",
+  "fitness",
+  # "go_right_input",
+  # "go_forward_input"
 ]
 var output_names = [
   "go_right",

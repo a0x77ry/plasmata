@@ -333,7 +333,6 @@ text = "Pause
 Press space to start"
 align = 1
 valign = 1
-percent_visible = -0.0454545
 
 [node name="TimeScale" type="VBoxContainer" parent="UI"]
 margin_left = 63.0

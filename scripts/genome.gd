@@ -3,12 +3,11 @@ class_name Genome
 const MUTATION_RATE = 0.8 # original: 0.8
 const WEIGHT_SHIFT_RATE = 0.9
 const EXPECTED_MUTATED_GENE_RATE = 0.1
-const EXPECTED_DISABLING_RATE = EXPECTED_MUTATED_GENE_RATE / 2
+const EXPECTED_DISABLING_RATE = EXPECTED_MUTATED_GENE_RATE / 3
 const MUTATION_STANDARD_DEVIATION = 2.0
 const ORIGINAL_WEIGHT_VALUE_LIMIT = 2.0
-const ADD_LINK_RATE = 0.3
+const ADD_LINK_RATE = 0.3 # original : 0.3
 const ADD_NODE_RATE = 0.15 # original : 0.25
-const NEGATIVE_RATE = 0.1
 
 var input_nodes
 var hidden_nodes
@@ -17,7 +16,9 @@ var links
 var fitness
 var population
 var tint: Color = Color(1.0, 1.0, 1.0)
-var gen_num # the gen of the species
+# var gen_num # the gen of the species
+var genome_id: int
+var species_id: int
 
 var adjusted_fitness
 var random = RandomNumberGenerator.new()
@@ -31,7 +32,9 @@ func _init(_population, _input_nodes=[], _hidden_nodes=[], _output_nodes=[],
   output_nodes = _output_nodes
   links = _links
   fitness = _fitness
-  gen_num = population.generation
+  # gen_num = population.generation
+  genome_id = population.generate_UIN()
+  species_id = -1
   
   # input_nodes.append(InputNode.new(population.add_UIN(0), "bias"))
 
