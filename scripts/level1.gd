@@ -60,9 +60,9 @@ func _process(_delta):
 
 
 func init_population():
-  population = Population.new()
+  population = Population.new([], [], input_names, output_names)
   number_of_agents = population.target_population
-  population.init_genomes(input_names, output_names, number_of_agents)
+  # population.init_genomes(input_names, output_names, number_of_agents)
   generate_agent_population()
   change_generation()
   # population.increment_generation()

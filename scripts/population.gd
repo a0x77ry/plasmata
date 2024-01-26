@@ -1,5 +1,6 @@
 class_name Population
 
+const ORIGINAL_SPECIES_NUMBER := 1
 const C1 := 0.5
 const C2 := 0.5
 const C3 := 0.4
@@ -21,22 +22,49 @@ var generation := 0
 var all_species_adj_fitness = 0.0
 
 
-func _init(_genomes=[], _species=[], _selection_rate=0.3, _target_population=100):
+func _init(_genomes=[], _species=[], input_names=[], output_names=[],
+    _selection_rate=0.3, _target_population=100):
   genomes = _genomes
   species = _species
   selection_rate = _selection_rate
   target_population = _target_population
-
   random.randomize()
+  for _i in range(0, target_population):
+    var new_genome = Genome.new(self)
+    new_genome.init_io_nodes(input_names, output_names)
+    genomes.append(new_genome)
+
+  var genome_groups = []
+  var total_genomes_in_groups := 0
+  for i in range(1, ORIGINAL_SPECIES_NUMBER+1):
+    genome_groups.append(genomes.slice(total_genomes_in_groups, int(i * floor(target_population / ORIGINAL_SPECIES_NUMBER))))
+    total_genomes_in_groups += genome_groups[-1].size()
+    for genome in genome_groups[-1]:
+      genome.species_id = genome_groups[-1][0].genome_id # the first of each group will be the prototype of the species
+    species.append(Species.new(self, genome_groups[-1][0], genome_groups[-1]))
+
+  # var first_genomes = genomes.slice(0, int(floor(target_population / 2)))
+  # var first_prototype = first_genomes[0]
+  # for genome in first_genomes:
+  #   genome.species_id = first_prototype.genome_id
+  # var second_genomes = genomes.slice(int(ceil(target_population / 2)), target_population)
+  # var second_prototype = second_genomes[0]
+  # for genome in second_genomes:
+  #   genome.species_id = second_prototype.genome_id
+  # var first_species = Species.new(self, first_genomes[0], first_genomes)
+  # species.append(first_species)
+  # if target_population > 1:
+  #   var second_species = Species.new(self, second_genomes[0], second_genomes)
+  #   species.append(second_species)
+  # breakpoint
 
 
 # Creates and initializes all genomes with input and output nodes
-func init_genomes(input_names: Array, output_names: Array, number_of_genomes: int):
-  for _i in range(0, number_of_genomes):
-    var new_genome = Genome.new(self)
-    new_genome.init_io_nodes(input_names, output_names)
-    # new_genome.gen_num = 0
-    genomes.append(new_genome)
+# func init_genomes(input_names: Array, output_names: Array, number_of_genomes: int):
+#   for _i in range(0, number_of_genomes):
+#     var new_genome = Genome.new(self)
+#     new_genome.init_io_nodes(input_names, output_names)
+#     genomes.append(new_genome)
 
 
 # Changes genomes to the next generation
