@@ -2,12 +2,16 @@ class_name Genome
 
 const MUTATION_RATE = 0.8 # original: 0.8
 const WEIGHT_SHIFT_RATE = 0.9
-const EXPECTED_MUTATED_GENE_RATE = 0.1
-const EXPECTED_DISABLING_RATE = EXPECTED_MUTATED_GENE_RATE / 3
+# const EXPECTED_MUTATED_GENE_RATE = 0.1
+# const EXPECTED_DISABLING_RATE = EXPECTED_MUTATED_GENE_RATE / 3
+const EXPECTED_DISABLING_RATE = 0.03
 const MUTATION_STANDARD_DEVIATION = 2.0
 const ORIGINAL_WEIGHT_VALUE_LIMIT = 2.0
 const ADD_LINK_RATE = 0.3 # original : 0.3
 const ADD_NODE_RATE = 0.15 # original : 0.25
+const META_W_MUTATION_RATE = 0.2
+const META_ADD_LINK_MUTATION_RATE = 0.2
+const META_ADD_NODE_MUTATION_RATE = 0.2
 
 var input_nodes
 var hidden_nodes
@@ -19,13 +23,16 @@ var tint: Color = Color(1.0, 1.0, 1.0)
 # var gen_num # the gen of the species
 var genome_id: int
 var species_id: int
-
 var adjusted_fitness
 var random = RandomNumberGenerator.new()
+var mutated_gene_rate = 0.1
+var add_link_rate = 0.3
+var add_node_rate = 0.15
 
 
 func _init(_population, _input_nodes=[], _hidden_nodes=[], _output_nodes=[],
     _links=[], _fitness=0):
+  random.randomize()
   population = _population
   input_nodes = _input_nodes
   hidden_nodes = _hidden_nodes
@@ -35,8 +42,10 @@ func _init(_population, _input_nodes=[], _hidden_nodes=[], _output_nodes=[],
   # gen_num = population.generation
   genome_id = population.generate_UIN()
   species_id = -1
-  
   # input_nodes.append(InputNode.new(population.add_UIN(0), "bias"))
+  mutated_gene_rate = random.randf_range(0.0, 0.4)
+  add_link_rate = random.randf_range(0.1, 0.6)
+  add_link_rate = random.randf_range(0.0, 0.3)
 
 
 func init_io_nodes(input_names: Array, output_names: Array):
@@ -56,17 +65,28 @@ func mutate():
     for link in links:
       # Shift weights
       if random.randf() < WEIGHT_SHIFT_RATE:
-        if random.randf() < EXPECTED_MUTATED_GENE_RATE:
+        if random.randf() < mutated_gene_rate:
           link.weight = random.randfn(link.weight, MUTATION_STANDARD_DEVIATION)
       # Change weights randomly
       else:
-        if random.randf() < EXPECTED_MUTATED_GENE_RATE:
+        if random.randf() < mutated_gene_rate:
           link.weight = random.randf_range(-ORIGINAL_WEIGHT_VALUE_LIMIT, ORIGINAL_WEIGHT_VALUE_LIMIT)
       # Disable link
       if random.randf() < EXPECTED_DISABLING_RATE:
         link.is_enabled = !link.is_enabled
+
+    # Change the meta weight mutation rate
+    if random.randf() < META_W_MUTATION_RATE:
+      mutated_gene_rate = clamp(random.randfn(mutated_gene_rate, 0.2), 0.0, 1.0)
+    # Change the add_link mutation rate
+    if random.randf() < META_ADD_LINK_MUTATION_RATE:
+      add_link_rate = clamp(random.randfn(add_link_rate, 0.2), 0.0, 1.0)
+    # Change the add_node mutation rate
+    # if random.randf() < META_ADD_NODE_MUTATION_RATE:
+    #   add_node_rate = clamp(random.randfn(add_node_rate, 0.2), 0.0, 1.0)
+
     # Add a link
-    if random.randf() < ADD_LINK_RATE:
+    if random.randf() < add_link_rate:
       var source_nodes = input_nodes + hidden_nodes
       var source_node = source_nodes[random.randi_range(0, source_nodes.size() - 1)]
       var target_node = choose_target_node(source_node)

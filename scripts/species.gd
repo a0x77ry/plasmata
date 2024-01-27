@@ -1,12 +1,14 @@
 class_name Species
 
-const STALE_GENS_BEFORE_DEATH = 300
+const STALE_GENS_BEFORE_DEATH = 20
 const REQUIRED_SPECIES_IMPROVEMENT = 50
+# const SELECTION_RATE = 0.3
 const SELECTION_RATE = 0.3
 const CROSSOVER_RATE = 0.75
 const DISABLED_LINK_SELECTION_RATE = 0.75
 const TOP_GENOMES_RATE = 1
 const INSPECIES_SELECTION_BIAS = 50
+const FITNESS_NUM_TO_COMPARE =5
 
 const Genome = preload("res://scripts/genome.gd")
 const InputNode = preload("res://scripts/genome.gd").InputNode
@@ -100,11 +102,11 @@ func empty_stale_spieces():
     var avg_first_avg_fitness 
     var total_last_avg_fitness = 0
     var total_first_avg_fitness = 0
-    for i in range(0, 5):
+    for i in range(0, FITNESS_NUM_TO_COMPARE):
       total_last_avg_fitness += avg_fitness[-(i+1)]
       total_first_avg_fitness += avg_fitness[i]
-    avg_last_avg_fitness = total_last_avg_fitness / 5
-    avg_first_avg_fitness = total_first_avg_fitness / 5
+    avg_last_avg_fitness = total_last_avg_fitness / FITNESS_NUM_TO_COMPARE
+    avg_first_avg_fitness = total_first_avg_fitness / FITNESS_NUM_TO_COMPARE
     print("Last avg_fitness: %s, First: %s" % [avg_last_avg_fitness, avg_first_avg_fitness])
     if avg_last_avg_fitness - avg_first_avg_fitness < REQUIRED_SPECIES_IMPROVEMENT:
       members = [] # if there is no improvement after some generations kill the species
@@ -169,6 +171,9 @@ func couple_crossover(couple_genomes: Array, offspring_number: int) -> Array:
 
     crossed_genome.species_id = fittest_parent.species_id
     crossed_genome.genome_id = fittest_parent.genome_id
+    crossed_genome.mutated_gene_rate = fittest_parent.mutated_gene_rate
+    crossed_genome.add_link_rate = fittest_parent.add_link_rate
+    crossed_genome.add_node_rate = fittest_parent.add_node_rate
     crossed_genome.tint = fittest_parent.tint
 
     # inherit nodes from the fittest parent

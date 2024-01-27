@@ -60,7 +60,10 @@ func _process(_delta):
 
 
 func init_population():
-  population = Population.new([], [], input_names, output_names)
+  var starting_gen = 0
+  if population != null:
+    starting_gen = population.generation
+  population = Population.new([], [], input_names, output_names, starting_gen)
   number_of_agents = population.target_population
   # population.init_genomes(input_names, output_names, number_of_agents)
   generate_agent_population()
@@ -81,7 +84,10 @@ func change_generation():
     for agent in agents_alive:
       agent.queue_free()
     generate_agent_population()
-    timer.start(TIME)
+    if number_of_agents > 0:
+      timer.start(TIME)
+    else:
+      timer.start(0.1)
     gen_counter.text = str(population.generation)
     genome_counter.text = str(population.genomes.size())
     species_counter.text = str(population.species.size())
