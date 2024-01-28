@@ -2,13 +2,11 @@ class_name Species
 
 const STALE_GENS_BEFORE_DEATH = 20
 const REQUIRED_SPECIES_IMPROVEMENT = 50
-# const SELECTION_RATE = 0.3
-const SELECTION_RATE = 0.8
 const CROSSOVER_RATE = 0.75
 const DISABLED_LINK_SELECTION_RATE = 0.75
 const TOP_GENOMES_RATE = 1
 const INSPECIES_SELECTION_BIAS = 10
-const FITNESS_NUM_TO_COMPARE =5
+const FITNESS_NUM_TO_COMPARE = 5
 
 const Genome = preload("res://scripts/genome.gd")
 const InputNode = preload("res://scripts/genome.gd").InputNode
@@ -39,7 +37,10 @@ func _init(_population, _prototype, _members=[], _parent_genomes=[], _avg_fitnes
   parent_genomes = _parent_genomes
   avg_fitness = _avg_fitness
   total_adjusted_fitness = _total_adjusted_fitness
-  tint = Color(random.randf(), random.randf(), random.randf())
+  if population.species.size() > 1:
+    tint = Color(random.randf(), random.randf(), random.randf())
+  else:
+    tint = Color(1.0, 1.0, 1.0) # normal form the first species
   # creation_gen = population.generation
   species_id = prototype.genome_id 
 

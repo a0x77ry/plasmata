@@ -1,10 +1,13 @@
 class_name Population
 
 const ORIGINAL_SPECIES_NUMBER := 1
+const POPULATION_NUMBER = 110
+# const SELECTION_RATE = 0.3
+const SELECTION_RATE = 0.3
 const C1 := 0.5
 const C2 := 0.5
 const C3 := 0.4
-const dt := 5.4 # distance, original 0.35
+const dt := 5.4 # distance, original 0.35. More than 1 is to disable it
 # const dt := 0.3 # distance, original 0.35
 
 const Species = preload("res://scripts/species.gd")
@@ -23,7 +26,7 @@ var all_species_adj_fitness = 0.0
 
 
 func _init(_genomes=[], _species=[], input_names=[], output_names=[],
-    _generation=0, _selection_rate=0.3, _target_population=100):
+    _generation=0, _selection_rate=SELECTION_RATE, _target_population=POPULATION_NUMBER):
   genomes = _genomes
   species = _species
   selection_rate = _selection_rate

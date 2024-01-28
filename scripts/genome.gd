@@ -150,7 +150,12 @@ func genome_fraction() -> float:
   var total_fitness := 0.0
   for genome in population.genomes:
     total_fitness += genome.fitness
-  return fitness / total_fitness
+  var fraction: float
+  if total_fitness > 0.0:
+    fraction = fitness / total_fitness
+  else:
+    fraction = 1 / population.genomes.size()
+  return fraction
 
 func link_already_exists(source_node, target_node):
   # if target_node.incoming_links != null: # Because it can be an input node in the recursion
