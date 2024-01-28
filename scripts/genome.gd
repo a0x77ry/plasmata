@@ -2,16 +2,16 @@ class_name Genome
 
 const MUTATION_RATE = 0.8 # original: 0.8
 const WEIGHT_SHIFT_RATE = 0.9
-# const EXPECTED_MUTATED_GENE_RATE = 0.1
-# const EXPECTED_DISABLING_RATE = EXPECTED_MUTATED_GENE_RATE / 3
-const EXPECTED_DISABLING_RATE = 0.03
+const WEIGHT_MUTATION_RATE = 0.02
+# const EXPECTED_DISABLING_RATE = EXPECTED_weight_mutation_rate / 3
+const EXPECTED_DISABLING_RATE = 0.05
 const MUTATION_STANDARD_DEVIATION = 2.0
 const ORIGINAL_WEIGHT_VALUE_LIMIT = 2.0
-const ADD_LINK_RATE = 0.3 # original : 0.3
-const ADD_NODE_RATE = 0.15 # original : 0.25
-const META_W_MUTATION_RATE = 0.2
-const META_ADD_LINK_MUTATION_RATE = 0.2
-const META_ADD_NODE_MUTATION_RATE = 0.2
+const ADD_LINK_RATE = 0.02 # original : 0.3
+const ADD_NODE_RATE = 0.15 # original : 0.15
+const META_W_MUTATION_RATE = 0.05
+const META_ADD_LINK_MUTATION_RATE = 0.05
+const META_ADD_NODE_MUTATION_RATE = 0.05
 
 var input_nodes
 var hidden_nodes
@@ -25,9 +25,10 @@ var genome_id: int
 var species_id: int
 var adjusted_fitness
 var random = RandomNumberGenerator.new()
-var mutated_gene_rate = 0.1
-var add_link_rate = 0.3
-var add_node_rate = 0.15
+var weight_mutation_rate := WEIGHT_MUTATION_RATE
+var add_link_rate := ADD_LINK_RATE
+var add_node_rate := ADD_NODE_RATE
+var added_mutation_rate := 0.0
 
 
 func _init(_population, _input_nodes=[], _hidden_nodes=[], _output_nodes=[],
@@ -43,7 +44,7 @@ func _init(_population, _input_nodes=[], _hidden_nodes=[], _output_nodes=[],
   genome_id = population.generate_UIN()
   species_id = -1
   # input_nodes.append(InputNode.new(population.add_UIN(0), "bias"))
-  mutated_gene_rate = random.randf_range(0.0, 0.4)
+  weight_mutation_rate = random.randf_range(0.0, 0.4)
   add_link_rate = random.randf_range(0.1, 0.6)
   add_link_rate = random.randf_range(0.0, 0.3)
 
@@ -62,31 +63,37 @@ func init_io_nodes(input_names: Array, output_names: Array):
 func mutate():
   random.randomize()
   if random.randf() < MUTATION_RATE:
+    var fraction := genome_fraction()
+    var mut_multiplier = (1-fraction) * population.genomes.size()
+
+    # Change the meta weight mutation rate
+    if random.randf() < META_W_MUTATION_RATE:
+      weight_mutation_rate = clamp(random.randfn(weight_mutation_rate, 0.2), 0.0, 0.8)
+    # Change the add_link mutation rate
+    if random.randf() < META_ADD_LINK_MUTATION_RATE:
+      add_link_rate = clamp(random.randfn(add_link_rate, 0.2), 0.0, 0.8)
+    # Change the add_node mutation rate
+    # if random.randf() < META_ADD_NODE_MUTATION_RATE:
+    #   add_node_rate = clamp(random.randfn(add_node_rate, 0.2), 0.0, 1.0)
+
     for link in links:
       # Shift weights
       if random.randf() < WEIGHT_SHIFT_RATE:
-        if random.randf() < mutated_gene_rate:
+        # if random.randf() < max((weight_mutation_rate + added_mutation_rate), 0.8):
+        if random.randf() < max(weight_mutation_rate * mut_multiplier, 0.8):
           link.weight = random.randfn(link.weight, MUTATION_STANDARD_DEVIATION)
       # Change weights randomly
       else:
-        if random.randf() < mutated_gene_rate:
+        # if random.randf() < max((weight_mutation_rate + added_mutation_rate), 0.8):
+        if random.randf() < max(weight_mutation_rate * mut_multiplier, 0.8):
           link.weight = random.randf_range(-ORIGINAL_WEIGHT_VALUE_LIMIT, ORIGINAL_WEIGHT_VALUE_LIMIT)
       # Disable link
       if random.randf() < EXPECTED_DISABLING_RATE:
         link.is_enabled = !link.is_enabled
 
-    # Change the meta weight mutation rate
-    if random.randf() < META_W_MUTATION_RATE:
-      mutated_gene_rate = clamp(random.randfn(mutated_gene_rate, 0.2), 0.0, 1.0)
-    # Change the add_link mutation rate
-    if random.randf() < META_ADD_LINK_MUTATION_RATE:
-      add_link_rate = clamp(random.randfn(add_link_rate, 0.2), 0.0, 1.0)
-    # Change the add_node mutation rate
-    # if random.randf() < META_ADD_NODE_MUTATION_RATE:
-    #   add_node_rate = clamp(random.randfn(add_node_rate, 0.2), 0.0, 1.0)
-
     # Add a link
-    if random.randf() < add_link_rate:
+    # if random.randf() < max((add_link_rate + added_mutation_rate), 0.8):
+    if random.randf() < max(add_link_rate * mut_multiplier, 0.8):
       var source_nodes = input_nodes + hidden_nodes
       var source_node = source_nodes[random.randi_range(0, source_nodes.size() - 1)]
       var target_node = choose_target_node(source_node)
@@ -138,6 +145,12 @@ func mutate():
       new_hidden_node.add_outgoing_link(link_b)
       original_source_node.add_outgoing_link(link_a)
       original_target_node.add_incoming_link(link_b)
+
+func genome_fraction() -> float:
+  var total_fitness := 0.0
+  for genome in population.genomes:
+    total_fitness += genome.fitness
+  return fitness / total_fitness
 
 func link_already_exists(source_node, target_node):
   # if target_node.incoming_links != null: # Because it can be an input node in the recursion

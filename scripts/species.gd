@@ -3,11 +3,11 @@ class_name Species
 const STALE_GENS_BEFORE_DEATH = 20
 const REQUIRED_SPECIES_IMPROVEMENT = 50
 # const SELECTION_RATE = 0.3
-const SELECTION_RATE = 0.3
+const SELECTION_RATE = 0.8
 const CROSSOVER_RATE = 0.75
 const DISABLED_LINK_SELECTION_RATE = 0.75
 const TOP_GENOMES_RATE = 1
-const INSPECIES_SELECTION_BIAS = 50
+const INSPECIES_SELECTION_BIAS = 10
 const FITNESS_NUM_TO_COMPARE =5
 
 const Genome = preload("res://scripts/genome.gd")
@@ -109,7 +109,13 @@ func empty_stale_spieces():
     avg_first_avg_fitness = total_first_avg_fitness / FITNESS_NUM_TO_COMPARE
     print("Last avg_fitness: %s, First: %s" % [avg_last_avg_fitness, avg_first_avg_fitness])
     if avg_last_avg_fitness - avg_first_avg_fitness < REQUIRED_SPECIES_IMPROVEMENT:
-      members = [] # if there is no improvement after some generations kill the species
+      pass
+      # members = [] # if there is no improvement after some generations kill the species
+    #   for member in members:
+    #     member.added_mutation_rate += 0.1
+    # else:
+    #   for member in members:
+    #     member.added_mutation_rate = 0.0
 
 
 func crossover(noff_species):
@@ -169,9 +175,10 @@ func couple_crossover(couple_genomes: Array, offspring_number: int) -> Array:
   for _i in offspring_number:
     var crossed_genome = Genome.new(population)
 
+    crossed_genome.fitness = int(round((fittest_parent.fitness + weakest_parent.fitness) / 2))
     crossed_genome.species_id = fittest_parent.species_id
     crossed_genome.genome_id = fittest_parent.genome_id
-    crossed_genome.mutated_gene_rate = fittest_parent.mutated_gene_rate
+    crossed_genome.weight_mutation_rate = fittest_parent.weight_mutation_rate
     crossed_genome.add_link_rate = fittest_parent.add_link_rate
     crossed_genome.add_node_rate = fittest_parent.add_node_rate
     crossed_genome.tint = fittest_parent.tint
