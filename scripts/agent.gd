@@ -19,7 +19,7 @@ onready var ray_right = get_node("ray_right")
 onready var ray_f_up_right = get_node("ray_f_up_right")
 onready var ray_f_down_right = get_node("ray_f_down_right")
 # onready var timer = get_parent().get_node("Timer")
-onready var timer = get_tree().get_root().get_node("Level1/Timer")
+# onready var timer = get_tree().get_root().get_node("Level1/Timer")
 onready var level_width = get_tree().get_root().size.x
 onready var level_height = get_tree().get_root().size.y
 onready var curve = get_parent().get_parent().get_node("Path2D").curve
@@ -33,6 +33,7 @@ var nn_activated_inputs := [] # set by the level
 var genome setget set_genome, get_genome
 var reached_the_end := false
 var time_left_when_finished := 0.0
+var timer: Timer
 
 func _ready():
   randomize()

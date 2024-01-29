@@ -5,17 +5,21 @@
 [ext_resource path="res://scripts/level1.gd" type="Script" id=3]
 
 [sub_resource type="RectangleShape2D" id=1]
+resource_local_to_scene = true
 extents = Vector2( 21.5, 40 )
 
 [sub_resource type="RectangleShape2D" id=2]
+resource_local_to_scene = true
 extents = Vector2( 10, 169.5 )
 
 [sub_resource type="Curve2D" id=4]
+resource_local_to_scene = true
 _data = {
 "points": PoolVector2Array( 0, 0, 0, 0, 61, 253, 0, 0, 0, 0, 317, 251, 0, 0, 0, 0, 368, 159, 0, 0, 0, 0, 597, 159, 0, 0, 0, 0, 625, 402, 0, 0, 0, 0, 885, 400, 0, 0, 0, 0, 913, 135, 0, 0, 0, 0, 1184, 136, 0, 0, 0, 0, 1209, 363, 0, 0, 0, 0, 1287, 359 )
 }
 
 [sub_resource type="DynamicFont" id=3]
+resource_local_to_scene = true
 size = 28
 outline_size = 1
 outline_color = Color( 0.0117647, 0, 0, 1 )
@@ -23,6 +27,7 @@ use_filter = true
 font_data = ExtResource( 1 )
 
 [sub_resource type="DynamicFont" id=5]
+resource_local_to_scene = true
 size = 50
 outline_size = 1
 outline_color = Color( 0.0352941, 0, 0, 1 )
@@ -35,12 +40,14 @@ outline_color = Color( 0.0352941, 0, 0, 1 )
 font_data = ExtResource( 1 )
 
 [sub_resource type="DynamicFont" id=7]
+resource_local_to_scene = true
 size = 35
 outline_size = 1
 outline_color = Color( 0.0352941, 0, 0, 1 )
 font_data = ExtResource( 1 )
 
 [sub_resource type="StyleBoxFlat" id=8]
+resource_local_to_scene = true
 bg_color = Color( 0.788235, 0.105882, 0.105882, 1 )
 border_width_left = 1
 border_width_top = 1
@@ -53,15 +60,18 @@ corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
 
 [sub_resource type="StyleBoxFlat" id=9]
+resource_local_to_scene = true
 bg_color = Color( 0.184314, 0.0745098, 0.0745098, 0.168627 )
 
 [sub_resource type="DynamicFont" id=10]
+resource_local_to_scene = true
 size = 40
 outline_size = 2
 outline_color = Color( 0.0823529, 0.027451, 0.027451, 1 )
 font_data = ExtResource( 1 )
 
 [sub_resource type="DynamicFont" id=11]
+resource_local_to_scene = true
 size = 25
 font_data = ExtResource( 1 )
 
@@ -356,7 +366,7 @@ margin_right = 218.0
 margin_bottom = 75.0
 min_value = 1.0
 max_value = 5.0
-value = 4.0
+value = 3.0
 tick_count = 5
 ticks_on_borders = true
 
