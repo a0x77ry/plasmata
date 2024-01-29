@@ -4,7 +4,7 @@ const MUTATION_RATE = 0.8 # original: 0.8
 const WEIGHT_SHIFT_RATE = 0.9
 const WEIGHT_MUTATION_RATE = 0.02
 # const EXPECTED_DISABLING_RATE = EXPECTED_weight_mutation_rate / 3
-const EXPECTED_DISABLING_RATE = 0.05
+const DISABLING_RATE = 0.0
 const MUTATION_STANDARD_DEVIATION = 2.0
 const ORIGINAL_WEIGHT_VALUE_LIMIT = 2.0
 const ADD_LINK_RATE = 0.02 # original : 0.3
@@ -92,7 +92,7 @@ func mutate():
         if random.randf() < max(weight_mutation_rate * mut_multiplier, 0.8):
           link.weight = random.randf_range(-ORIGINAL_WEIGHT_VALUE_LIMIT, ORIGINAL_WEIGHT_VALUE_LIMIT)
       # Disable link
-      if random.randf() < EXPECTED_DISABLING_RATE:
+      if random.randf() < DISABLING_RATE:
         link.is_enabled = !link.is_enabled
 
     # Add a link
