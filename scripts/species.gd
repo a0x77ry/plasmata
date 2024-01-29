@@ -108,7 +108,7 @@ func empty_stale_spieces():
       total_first_avg_fitness += avg_fitness[i]
     avg_last_avg_fitness = total_last_avg_fitness / FITNESS_NUM_TO_COMPARE
     avg_first_avg_fitness = total_first_avg_fitness / FITNESS_NUM_TO_COMPARE
-    print("Last avg_fitness: %s, First: %s" % [avg_last_avg_fitness, avg_first_avg_fitness])
+    # print("Last avg_fitness: %s, First: %s" % [avg_last_avg_fitness, avg_first_avg_fitness])
     if avg_last_avg_fitness - avg_first_avg_fitness < REQUIRED_SPECIES_IMPROVEMENT:
       pass
       # members = [] # if there is no improvement after some generations kill the species
@@ -178,7 +178,7 @@ func couple_crossover(couple_genomes: Array, offspring_number: int) -> Array:
 
     crossed_genome.fitness = int(round((fittest_parent.fitness + weakest_parent.fitness) / 2))
     crossed_genome.species_id = fittest_parent.species_id
-    crossed_genome.genome_id = fittest_parent.genome_id
+    crossed_genome.genome_id = population.generate_UIN()
     crossed_genome.weight_mutation_rate = fittest_parent.weight_mutation_rate
     crossed_genome.add_link_rate = fittest_parent.add_link_rate
     crossed_genome.add_node_rate = fittest_parent.add_node_rate

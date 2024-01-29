@@ -8,7 +8,7 @@ const EXPECTED_DISABLING_RATE = 0.05
 const MUTATION_STANDARD_DEVIATION = 2.0
 const ORIGINAL_WEIGHT_VALUE_LIMIT = 2.0
 const ADD_LINK_RATE = 0.02 # original : 0.3
-const ADD_NODE_RATE = 0.15 # original : 0.15
+const ADD_NODE_RATE = 0.05 # original : 0.15
 const META_W_MUTATION_RATE = 0.05
 const META_ADD_LINK_MUTATION_RATE = 0.05
 const META_ADD_NODE_MUTATION_RATE = 0.05
@@ -64,7 +64,11 @@ func mutate():
   random.randomize()
   if random.randf() < MUTATION_RATE:
     var fraction := genome_fraction()
-    var mut_multiplier = (1-fraction) * population.genomes.size()
+    var mut_multiplier: float
+    if fraction > 0.0:
+      mut_multiplier = 1 / (fraction * population.genomes.size())
+    else:
+      mut_multiplier = 200
 
     # Change the meta weight mutation rate
     if random.randf() < META_W_MUTATION_RATE:
@@ -150,6 +154,7 @@ func genome_fraction() -> float:
   var total_fitness := 0.0
   for genome in population.genomes:
     total_fitness += genome.fitness
+    # print("genome_fitness: %s, total: %s" % [genome.fitness, total_fitness])
   var fraction: float
   if total_fitness > 0.0:
     fraction = fitness / total_fitness

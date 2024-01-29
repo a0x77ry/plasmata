@@ -1,0 +1,75 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://fonts/Jura-Light.ttf" type="DynamicFontData" id=1]
+
+[sub_resource type="RectangleShape2D" id=1]
+extents = Vector2( 21.5, 40 )
+
+[sub_resource type="RectangleShape2D" id=2]
+extents = Vector2( 10, 169.5 )
+
+[sub_resource type="StyleBoxFlat" id=9]
+bg_color = Color( 0.184314, 0.0745098, 0.0745098, 0.168627 )
+
+[sub_resource type="DynamicFont" id=10]
+size = 40
+outline_size = 2
+outline_color = Color( 0.0823529, 0.027451, 0.027451, 1 )
+font_data = ExtResource( 1 )
+
+[node name="Game" type="Node2D" groups=["level"]]
+position = Vector2( -1, 100 )
+
+[node name="Agents" type="Node2D" parent="."]
+
+[node name="SpawningArea" type="Area2D" parent="."]
+position = Vector2( 49, 252 )
+__meta__ = {
+"_edit_group_": true
+}
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="SpawningArea"]
+shape = SubResource( 1 )
+
+[node name="FinishLine" type="Area2D" parent="."]
+position = Vector2( 1285, 303 )
+__meta__ = {
+"_edit_group_": true
+}
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FinishLine"]
+position = Vector2( 0, -37.5 )
+shape = SubResource( 2 )
+
+[node name="Timer" type="Timer" parent="."]
+wait_time = 20.0
+one_shot = true
+autostart = true
+
+[node name="UI" type="Control" parent="."]
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="Pause" type="Control" parent="UI"]
+visible = false
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="PausePanel" type="Panel" parent="UI/Pause"]
+margin_left = 2.0
+margin_top = -100.0
+margin_right = 1301.0
+margin_bottom = 697.0
+custom_styles/panel = SubResource( 9 )
+
+[node name="PauseMessage" type="Label" parent="UI/Pause"]
+margin_left = 5.0
+margin_top = -98.0
+margin_right = 1296.0
+margin_bottom = 702.0
+custom_colors/font_color = Color( 0.564706, 0.117647, 0.117647, 1 )
+custom_fonts/font = SubResource( 10 )
+text = "Pause
+Press space to start"
+align = 1
+valign = 1

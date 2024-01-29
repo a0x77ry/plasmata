@@ -24,6 +24,7 @@ var agents = []
 var agents_alive = []
 var best_time = INF
 var do_pause_when_solved
+var is_game_paused := false
 
 var input_names = [
   "rotation",
@@ -135,13 +136,20 @@ func generate_agent_population():
 func pause(is_paused):
   if is_paused:
     pause_message.visible = true
+    is_game_paused = true
+    FF_slider.editable = false
+    FF_slider.scrollable = false
   else:
     pause_message.visible = false
+    is_game_paused = false
+    FF_slider.editable = true
+    FF_slider.scrollable = true
 
 
 func set_time_scale(value):
-  Main.change_time_scale(value)
-  time_scale_label.text = "Time Scale: %sx" % value
+  if !is_game_paused:
+    Main.change_time_scale(value)
+    time_scale_label.text = "Time Scale: %sx" % value
 
 
 func _on_FinishLine_body_entered(body:Node):

@@ -12,7 +12,7 @@ extents = Vector2( 10, 169.5 )
 
 [sub_resource type="Curve2D" id=4]
 _data = {
-"points": PoolVector2Array( 0, 0, 0, 0, 61, 253, 0, 0, 0, 0, 309, 258, 0, 0, 0, 0, 316, 159, 0, 0, 0, 0, 597, 159, 0, 0, 0, 0, 625, 402, 0, 0, 0, 0, 885, 400, 0, 0, 0, 0, 913, 135, 0, 0, 0, 0, 1184, 136, 0, 0, 0, 0, 1209, 363, 0, 0, 0, 0, 1287, 359 )
+"points": PoolVector2Array( 0, 0, 0, 0, 61, 253, 0, 0, 0, 0, 317, 251, 0, 0, 0, 0, 368, 159, 0, 0, 0, 0, 597, 159, 0, 0, 0, 0, 625, 402, 0, 0, 0, 0, 885, 400, 0, 0, 0, 0, 913, 135, 0, 0, 0, 0, 1184, 136, 0, 0, 0, 0, 1209, 363, 0, 0, 0, 0, 1287, 359 )
 }
 
 [sub_resource type="DynamicFont" id=3]
@@ -371,6 +371,7 @@ alignment = 1
 margin_left = 31.0
 margin_right = 233.0
 margin_bottom = 40.0
+focus_mode = 0
 pressed = true
 text = "Pause when solved"
 
