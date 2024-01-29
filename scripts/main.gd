@@ -13,25 +13,25 @@ func _ready():
   get_level()
 
 
-func _process(_delta):
-  if Input.is_action_just_pressed("ui_accept"):
-    pause()
+# func _process(_delta):
+#   if Input.is_action_just_pressed("ui_accept"):
+#     pause()
 
 
 func get_level():
   level = get_tree().get_nodes_in_group("level")[0]
 
 
-func pause():
-  if is_paused:
-    Engine.time_scale = TIME_SCALE
-    is_paused = false
-    level.pause(false)
-  else:
-    Engine.time_scale = 0
-    is_paused = true
-    level.pause(true)
+# func pause():
+#   if is_paused:
+#     Engine.time_scale = TIME_SCALE
+#     is_paused = false
+#     level.pause(false)
+#   else:
+#     Engine.time_scale = 0
+#     is_paused = true
+#     level.pause(true)
 
 
-func change_time_scale(ts):
-  Engine.time_scale = ts
+# func change_time_scale(ts):
+#   Engine.time_scale = ts
