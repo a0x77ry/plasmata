@@ -19,9 +19,6 @@ var do_pause_when_solved
 
 func _ready():
   randomize()
-  init_population()
-  set_time_scale(unpaused_time_scale)
-  do_pause_when_solved = pause_when_solved_button.pressed
   input_names = [
     "rotation",
     # "inverse_rotation",
@@ -41,19 +38,15 @@ func _ready():
     "go_right",
     "go_forward"
   ]
+  init_population()
+  set_time_scale(unpaused_time_scale)
+  do_pause_when_solved = pause_when_solved_button.pressed
 
 
 func _process(_delta):
   if Input.is_action_just_pressed("ui_accept"):
     pause()
   countdown.text = String("%.1f" % timer.time_left)
-
-
-func change_generation():
-  .change_generation()
-  gen_counter.text = str(population.generation)
-  genome_counter.text = str(population.genomes.size())
-  species_counter.text = str(population.species.size())
 
 
 func generate_agent_population():
@@ -82,15 +75,27 @@ func generate_agent_population():
     agents_node.add_child(agent)
 
 
+func change_generation():
+  .change_generation()
+  gen_counter.text = str(population.generation)
+  genome_counter.text = str(population.genomes.size())
+  species_counter.text = str(population.species.size())
+
+
+func set_time_scale(value):
+  .set_time_scale(value)
+  time_scale_label.text = "Time Scale: %sx" % value
+
+
 func _on_FinishLine_body_entered(body:Node):
   if body.is_in_group("agents"):
     var agent = body as Node2D
     agent.finish(timer.time_left)
     solved_message_box.visible = true
-    var time = time - timer.time_left
-    if time < best_time:
-      best_time = time
-      solved_best_time.text = String("%.2f" % time)
+    var _time = time - timer.time_left
+    if _time < best_time:
+      best_time = _time
+      solved_best_time.text = String("%.2f" % _time)
       winning_color_panel.bg_color = agent.genome.tint
     if do_pause_when_solved:
       pause()
