@@ -10,7 +10,7 @@ var is_paused = false
 
 func _ready():
   Engine.time_scale = TIME_SCALE
-  get_level()
+  # get_level()
 
 
 # func _process(_delta):
@@ -18,8 +18,8 @@ func _ready():
 #     pause()
 
 
-func get_level():
-  level = get_tree().get_nodes_in_group("level")[0]
+# func get_level():
+#   level = get_tree().get_nodes_in_group("level")[0]
 
 
 # func pause():

@@ -39,9 +39,9 @@ _global_script_class_icons={
 [application]
 
 config/name="plasmata"
-run/main_scene="res://level1.tscn"
+run/main_scene="res://menu/main-menu/main-menu.tscn"
 run/delta_smoothing=false
-config/icon="res://icon.png"
+config/icon="res://plasmata64x64.png"
 
 [autoload]
 

@@ -87,16 +87,6 @@ func set_time_scale(value):
   time_scale_label.text = "Time Scale: %sx" % value
 
 
-func pause():
-  .pause()
-  if is_paused():
-    FF_slider.editable = false
-    FF_slider.scrollable = false
-  else:
-    FF_slider.editable = true
-    FF_slider.scrollable = true
-
-
 func _on_FinishLine_body_entered(body:Node):
   if body.is_in_group("agents"):
     var agent = body as Node2D

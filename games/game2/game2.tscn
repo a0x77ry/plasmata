@@ -17,7 +17,7 @@ extents = Vector2( 10, 169.5 )
 [sub_resource type="Curve2D" id=9]
 resource_local_to_scene = true
 _data = {
-"points": PoolVector2Array( 0, 0, 0, 0, 61, 253, 0, 0, 0, 0, 317, 251, 0, 0, 0, 0, 368, 159, 0, 0, 0, 0, 597, 159, 0, 0, 0, 0, 625, 402, 0, 0, 0, 0, 885, 400, 0, 0, 0, 0, 913, 135, 0, 0, 0, 0, 1184, 136, 0, 0, 0, 0, 1209, 363, 0, 0, 0, 0, 1287, 359 )
+"points": PoolVector2Array( 0, 0, 0, 0, 61, 253, 0, 0, 0, 0, 109, 389, 0, 0, 0, 0, 329, 386, 0, 0, 0, 0, 368, 159, 0, 0, 0, 0, 597, 159, 0, 0, 0, 0, 625, 402, 0, 0, 0, 0, 885, 400, 0, 0, 0, 0, 913, 135, 0, 0, 0, 0, 1184, 136, 0, 0, 0, 0, 1209, 363, 0, 0, 0, 0, 1287, 359 )
 }
 
 [sub_resource type="DynamicFont" id=1]
@@ -84,36 +84,42 @@ scale = Vector2( 59.7816, -0.802072 )
 collision_layer = 3
 
 [node name="Wall3" parent="Walls" index="2" instance=ExtResource( 4 )]
-position = Vector2( 468, 326 )
+position = Vector2( 481, 325 )
 rotation = 1.5708
 scale = Vector2( 6.88, 11.122 )
 collision_layer = 3
 
-[node name="Wall6" parent="Walls" index="3" instance=ExtResource( 4 )]
+[node name="Wall9" parent="Walls" index="3" instance=ExtResource( 4 )]
+position = Vector2( 219, 208 )
+rotation = 1.5708
+scale = Vector2( 6.98628, 10.4094 )
+collision_layer = 3
+
+[node name="Wall6" parent="Walls" index="4" instance=ExtResource( 4 )]
 position = Vector2( 753, 207 )
 rotation = 1.5708
 scale = Vector2( 7.44, 11.482 )
 collision_layer = 3
 
-[node name="Wall7" parent="Walls" index="4" instance=ExtResource( 4 )]
+[node name="Wall7" parent="Walls" index="5" instance=ExtResource( 4 )]
 position = Vector2( 1057, 309 )
 rotation = 1.5708
 scale = Vector2( 8.28, 12.602 )
 collision_layer = 3
 
-[node name="Wall4" parent="Walls" index="5" instance=ExtResource( 4 )]
+[node name="Wall4" parent="Walls" index="6" instance=ExtResource( 4 )]
 position = Vector2( 2, 273 )
 rotation = -1.57079
 scale = Vector2( 59.7816, -0.802072 )
 collision_layer = 3
 
-[node name="Wall5" parent="Walls" index="6" instance=ExtResource( 4 )]
+[node name="Wall5" parent="Walls" index="7" instance=ExtResource( 4 )]
 position = Vector2( 2, 273 )
 rotation = -1.57079
 scale = Vector2( 59.7816, -0.802072 )
 collision_layer = 3
 
-[node name="Wall8" parent="Walls" index="7" instance=ExtResource( 4 )]
+[node name="Wall8" parent="Walls" index="8" instance=ExtResource( 4 )]
 position = Vector2( 1324, 267 )
 rotation = 1.5708
 scale = Vector2( 11.8, 1 )

@@ -50,13 +50,21 @@ func _init(_genomes=[], _species=[], input_names=[], output_names=[],
 # Changes genomes to the next generation
 func next_generation(agents: Array):
   initialize_genomes_with_fitness(agents) # Initializes genomes array with fitness values only
-  speciate() # Categorizes genomes into species
+  # speciate() # Categorizes genomes into species
+  dummy_speciate() # Only one species
   share_fitness_all_species() # Fills the adjusted_fitness in all genomes
   select_in_all_species(target_population) # Fills the parent_genomes in all species, calcs avg_fitness
   genomes = crossover_all_species()
   mutate_all_genomes()
   increment_generation()
 
+
+func dummy_speciate():
+  if species.size() == 0:
+    add_new_species(genomes[0])
+    print("new species")
+  for genome in genomes:
+    add_member_to_species(species[0], genome)
 
 # Initializes genomes array with fitness values only
 func initialize_genomes_with_fitness(agents: Array):

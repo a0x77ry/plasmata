@@ -67,52 +67,80 @@ func get_fitness():
 
 
 func get_sensor_input():
-  var current_rot = get_rotation()
-  # Normalized rotation in positive radians
-  var newrot = (current_rot if current_rot > 0 else current_rot + TAU) / TAU
-  # var newrot = current_rot / PI
-  # var newrot = current_rot
-  var invrot = 1 - newrot
-  var time_since_birth = (timer.wait_time - timer.time_left) / timer.wait_time
-  var norm_pos_x = global_position.x / level_width
-  var norm_pos_y = global_position.y / level_height
+  var newrot: float
+  var invrot: float
+  var time_since_birth: float
+  var norm_pos_x: float
+  var norm_pos_y: float
+  var ray_f_distance: float
+  var ray_left_distance: float
+  var ray_right_distance: float
+  var ray_f_up_right_distance: float
+  var ray_f_down_right_distance: float
+  var fitness: float
+  var go_forward_input: float
+  var go_right_input: float
 
-  var ray_f_distance = 0.0 # is was 1.0
-  if ray_forward.is_colliding():
-    var distance = global_position.distance_to(ray_forward.get_collision_point())
-    # ray_f_distance = distance / ray_forward.cast_to.x
-    ray_f_distance = (ray_forward.cast_to.x - distance) / ray_forward.cast_to.x
+  if nn_activated_inputs.has("rotation"):
+    var current_rot = get_rotation()
+    # Normalized rotation in positive radians
+    newrot = (current_rot if current_rot > 0 else current_rot + TAU) / TAU
+    # var newrot = current_rot / PI
+    # var newrot = current_rot
 
-  var ray_left_distance = 0.0 # is was 1.0
-  if ray_left.is_colliding():
-    var distance = global_position.distance_to(ray_left.get_collision_point())
-    ray_left_distance = (abs(ray_left.cast_to.y) - distance) / abs(ray_left.cast_to.y)
+  if nn_activated_inputs.has("inverse_rotation"):
+    invrot = 1 - newrot
+  if nn_activated_inputs.has("time_since_birth"):
+    time_since_birth = (timer.wait_time - timer.time_left) / timer.wait_time
+  if nn_activated_inputs.has("pos_x"):
+    norm_pos_x = global_position.x / level_width
+  if nn_activated_inputs.has("pos_y"):
+    norm_pos_y = global_position.y / level_height
 
-  var ray_right_distance = 0.0 # is was 1.0
-  if ray_right.is_colliding():
-    var distance = global_position.distance_to(ray_right.get_collision_point())
-    ray_right_distance = (ray_right.cast_to.y - distance) / ray_right.cast_to.y
+  if nn_activated_inputs.has("ray_f_distance"):
+    ray_f_distance = 0.0 # is was 1.0
+    if ray_forward.is_colliding():
+      var distance = global_position.distance_to(ray_forward.get_collision_point())
+      # ray_f_distance = distance / ray_forward.cast_to.x
+      ray_f_distance = (ray_forward.cast_to.x - distance) / ray_forward.cast_to.x
 
-  var ray_f_up_right_distance = 0.0
-  if ray_f_up_right.is_colliding():
-    var distance = global_position.distance_to(ray_f_up_right.get_collision_point())
-    var ray_length = Vector2.ZERO.distance_to(Vector2(ray_f_up_right.cast_to.x,
-        ray_f_up_right.cast_to.y))
-    # ray_f_up_distance = distance / ray_length
-    ray_f_up_right_distance = (ray_length - distance) / ray_length
+  if nn_activated_inputs.has("ray_left_distance"):
+    ray_left_distance = 0.0 # is was 1.0
+    if ray_left.is_colliding():
+      var distance = global_position.distance_to(ray_left.get_collision_point())
+      ray_left_distance = (abs(ray_left.cast_to.y) - distance) / abs(ray_left.cast_to.y)
 
-  var ray_f_down_right_distance = 0.0
-  if ray_f_down_right.is_colliding():
-    var distance = global_position.distance_to(ray_f_down_right.get_collision_point())
-    var ray_length = Vector2.ZERO.distance_to(Vector2(ray_f_down_right.cast_to.x,
-        ray_f_down_right.cast_to.y))
-    # ray_f_down_distance = distance / ray_length
-    ray_f_down_right_distance = (ray_length - distance) / ray_length
+  if nn_activated_inputs.has("ray_right_distance"):
+    ray_right_distance = 0.0 # is was 1.0
+    if ray_right.is_colliding():
+      var distance = global_position.distance_to(ray_right.get_collision_point())
+      ray_right_distance = (ray_right.cast_to.y - distance) / ray_right.cast_to.y
 
-  var fitness = curve.get_closest_offset(position) / curve.get_baked_length()
+  if nn_activated_inputs.has("ray_f_up_right_distance"):
+    ray_f_up_right_distance = 0.0
+    if ray_f_up_right.is_colliding():
+      var distance = global_position.distance_to(ray_f_up_right.get_collision_point())
+      var ray_length = Vector2.ZERO.distance_to(Vector2(ray_f_up_right.cast_to.x,
+          ray_f_up_right.cast_to.y))
+      # ray_f_up_distance = distance / ray_length
+      ray_f_up_right_distance = (ray_length - distance) / ray_length
 
-  var go_forward_input = nn_speed
-  var go_right_input = nn_rotation
+  if nn_activated_inputs.has("ray_f_down_right_distance"):
+    ray_f_down_right_distance = 0.0
+    if ray_f_down_right.is_colliding():
+      var distance = global_position.distance_to(ray_f_down_right.get_collision_point())
+      var ray_length = Vector2.ZERO.distance_to(Vector2(ray_f_down_right.cast_to.x,
+          ray_f_down_right.cast_to.y))
+      # ray_f_down_distance = distance / ray_length
+      ray_f_down_right_distance = (ray_length - distance) / ray_length
+
+  if nn_activated_inputs.has("fitness"):
+    fitness = curve.get_closest_offset(position) / curve.get_baked_length()
+
+  if nn_activated_inputs.has("go_forward_input"):
+    go_forward_input = nn_speed
+  if nn_activated_inputs.has("go_right_input"):
+    go_right_input = nn_rotation
 
   var inp_dict = {"rotation": newrot,
         "inverse_rotation": invrot,

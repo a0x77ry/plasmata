@@ -31,6 +31,20 @@ func init_population():
   change_generation()
 
 
+func restart_population():
+  agents_alive = get_tree().get_nodes_in_group("agents")
+  for agent in agents_alive:
+    agent.queue_free()
+  population.genomes = []
+  population.species = []
+  population = Population.new([], [], input_names, output_names,
+      0, target_population)
+  number_of_agents = population.target_population
+  generate_agent_population()
+  timer.start(0.1)
+
+
+# To be overriden
 func generate_agent_population():
   pass
 
@@ -62,7 +76,24 @@ func pause():
     pause_message.visible = false
 
 
+func is_paused():
+  return is_game_paused
+
+
 func set_time_scale(value):
   if !is_game_paused:
     unpaused_time_scale = value
     Engine.time_scale = value
+
+
+func _on_Quit_pressed():
+  get_tree().quit(0)
+
+
+func _on_Resume_pressed():
+  pause()
+
+
+func _on_Restart_pressed():
+  restart_population()
+  pause()
