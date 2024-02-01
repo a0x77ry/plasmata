@@ -44,8 +44,6 @@ func _ready():
 
 
 func _process(_delta):
-  if Input.is_action_just_pressed("ui_accept"):
-    pause()
   countdown.text = String("%.1f" % timer.time_left)
 
 

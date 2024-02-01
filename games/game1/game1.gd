@@ -18,6 +18,7 @@ var do_pause_when_solved
 
 
 func _ready():
+  print("total curve lenght: %s" % curve.get_baked_length())
   randomize()
   input_names = [
     "rotation",
@@ -44,8 +45,6 @@ func _ready():
 
 
 func _process(_delta):
-  if Input.is_action_just_pressed("ui_accept"):
-    pause()
   countdown.text = String("%.1f" % timer.time_left)
 
 

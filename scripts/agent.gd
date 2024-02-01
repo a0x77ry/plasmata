@@ -11,7 +11,7 @@ export (int) var number_of_hidden_nodes = 8
 # export (int) var level_height = 350
 
 const NN = preload("res://scripts/neural_network.gd")
-const TIME_TO_FITNESS_MULTIPLICATOR = 120
+# const TIME_TO_FITNESS_MULTIPLICATOR = 120
 
 onready var ray_forward = get_node("ray_forward")
 onready var ray_left = get_node("ray_left")
@@ -34,9 +34,20 @@ var genome setget set_genome, get_genome
 var reached_the_end := false
 var time_left_when_finished := 0.0
 var timer: Timer
+var penalty := 0.0
+var crashed := false
+var finish_time_bonus: float
+# var distance_penalty_multiplier: float
+var current_pos: Vector2
+# var distance_covered := 0.0
+
 
 func _ready():
   randomize()
+  var total_level_length = curve.get_baked_length()
+  finish_time_bonus = total_level_length / 17
+  # distance_penalty_multiplier = 0.05
+  current_pos = position
   assert(genome != null)
   # var starting_link_id = nn_inputs.size() + nn_outputs.size()
   # modulate = genome.tint
@@ -44,7 +55,7 @@ func _ready():
 
 
 func _physics_process(delta):
-  if !reached_the_end:
+  if !reached_the_end && !crashed:
     # get_player_input()
     get_nn_controls(nn, get_sensor_input())
     rotation += nn_rotation * rotation_speed * delta
@@ -63,7 +74,9 @@ func get_genome():
 
 func get_fitness():
   genome.fitness = curve.get_closest_offset(position) \
-      + time_left_when_finished * TIME_TO_FITNESS_MULTIPLICATOR
+      + time_left_when_finished * finish_time_bonus
+  # genome.fitness -= distance_penalty_multiplier * distance_covered
+  # genome.fitness = max(0, genome.fitness)
 
 
 func get_sensor_input():
@@ -188,3 +201,10 @@ func get_nn_controls(_nn: NN, sensor_input: Dictionary):
 func finish(time_left: float):
   reached_the_end = true
   time_left_when_finished = time_left
+
+
+# func _on_DistanceTimer_timeout():
+#   var curr_dist = position.distance_to(current_pos)
+#   current_pos = position
+#   distance_covered += curr_dist
+

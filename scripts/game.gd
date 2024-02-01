@@ -20,6 +20,11 @@ var input_names = []
 var output_names = []
 
 
+func _process(_delta):
+  if Input.is_action_just_pressed("pause"):
+    pause()
+
+
 func init_population():
   var starting_gen = 0
   if population != null:
@@ -97,3 +102,10 @@ func _on_Resume_pressed():
 func _on_Restart_pressed():
   restart_population()
   pause()
+
+
+func _on_MainMenu_pressed():
+  pause()
+  var err = get_tree().change_scene("res://menu/main-menu/main-menu.tscn")
+  if err != OK:
+    print("Cannot change scene")
