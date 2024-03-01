@@ -2,12 +2,12 @@ class_name Genome
 
 const MUTATION_RATE = 0.8 # original: 0.8
 const WEIGHT_SHIFT_RATE = 0.9
-const WEIGHT_MUTATION_RATE = 0.02
+const WEIGHT_MUTATION_RATE = 0.02 # was 0.02
 # const EXPECTED_DISABLING_RATE = EXPECTED_weight_mutation_rate / 3
 const DISABLING_RATE = 0.0
 const MUTATION_STANDARD_DEVIATION = 2.0
 const ORIGINAL_WEIGHT_VALUE_LIMIT = 2.0
-const ADD_LINK_RATE = 0.02 # original : 0.3
+const ADD_LINK_RATE = 0.02 # original : 0.2
 const ADD_NODE_RATE = 0.05 # original : 0.15
 const META_W_MUTATION_RATE = 0.05
 const META_ADD_LINK_MUTATION_RATE = 0.05
@@ -62,14 +62,14 @@ func init_io_nodes(input_names: Array, output_names: Array):
 # Mutate this specific genome
 func mutate():
   random.randomize()
-  if random.randf() < MUTATION_RATE:
-    var fraction := genome_fraction()
-    var mut_multiplier: float
-    if fraction > 0.0:
-      mut_multiplier = 1 / (fraction * population.genomes.size())
-    else:
-      mut_multiplier = 200
+  var fraction := genome_fraction()
+  var mut_multiplier: float
+  if fraction > 0.0:
+    mut_multiplier = 1 / (fraction * population.genomes.size())
+  else:
+    mut_multiplier = 10.0
 
+  if random.randf() < MUTATION_RATE:
     # Change the meta weight mutation rate
     if random.randf() < META_W_MUTATION_RATE:
       weight_mutation_rate = clamp(random.randfn(weight_mutation_rate, 0.2), 0.0, 0.8)
@@ -77,19 +77,19 @@ func mutate():
     if random.randf() < META_ADD_LINK_MUTATION_RATE:
       add_link_rate = clamp(random.randfn(add_link_rate, 0.2), 0.0, 0.8)
     # Change the add_node mutation rate
-    # if random.randf() < META_ADD_NODE_MUTATION_RATE:
-    #   add_node_rate = clamp(random.randfn(add_node_rate, 0.2), 0.0, 1.0)
+    if random.randf() < META_ADD_NODE_MUTATION_RATE:
+      add_node_rate = clamp(random.randfn(add_node_rate, 0.2), 0.0, 0.8)
 
     for link in links:
       # Shift weights
       if random.randf() < WEIGHT_SHIFT_RATE:
         # if random.randf() < max((weight_mutation_rate + added_mutation_rate), 0.8):
-        if random.randf() < max(weight_mutation_rate * mut_multiplier, 0.8):
+        if random.randf() < max(weight_mutation_rate * mut_multiplier, 1.0):
           link.weight = random.randfn(link.weight, MUTATION_STANDARD_DEVIATION)
       # Change weights randomly
       else:
         # if random.randf() < max((weight_mutation_rate + added_mutation_rate), 0.8):
-        if random.randf() < max(weight_mutation_rate * mut_multiplier, 0.8):
+        if random.randf() < max(weight_mutation_rate * mut_multiplier, 1.0):
           link.weight = random.randf_range(-ORIGINAL_WEIGHT_VALUE_LIMIT, ORIGINAL_WEIGHT_VALUE_LIMIT)
       # Disable link
       if random.randf() < DISABLING_RATE:
@@ -97,7 +97,7 @@ func mutate():
 
     # Add a link
     # if random.randf() < max((add_link_rate + added_mutation_rate), 0.8):
-    if random.randf() < max(add_link_rate * mut_multiplier, 0.8):
+    if random.randf() < max(add_link_rate * mut_multiplier, 1.0):
       var source_nodes = input_nodes + hidden_nodes
       var source_node = source_nodes[random.randi_range(0, source_nodes.size() - 1)]
       var target_node = choose_target_node(source_node)
@@ -113,7 +113,8 @@ func mutate():
     # Add a new node and break the link
     if links.size() == 0:
       return # cannot break a link if there isn't one
-    if random.randf() < ADD_NODE_RATE:
+    # if random.randf() < ADD_NODE_RATE:
+    if random.randf() < add_node_rate * mut_multiplier && hidden_nodes.size():# <= 16:
       # find a random link to break
       var link_to_break
       while link_to_break == null:

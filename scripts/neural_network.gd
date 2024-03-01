@@ -92,10 +92,11 @@ func set_input(input_dict: Dictionary):
 
 func get_output() -> Dictionary:
   # thread.start(self, "get_out")
-  # return thread.wait_to_finish()
-  return get_out()
+  # var res = thread.wait_to_finish()
+  # return res
+  return get_out(null) # paramenter needed for thread compatibility
 
-func get_out() -> Dictionary:
+func get_out(_userdata) -> Dictionary:
   var output_dict = {}
   for node in output_layer:
     var node_name = node.get_name()

@@ -23,25 +23,25 @@ shape = SubResource( 1 )
 
 [node name="ray_forward" type="RayCast2D" parent="."]
 enabled = true
-cast_to = Vector2( 300, 0 )
+cast_to = Vector2( 500, 0 )
 collision_mask = 2
 
 [node name="ray_left" type="RayCast2D" parent="."]
 enabled = true
-cast_to = Vector2( 0, -300 )
+cast_to = Vector2( 0, -500 )
 collision_mask = 2
 
 [node name="ray_right" type="RayCast2D" parent="."]
 enabled = true
-cast_to = Vector2( 0, 300 )
+cast_to = Vector2( 0, 500 )
 collision_mask = 2
 
 [node name="ray_f_up_right" type="RayCast2D" parent="."]
 enabled = true
-cast_to = Vector2( 200, -200 )
+cast_to = Vector2( 353.55, -353.55 )
 collision_mask = 2
 
 [node name="ray_f_down_right" type="RayCast2D" parent="."]
 enabled = true
-cast_to = Vector2( 200, 200 )
+cast_to = Vector2( 353.55, 353.55 )
 collision_mask = 2

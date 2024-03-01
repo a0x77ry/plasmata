@@ -6,7 +6,6 @@ export (float) var speed = 20.0 # waa 50.0
 export (float) var rotation_speed = 0.5 # was 1.5
 export (float) var speed_limit = 300.0
 export (float) var rotation_speed_limit = 8.0
-export (int) var number_of_hidden_nodes = 8
 # export (int) var level_width = 1300
 # export (int) var level_height = 350
 
@@ -75,6 +74,8 @@ func get_genome():
 func get_fitness():
   genome.fitness = curve.get_closest_offset(position) \
       + time_left_when_finished * finish_time_bonus
+  var hidden_nodes_size = genome.hidden_nodes.size()
+  genome.fitness -= hidden_nodes_size * 20
   # genome.fitness -= distance_penalty_multiplier * distance_covered
   # genome.fitness = max(0, genome.fitness)
 
@@ -151,7 +152,7 @@ func get_sensor_input():
     fitness = curve.get_closest_offset(position) / curve.get_baked_length()
 
   if nn_activated_inputs.has("go_forward_input"):
-    go_forward_input = nn_speed
+    go_forward_input = clamp(nn_speed, 0, speed_limit) / speed_limit
   if nn_activated_inputs.has("go_right_input"):
     go_right_input = nn_rotation
 

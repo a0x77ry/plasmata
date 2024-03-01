@@ -6,8 +6,8 @@ const SELECTION_RATE = 0.3
 const C1 := 0.5
 const C2 := 0.5
 const C3 := 0.4
-const dt := 55.4 # distance, original 0.35. More than 1 is to disable it
-# const dt := 0.3 # distance, original 0.35
+# const dt := 55.4 # distance, original 0.35. More than 1 is to disable it
+const dt := 0.4 # distance, original 0.35
 
 const Species = preload("res://scripts/species.gd")
 const Genome = preload("res://scripts/genome.gd")
