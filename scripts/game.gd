@@ -2,7 +2,7 @@ extends Node2D
 
 # const TIME =
 export(int, 200) var time
-export(int, 200) var target_population
+export(int, 400) var target_population
 export(PackedScene) var Agent
 export(int, 10) var unpaused_time_scale = 0
 

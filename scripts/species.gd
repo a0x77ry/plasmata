@@ -1,12 +1,12 @@
 class_name Species
 
 const STALE_GENS_BEFORE_DEATH = 20
+const FITNESS_NUM_TO_COMPARE = 5
 const REQUIRED_SPECIES_IMPROVEMENT = 50
-const CROSSOVER_RATE = 0.75
+const CROSSOVER_RATE = 0.9
 const DISABLED_LINK_SELECTION_RATE = 0.75
 const TOP_GENOMES_RATE = 1
-const INSPECIES_SELECTION_BIAS = 10
-const FITNESS_NUM_TO_COMPARE = 5
+const INSPECIES_SELECTION_BIAS = 10.0
 
 const Genome = preload("res://scripts/genome.gd")
 const InputNode = preload("res://scripts/genome.gd").InputNode
@@ -157,7 +157,7 @@ func crossover(noff_species):
       # for c in number_of_offspring_each_couple:
       for c in noff:
         var genome_to_append = couple_genomes[c % 2]
-        genome_to_append.fitness = 0.0
+        # genome_to_append.fitness = 0.0
         couple_crossovered_genomes.append(genome_to_append)
     crossovered_genomes.append_array(couple_crossovered_genomes)
   return crossovered_genomes

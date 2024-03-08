@@ -46,7 +46,7 @@ extents = Vector2( 10, 169.5 )
 [sub_resource type="Curve2D" id=9]
 resource_local_to_scene = true
 _data = {
-"points": PoolVector2Array( 0, 0, 0, 0, 61, 253, 0, 0, 0, 0, 1287, 254 )
+"points": PoolVector2Array( 0, 0, 0, 0, 61, 253, 0, 0, 0, 0, 174, 386, 0, 0, 0, 0, 940, 395, 0, 0, 0, 0, 1029, 256, 0, 0, 0, 0, 1287, 254 )
 }
 
 [sub_resource type="DynamicFont" id=1]
@@ -91,7 +91,7 @@ corner_radius_bottom_left = 2
 size = 25
 font_data = ExtResource( 3 )
 
-[node name="Game1" instance=ExtResource( 1 )]
+[node name="Game3" instance=ExtResource( 1 )]
 script = ExtResource( 2 )
 time = 20
 target_population = 200
@@ -129,19 +129,19 @@ rotation = 1.5708
 scale = Vector2( 11.8, 1 )
 
 [node name="MovingWall" parent="Walls" index="5" instance=ExtResource( 5 )]
-position = Vector2( 490, 212 )
+position = Vector2( 490, 316 )
 
 [node name="MovingWall2" parent="Walls" index="6" instance=ExtResource( 5 )]
-position = Vector2( 807, 320 )
+position = Vector2( 807, 216 )
 
 [node name="Wall9" parent="Walls" index="7" instance=ExtResource( 4 )]
-position = Vector2( 392, -25 )
+position = Vector2( 283, 202 )
 rotation = 1.5708
 scale = Vector2( 6.98628, 10.4094 )
 collision_layer = 3
 
 [node name="Wall10" parent="Walls" index="8" instance=ExtResource( 4 )]
-position = Vector2( 1156, 341 )
+position = Vector2( 1140, 407 )
 rotation = 1.5708
 scale = Vector2( 6.2, 10.409 )
 collision_layer = 3

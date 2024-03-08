@@ -8,6 +8,7 @@ export (float) var speed_limit = 300.0
 export (float) var rotation_speed_limit = 8.0
 # export (int) var level_width = 1300
 # export (int) var level_height = 350
+export (int) var penalty_for_hidden_nodes = 5 # was 20
 
 const NN = preload("res://scripts/neural_network.gd")
 # const TIME_TO_FITNESS_MULTIPLICATOR = 120
@@ -36,16 +37,13 @@ var timer: Timer
 var penalty := 0.0
 var crashed := false
 var finish_time_bonus: float
-# var distance_penalty_multiplier: float
 var current_pos: Vector2
-# var distance_covered := 0.0
 
 
 func _ready():
   randomize()
   var total_level_length = curve.get_baked_length()
   finish_time_bonus = total_level_length / 17
-  # distance_penalty_multiplier = 0.05
   current_pos = position
   assert(genome != null)
   # var starting_link_id = nn_inputs.size() + nn_outputs.size()
@@ -75,9 +73,8 @@ func get_fitness():
   genome.fitness = curve.get_closest_offset(position) \
       + time_left_when_finished * finish_time_bonus
   var hidden_nodes_size = genome.hidden_nodes.size()
-  genome.fitness -= hidden_nodes_size * 20
-  # genome.fitness -= distance_penalty_multiplier * distance_covered
-  # genome.fitness = max(0, genome.fitness)
+  genome.fitness -= hidden_nodes_size * penalty_for_hidden_nodes
+  genome.fitness = pow(genome.fitness / 2.0, 2.0)
 
 
 func get_sensor_input():
@@ -94,6 +91,8 @@ func get_sensor_input():
   var fitness: float
   var go_forward_input: float
   var go_right_input: float
+  var mwall_1_pos: float
+  var mwall_2_pos: float
 
   if nn_activated_inputs.has("rotation"):
     var current_rot = get_rotation()
@@ -104,6 +103,7 @@ func get_sensor_input():
 
   if nn_activated_inputs.has("inverse_rotation"):
     invrot = 1 - newrot
+
   if nn_activated_inputs.has("time_since_birth"):
     time_since_birth = (timer.wait_time - timer.time_left) / timer.wait_time
   if nn_activated_inputs.has("pos_x"):
@@ -156,6 +156,20 @@ func get_sensor_input():
   if nn_activated_inputs.has("go_right_input"):
     go_right_input = nn_rotation
 
+  if nn_activated_inputs.has("mwall_1_pos"):
+    var mwall_1 = get_parent().get_parent().get_node("Walls/MovingWall")
+    var w_starting_y = 216
+    var w_ending_y = 316
+    var w_distance = abs(w_starting_y - w_ending_y)
+    mwall_1_pos = abs(w_starting_y - mwall_1.position.y) / w_distance
+
+  if nn_activated_inputs.has("mwall_2_pos"):
+    var mwall_2 = get_parent().get_parent().get_node("Walls/MovingWall2")
+    var w_starting_y = 320
+    var w_ending_y = 216
+    var w_distance = abs(w_starting_y - w_ending_y)
+    mwall_2_pos = abs(w_starting_y - mwall_2.position.y) / w_distance
+
   var inp_dict = {"rotation": newrot,
         "inverse_rotation": invrot,
         "time_since_birth": time_since_birth,
@@ -168,7 +182,9 @@ func get_sensor_input():
         "ray_right_distance": ray_right_distance,
         "fitness": fitness,
         "go_right_input": go_right_input,
-        "go_forward_input": go_forward_input
+        "go_forward_input": go_forward_input,
+        "mwall_1_pos": mwall_1_pos,
+        "mwall_2_pos": mwall_2_pos 
       }
 
   var activated_input_dict := {}

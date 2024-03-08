@@ -18,7 +18,6 @@ var do_pause_when_solved
 
 
 func _ready():
-  print("total curve lenght: %s" % curve.get_baked_length())
   randomize()
   input_names = [
     "rotation",

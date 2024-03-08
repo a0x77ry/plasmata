@@ -11,7 +11,7 @@ var input_layer = []
 var output_layer = [] 
 var hidden_layer = [] 
 var links = []
-var thread = Thread.new()
+# var thread = Thread.new()
 
 var genome
 # var starting_link_id: int
