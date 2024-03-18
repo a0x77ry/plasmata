@@ -4,6 +4,7 @@ extends KinematicBody2D
 # export (float) var rotation_speed = 3.0
 export (float) var speed = 20.0 # waa 50.0
 export (float) var rotation_speed = 0.5 # was 1.5
+# export (float) var speed_limit = 300.0
 export (float) var speed_limit = 300.0
 export (float) var rotation_speed_limit = 8.0
 # export (int) var level_width = 1300
@@ -74,7 +75,7 @@ func get_fitness():
       + time_left_when_finished * finish_time_bonus
   var hidden_nodes_size = genome.hidden_nodes.size()
   genome.fitness -= hidden_nodes_size * penalty_for_hidden_nodes
-  genome.fitness = pow(genome.fitness / 2.0, 2.0)
+  # genome.fitness = pow(genome.fitness, 2.0) / 3.0
 
 
 func get_sensor_input():

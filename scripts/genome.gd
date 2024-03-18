@@ -2,7 +2,7 @@ class_name Genome
 
 const MUTATION_RATE = 0.8 # original: 0.8
 const WEIGHT_SHIFT_RATE = 0.9 # was 0.9
-const WEIGHT_MUTATION_RATE = 1.0 # was 0.02
+const WEIGHT_MUTATION_RATE = 1.0
 # const EXPECTED_DISABLING_RATE = EXPECTED_weight_mutation_rate / 3
 const DISABLING_RATE = 0.0
 const MUTATION_STANDARD_DEVIATION = 2.0
@@ -67,7 +67,8 @@ func mutate():
     mut_multiplier = 1 / (fraction * population.genomes.size())
   else:
     mut_multiplier = 8.0
-  mut_multiplier = clamp(mut_multiplier, 1.0, 3.0)
+  mut_multiplier = clamp(mut_multiplier, 0.8, 1.0)
+  # mut_multiplier = 1.0
 
   if random.randf() < MUTATION_RATE:
     # Change the meta weight mutation rate
@@ -83,18 +84,21 @@ func mutate():
     for link in links:
       # Shift weights
       if random.randf() < WEIGHT_SHIFT_RATE:
-        if random.randf() < 1.0: # weight_mutation_rate: # * mut_multiplier:
+        # if random.randf() < weight_mutation_rate * mut_multiplier:
+        if random.randf() < mut_multiplier:
           link.weight = random.randfn(link.weight, MUTATION_STANDARD_DEVIATION)
       # Change weights randomly
       else:
-        if random.randf() < 1.0: #weight_mutation_rate: # * mut_multiplier:
+        # if random.randf() < weight_mutation_rate * mut_multiplier:
+        if random.randf() < mut_multiplier:
           link.weight = random.randf_range(-ORIGINAL_WEIGHT_VALUE_LIMIT, ORIGINAL_WEIGHT_VALUE_LIMIT)
       # Disable link
       if random.randf() < DISABLING_RATE:
         link.is_enabled = !link.is_enabled
 
     # Add a link
-    if random.randf() < 1.0: #add_link_rate: # * mut_multiplier:
+    # if random.randf() < add_link_rate * mut_multiplier:
+    if random.randf() < mut_multiplier:
       var source_nodes = input_nodes + hidden_nodes
       var source_node = source_nodes[random.randi_range(0, source_nodes.size() - 1)]
       var target_node = choose_target_node(source_node)
@@ -111,7 +115,7 @@ func mutate():
     if links.size() == 0:
       return # cannot break a link if there isn't one
     # if random.randf() < ADD_NODE_RATE:
-    if random.randf() < 0.2 && hidden_nodes.size() <= 16: # add_node_rate: # * mut_multiplier: # && hidden_nodes.size() <= 16:
+    if random.randf() < 0.05 && hidden_nodes.size() <= 16: # add_node_rate: # * mut_multiplier: # && hidden_nodes.size() <= 16:
       # find a random link to break
       var link_to_break
       while link_to_break == null:

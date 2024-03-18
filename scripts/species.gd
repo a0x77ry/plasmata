@@ -5,7 +5,7 @@ const FITNESS_NUM_TO_COMPARE = 5
 const REQUIRED_SPECIES_IMPROVEMENT = 50
 const CROSSOVER_RATE = 0.9
 const DISABLED_LINK_SELECTION_RATE = 0.75
-const TOP_GENOMES_RATE = 1
+const TOP_GENOMES_RATE = 1.0
 const INSPECIES_SELECTION_BIAS = 10.0
 
 const Genome = preload("res://scripts/genome.gd")

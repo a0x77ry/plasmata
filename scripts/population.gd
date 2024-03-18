@@ -76,17 +76,17 @@ func initialize_genomes_with_fitness(agents: Array):
 
 
 func mutate_all_genomes():
-  var total_link_rate := 0.0
-  var total_node_rate := 0.0
-  var total_weight_mutation_rate := 0.0
+  # var total_link_rate := 0.0
+  # var total_node_rate := 0.0
+  # var total_weight_mutation_rate := 0.0
   for genome in genomes:
     genome.mutate()
-    total_link_rate += genome.add_link_rate
-    total_node_rate += genome.add_node_rate
-    total_weight_mutation_rate += genome.weight_mutation_rate
-  print("Avg add link rate: %s" % (total_link_rate / genomes.size()))
-  print("Avg add node rate: %s" % (total_node_rate / genomes.size()))
-  print("Avg weight mutation rate: %s" % (total_weight_mutation_rate / genomes.size()))
+    # total_link_rate += genome.add_link_rate
+    # total_node_rate += genome.add_node_rate
+    # total_weight_mutation_rate += genome.weight_mutation_rate
+  # print("Avg add link rate: %s" % (total_link_rate / genomes.size()))
+  # print("Avg add node rate: %s" % (total_node_rate / genomes.size()))
+  # print("Avg weight mutation rate: %s" % (total_weight_mutation_rate / genomes.size()))
 
 
 func crossover_all_species() -> Array:
