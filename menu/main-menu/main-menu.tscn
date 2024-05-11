@@ -15,6 +15,9 @@ font_data = ExtResource( 1 )
 
 [node name="MainMenu" type="Control"]
 script = ExtResource( 6 )
+__meta__ = {
+"_edit_lock_": true
+}
 game1 = ExtResource( 4 )
 game2 = ExtResource( 5 )
 

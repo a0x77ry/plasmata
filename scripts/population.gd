@@ -37,14 +37,9 @@ func _init(_genomes=[], _species=[], input_names=[], output_names=[],
     new_genome.init_io_nodes(input_names, output_names)
     genomes.append(new_genome)
 
-  var genome_groups = []
-  var total_genomes_in_groups := 0
-  for i in range(1, ORIGINAL_SPECIES_NUMBER+1):
-    genome_groups.append(genomes.slice(total_genomes_in_groups, int(i * floor(target_population / ORIGINAL_SPECIES_NUMBER))))
-    total_genomes_in_groups += genome_groups[-1].size()
-    for genome in genome_groups[-1]:
-      genome.species_id = genome_groups[-1][0].genome_id # the first of each group will be the prototype of the species
-    species.append(Species.new(self, genome_groups[-1][0], genome_groups[-1]))
+  for genome in genomes:
+    genome.species_id = genomes[0].genome_id # the first genome will be the prototype of the species
+  species.append(Species.new(self, genomes[0], genomes))
 
 
 # Changes genomes to the next generation
@@ -63,8 +58,12 @@ func dummy_speciate():
   if species.size() == 0:
     add_new_species(genomes[0])
     print("new species")
+  empty_species(species[0]) # TODO
   for genome in genomes:
     add_member_to_species(species[0], genome)
+
+func empty_species(sp):
+    sp.members = []
 
 # Initializes genomes array with fitness values only
 func initialize_genomes_with_fitness(agents: Array):

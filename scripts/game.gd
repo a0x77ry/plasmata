@@ -20,10 +20,10 @@ var input_names = []
 var output_names = []
 
 
+
 func _process(_delta):
   if Input.is_action_just_pressed("pause"):
     pause()
-
 
 func init_population():
   var starting_gen = 0
