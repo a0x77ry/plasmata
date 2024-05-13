@@ -5,6 +5,7 @@ export(int, 200) var time
 export(int, 400) var target_population
 export(PackedScene) var Agent
 export(int, 10) var unpaused_time_scale = 0
+export(float, 10.0) var mut_std_dev = 2.0
 
 onready var timer = get_node("Timer")
 onready var pause_message = get_node("UI/Pause")

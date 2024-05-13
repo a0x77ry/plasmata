@@ -1,12 +1,12 @@
 class_name Species
 
-const STALE_GENS_BEFORE_DEATH = 20
-const FITNESS_NUM_TO_COMPARE = 5
-const REQUIRED_SPECIES_IMPROVEMENT = 50
+# const STALE_GENS_BEFORE_DEATH = 2000 # was 20
+# const FITNESS_NUM_TO_COMPARE = 5 
+# const REQUIRED_SPECIES_IMPROVEMENT = 50
 const CROSSOVER_RATE = 0.9
-const DISABLED_LINK_SELECTION_RATE = 0.75
+const DISABLED_LINK_SELECTION_RATE = 0.05 #was 0.75
 const TOP_GENOMES_RATE = 1.0
-const INSPECIES_SELECTION_BIAS = 10.0
+const INSPECIES_SELECTION_BIAS = 50.0 # was 10.0
 
 const Genome = preload("res://scripts/genome.gd")
 const InputNode = preload("res://scripts/genome.gd").InputNode
@@ -19,8 +19,8 @@ var random = RandomNumberGenerator.new()
 var prototype
 var members
 var parent_genomes
-var avg_fitness
-var total_adjusted_fitness
+# var avg_fitness
+# var total_adjusted_fitness
 var population
 var tint: Color
 var creation_gen: int
@@ -28,15 +28,14 @@ var population_fraction
 var species_id: int
 
 
-func _init(_population, _prototype, _members=[], _parent_genomes=[], _avg_fitness=[],
-      _total_adjusted_fitness=0):
+# func _init(_population, _prototype, _members=[], _parent_genomes=[], _avg_fitness=[],
+#       _total_adjusted_fitness=0):
+func _init(_population, _prototype, _members=[], _parent_genomes=[]):
   random.randomize()
   population = _population
   prototype = _prototype
   members = _members
   parent_genomes = _parent_genomes
-  avg_fitness = _avg_fitness
-  total_adjusted_fitness = _total_adjusted_fitness
   if population.species.size() > 1:
     tint = Color(random.randf(), random.randf(), random.randf())
   else:
@@ -45,98 +44,53 @@ func _init(_population, _prototype, _members=[], _parent_genomes=[], _avg_fitnes
   species_id = prototype.genome_id 
 
 
-func share_fitness():
-  for member_genome in members:
-    member_genome.adjusted_fitness = float(member_genome.fitness / members.size())
-    # print("member_genome.fitness: %s" % member_genome.fitness)
-    # print("members.size: %s" % members.size())
-    # print("adj fitness: %s" % member_genome.adjusted_fitness)
-    # print("fitness / size: %s" % float(member_genome.fitness / members.size()))
+# func share_fitness():
+#   for member_genome in members:
+#     member_genome.adjusted_fitness = float(member_genome.fitness / members.size())
 
 
 func select_in_species(parents_number):
-  # Calculate the avg_fitness and append it to the array
-  # calculate_avg_fitness()
-  # If no improvement in x generations then members = []
-  empty_stale_spieces()
+  parent_genomes = []
 
   # Calculate the number of parents for each species
   members.sort_custom(GenomeSorter, "sort_ascenting")
   # parent_genomes = []
-  if members.size() == 0:
-    parents_number = 0
+  assert(members.size() > 0)
+  # if members.size() == 0:
+  #   parents_number = 0
   # Add the last (best performing) genomes of the species or random
-  if parents_number > 0:
-    for i in range(1, parents_number + 1):
-      if members.size() >= i:
-        # Append normal member
-        parent_genomes.append(members[-i])
-      else:
-        # Append random member
-        parent_genomes.append(members[random.randi_range(0, members.size() - 1)])
-
-func calculate_avg_fitness():
-  if members.size() == 0:
-    avg_fitness = []
-    total_adjusted_fitness = 0.0
-    return
-
-  var top_members = []
-  members.sort_custom(GenomeSorter, "sort_ascenting")
-  var top_num = max(1, int(round(members.size() * TOP_GENOMES_RATE)))
-  for i in range(1, top_num + 1):
-    top_members.append(members[-i])
-
-  var total_fitness = 0.0
-  for member_genome in top_members:
-    total_fitness += member_genome.fitness
-    total_adjusted_fitness += member_genome.adjusted_fitness
-  if avg_fitness.size() < STALE_GENS_BEFORE_DEATH:
-    avg_fitness.append(total_fitness / float(top_members.size()))
-  else:
-    avg_fitness.remove(0)
-    avg_fitness.push_back(total_fitness / float(top_members.size())) # same as append
-
-func empty_stale_spieces():
-  if avg_fitness.size() >= STALE_GENS_BEFORE_DEATH:
-    var avg_last_avg_fitness 
-    var avg_first_avg_fitness 
-    var total_last_avg_fitness = 0
-    var total_first_avg_fitness = 0
-    for i in range(0, FITNESS_NUM_TO_COMPARE):
-      total_last_avg_fitness += avg_fitness[-(i+1)]
-      total_first_avg_fitness += avg_fitness[i]
-    avg_last_avg_fitness = total_last_avg_fitness / FITNESS_NUM_TO_COMPARE
-    avg_first_avg_fitness = total_first_avg_fitness / FITNESS_NUM_TO_COMPARE
-    # print("Last avg_fitness: %s, First: %s" % [avg_last_avg_fitness, avg_first_avg_fitness])
-    if avg_last_avg_fitness - avg_first_avg_fitness < REQUIRED_SPECIES_IMPROVEMENT:
-      pass
-      # members = [] # if there is no improvement after some generations kill the species
-    #   for member in members:
-    #     member.added_mutation_rate += 0.1
-    # else:
-    #   for member in members:
-    #     member.added_mutation_rate = 0.0
+  for i in range(1, parents_number + 1):
+    if members.size() >= i:
+      # Append normal member
+      parent_genomes.append(members[-i])
+    else:
+      # Append random member
+      print("Adding random")
+      parent_genomes.append(members[random.randi_range(0, members.size() - 1)])
 
 
 func crossover(noff_species):
   var crossovered_genomes = []
   # var one_extra_genome := false
-  if parent_genomes.size() == 0:
-    return []
-  elif parent_genomes.size() % 2 != 0:
-    parent_genomes.append(parent_genomes[0]) # add a genome to become even
+  assert(parent_genomes.size() > 0)
+  # if parent_genomes.size() == 0:
+  #   return []
+  if parent_genomes.size() % 2 != 0:
+    # parent_genomes.append(parent_genomes[0]) # add a genome to become even
+    parent_genomes.push_front(parent_genomes[0]) # add a genome to become even
     # one_extra_genome = true
   # Calculate total biased fitness of parent genomes
   var bias = INSPECIES_SELECTION_BIAS
   var total_biased_fitness := 0
+  var min_fitness = parent_genomes[-1].fitness
   for parent_genome in parent_genomes:
+    parent_genome.fitness = max(0.0, parent_genome.fitness - min_fitness)
     total_biased_fitness += parent_genome.fitness + bias
   # Crossover couples of parent_genomes in crossovered_genomes
+  var c_indices = []
+  var couple_genomes = []
   for i in range(0, parent_genomes.size(), 2):
-    var couple_genomes = []
     var noff := 0
-    var c_indices = []
 
     if i == 0:
       c_indices = [i, i]
@@ -243,14 +197,6 @@ func couple_crossover(couple_genomes: Array, offspring_number: int) -> Array:
         crossed_genome.links.append(fit_link)
     crossovered_genomes.append(crossed_genome)
   return crossovered_genomes
-
-
-# Reset everything except the prototype
-func reset_species():
-  members = []
-  parent_genomes = []
-  total_adjusted_fitness = 0.0
-
 
 
 class GenomeSorter:

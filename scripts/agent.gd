@@ -10,7 +10,7 @@ export (float) var speed_limit = 300.0
 export (float) var rotation_speed_limit = 8.0
 # export (int) var level_width = 1300
 # export (int) var level_height = 350
-export (int) var penalty_for_hidden_nodes = 1 # was 5
+export (int) var penalty_for_hidden_nodes = 0 # was 5
 
 const NN = preload("res://scripts/neural_network.gd")
 # const TIME_TO_FITNESS_MULTIPLICATOR = 120
