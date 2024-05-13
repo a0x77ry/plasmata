@@ -28,8 +28,6 @@ var population_fraction
 var species_id: int
 
 
-# func _init(_population, _prototype, _members=[], _parent_genomes=[], _avg_fitness=[],
-#       _total_adjusted_fitness=0):
 func _init(_population, _prototype, _members=[], _parent_genomes=[]):
   random.randomize()
   population = _population
@@ -44,20 +42,12 @@ func _init(_population, _prototype, _members=[], _parent_genomes=[]):
   species_id = prototype.genome_id 
 
 
-# func share_fitness():
-#   for member_genome in members:
-#     member_genome.adjusted_fitness = float(member_genome.fitness / members.size())
-
-
 func select_in_species(parents_number):
   parent_genomes = []
 
   # Calculate the number of parents for each species
   members.sort_custom(GenomeSorter, "sort_ascenting")
-  # parent_genomes = []
   assert(members.size() > 0)
-  # if members.size() == 0:
-  #   parents_number = 0
   # Add the last (best performing) genomes of the species or random
   for i in range(1, parents_number + 1):
     if members.size() >= i:
