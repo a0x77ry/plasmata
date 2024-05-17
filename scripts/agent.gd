@@ -1,19 +1,13 @@
 extends KinematicBody2D
 
 
-# export (int) var speed = 200
-# export (float) var rotation_speed = 3.0
 export (float) var speed = 20.0 # waa 50.0
 export (float) var rotation_speed = 0.5 # was 1.5
-# export (float) var speed_limit = 300.0
 export (float) var speed_limit = 300.0
 export (float) var rotation_speed_limit = 8.0
-# export (int) var level_width = 1300
-# export (int) var level_height = 350
 export (int) var penalty_for_hidden_nodes = 0 # was 5
 
 const NN = preload("res://scripts/neural_network.gd")
-# const TIME_TO_FITNESS_MULTIPLICATOR = 120
 
 onready var ray_forward = get_node("ray_forward")
 onready var ray_left = get_node("ray_left")
@@ -71,9 +65,10 @@ func get_genome():
   return genome
 
 
-func get_fitness():
+func assign_fitness():
   genome.fitness = curve.get_closest_offset(position) \
       + time_left_when_finished * finish_time_bonus
+  genome.fitness *= 0.1
   var hidden_nodes_size = genome.hidden_nodes.size()
   genome.fitness -= hidden_nodes_size * penalty_for_hidden_nodes
   # genome.fitness = pow(genome.fitness, 2.0) / 3.0
@@ -221,9 +216,4 @@ func finish(time_left: float):
   reached_the_end = true
   time_left_when_finished = time_left
 
-
-# func _on_DistanceTimer_timeout():
-#   var curr_dist = position.distance_to(current_pos)
-#   current_pos = position
-#   distance_covered += curr_dist
 
