@@ -23,17 +23,11 @@ _global_script_classes=[ {
 "class": "Population",
 "language": "GDScript",
 "path": "res://scripts/population.gd"
-}, {
-"base": "Reference",
-"class": "Species",
-"language": "GDScript",
-"path": "res://scripts/species.gd"
 } ]
 _global_script_class_icons={
 "Genome": "",
 "NeuralNetwork": "",
-"Population": "",
-"Species": ""
+"Population": ""
 }
 
 [application]

@@ -22,7 +22,7 @@ var population
 var tint: Color = Color(1.0, 1.0, 1.0)
 # var gen_num # the gen of the species
 var genome_id: int
-var species_id: int
+# var species_id: int
 var adjusted_fitness
 var random = RandomNumberGenerator.new()
 var weight_mutation_rate := WEIGHT_MUTATION_RATE
@@ -42,7 +42,7 @@ func _init(_population, _input_nodes=[], _hidden_nodes=[], _output_nodes=[],
   fitness = _fitness
   # gen_num = population.generation
   genome_id = population.generate_UIN()
-  species_id = -1
+  # species_id = -1
   # weight_mutation_rate = random.randf_range(0.0, 1.0)
   # add_link_rate = random.randf_range(0.0, 1.0)
   # add_node_rate = random.randf_range(0.0, 1.0)

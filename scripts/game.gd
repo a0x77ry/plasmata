@@ -30,7 +30,7 @@ func init_population():
   var starting_gen = 0
   if population != null:
     starting_gen = population.generation
-  population = Population.new([], [], input_names, output_names,
+  population = Population.new([], input_names, output_names,
       starting_gen, target_population)
   number_of_agents = population.target_population
   generate_agent_population()
@@ -43,7 +43,7 @@ func restart_population():
     agent.queue_free()
   population.genomes = []
   population.species = []
-  population = Population.new([], [], input_names, output_names,
+  population = Population.new([], input_names, output_names,
       0, target_population)
   number_of_agents = population.target_population
   generate_agent_population()

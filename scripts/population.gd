@@ -5,7 +5,6 @@ const INSPECIES_SELECTION_BIAS = 0.0 # was 10.0
 const CROSSOVER_RATE = 1.0
 const DISABLED_LINK_SELECTION_RATE = 0.05 #was 0.75
 
-const Species = preload("res://scripts/species.gd")
 const Genome = preload("res://scripts/genome.gd")
 
 const InputNode = preload("res://scripts/genome.gd").InputNode
@@ -14,7 +13,6 @@ const OutputNode = preload("res://scripts/genome.gd").OutputNode
 const Link = preload("res://scripts/genome.gd").Link
 
 var genomes
-var species
 
 var selection_rate
 var target_population
@@ -22,15 +20,13 @@ var target_population
 var random = RandomNumberGenerator.new()
 var max_IN_used := 0
 var generation
-# var all_species_adj_fitness = 0.0
 
 var parent_genomes := []
 
 
-func _init(_genomes=[], _species=[], input_names=[], output_names=[],
+func _init(_genomes=[], input_names=[], output_names=[],
     _generation=0, _target_population=0, _selection_rate=SELECTION_RATE):
   genomes = _genomes
-  species = _species
   selection_rate = _selection_rate
   target_population = _target_population
   generation = _generation
@@ -40,10 +36,6 @@ func _init(_genomes=[], _species=[], input_names=[], output_names=[],
     var new_genome = Genome.new(self)
     new_genome.init_io_nodes(input_names, output_names)
     genomes.append(new_genome)
-
-  for genome in genomes:
-    genome.species_id = genomes[0].genome_id # the first genome will be the prototype of the species
-  species.append(Species.new(self, genomes[0], genomes))
 
 
 # Changes genomes to the next generation
@@ -121,7 +113,6 @@ func couple_crossover(couple_genomes: Array, offspring_number: int) -> Array:
     var crossed_genome = Genome.new(self)
 
     crossed_genome.fitness = int(round((fittest_parent.fitness + weakest_parent.fitness) / 2))
-    crossed_genome.species_id = fittest_parent.species_id
     crossed_genome.genome_id = generate_UIN()
     crossed_genome.weight_mutation_rate = fittest_parent.weight_mutation_rate
     crossed_genome.add_link_rate = fittest_parent.add_link_rate

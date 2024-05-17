@@ -4,7 +4,6 @@ onready var spawning_area = get_node("SpawningArea")
 onready var countdown = get_node("UI/Countdown/Time")
 onready var gen_counter = get_node("UI/Statistics/GenCounter/GenNumber")
 onready var genome_counter = get_node("UI/Statistics/Genomes/GenomesNumber")
-onready var species_counter = get_node("UI/Statistics/Species/SpeciesNum")
 onready var curve = get_node("Path2D").curve
 onready var solved_message_box = get_node("UI/SolvedMessage")
 onready var solved_best_time = get_node("UI/SolvedMessage/HBox/BestTime/HBox/Time")
@@ -79,7 +78,6 @@ func change_generation():
   .change_generation()
   gen_counter.text = str(population.generation)
   genome_counter.text = str(population.genomes.size())
-  species_counter.text = str(population.species.size())
 
 
 func set_time_scale(value):
