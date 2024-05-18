@@ -32,6 +32,7 @@ var penalty := 0.0
 var crashed := false
 var finish_time_bonus: float
 var current_pos: Vector2
+var population: Population
 
 
 func _ready():

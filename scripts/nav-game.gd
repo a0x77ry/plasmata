@@ -37,6 +37,7 @@ func generate_agent_population():
     agent.set_position(Vector2(pos_x, pos_y))
     agent.rotation = rand_range(-PI, PI)
 
+    agent.population = population
     agent.timer = timer
     agent.nn_activated_inputs = input_names
     assert(population.genomes[i] != null)
