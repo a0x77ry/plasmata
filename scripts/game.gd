@@ -42,7 +42,6 @@ func restart_population():
   for agent in agents_alive:
     agent.queue_free()
   population.genomes = []
-  population.species = []
   population = Population.new([], input_names, output_names,
       0, target_population)
   number_of_agents = population.target_population
