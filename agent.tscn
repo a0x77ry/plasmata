@@ -12,6 +12,7 @@ script = ExtResource( 2 )
 __meta__ = {
 "_edit_group_": true
 }
+Agent = null
 
 [node name="Sprite" type="Sprite" parent="."]
 rotation = 1.5708
@@ -45,3 +46,10 @@ collision_mask = 2
 enabled = true
 cast_to = Vector2( 353.55, 353.55 )
 collision_mask = 2
+
+[node name="SpawnTimer" type="Timer" parent="."]
+wait_time = 5.0
+one_shot = true
+autostart = true
+
+[connection signal="timeout" from="SpawnTimer" to="." method="_on_SpawnTimer_timeout"]

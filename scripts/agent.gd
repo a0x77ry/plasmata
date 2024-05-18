@@ -6,6 +6,7 @@ export (float) var rotation_speed = 0.5 # was 1.5
 export (float) var speed_limit = 300.0
 export (float) var rotation_speed_limit = 8.0
 export (int) var penalty_for_hidden_nodes = 0 # was 5
+export(PackedScene) var Agent
 
 const NN = preload("res://scripts/neural_network.gd")
 
@@ -17,6 +18,7 @@ onready var ray_f_down_right = get_node("ray_f_down_right")
 onready var level_width = get_tree().get_root().size.x
 onready var level_height = get_tree().get_root().size.y
 onready var curve = get_parent().get_parent().get_node("Path2D").curve
+onready var spawn_timer = get_node("SpawnTimer")
 
 var nn_rotation := 0.0
 var nn_speed := 0.0
@@ -32,7 +34,7 @@ var penalty := 0.0
 var crashed := false
 var finish_time_bonus: float
 var current_pos: Vector2
-var population: Population
+# var population: Population
 
 
 func _ready():
@@ -62,6 +64,13 @@ func set_genome(_genome):
 
 func get_genome():
   return genome
+
+
+func spawn_children():
+  var new_agent = Agent.instance()
+
+func spawn_new_agent():
+  pass
 
 
 func assign_fitness():
@@ -215,4 +224,7 @@ func finish(time_left: float):
   reached_the_end = true
   time_left_when_finished = time_left
 
+
+func _on_SpawnTimer_timeout():
+	pass # Replace with function body.
 

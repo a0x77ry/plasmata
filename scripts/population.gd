@@ -36,6 +36,7 @@ func _init(_genomes=[], input_names=[], output_names=[],
     var new_genome = Genome.new(self)
     new_genome.init_io_nodes(input_names, output_names)
     genomes.append(new_genome)
+  mutate_all_genomes()
 
 
 # Changes genomes to the next generation
