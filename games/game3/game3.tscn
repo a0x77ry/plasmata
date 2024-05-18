@@ -46,7 +46,7 @@ extents = Vector2( 10, 169.5 )
 [sub_resource type="Curve2D" id=9]
 resource_local_to_scene = true
 _data = {
-"points": PoolVector2Array( 0, 0, 0, 0, 18, 253, 0, 0, 0, 0, 1287, 254 )
+"points": PoolVector2Array( 0, 0, 0, 0, 18, 253, 0, 0, 0, 0, 189, 403, 0, 0, 0, 0, 959, 394, 0, 0, 0, 0, 1026, 250, 0, 0, 0, 0, 1287, 254 )
 }
 
 [sub_resource type="DynamicFont" id=1]

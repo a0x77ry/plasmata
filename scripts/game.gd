@@ -10,6 +10,7 @@ export(float, 10.0) var mut_std_dev = 2.0
 onready var timer = get_node("Timer")
 onready var pause_message = get_node("UI/Pause")
 onready var agents_node = get_node("Agents")
+# onready var spawning_area = get_node("SpawningArea")
 
 var population
 var number_of_agents
@@ -19,7 +20,6 @@ var is_game_paused := false
 
 var input_names = []
 var output_names = []
-
 
 
 func _process(_delta):
@@ -48,11 +48,33 @@ func restart_population():
   generate_agent_population()
   timer.start(0.1)
 
-
-# To be overriden
 func generate_agent_population():
   pass
 
+# func generate_agent_population():
+#   agents = []
+#   var agent: Node2D
+#   var area_extents = spawning_area.get_node("CollisionShape2D").shape.extents
+#   for i in number_of_agents:
+#     agent = Agent.instance()
+#     # Set the initial position and rotation of the agent
+#     var pos_x = rand_range(spawning_area.get_position().x - area_extents.x,
+#         spawning_area.get_position().x + area_extents.x)
+#     var pos_y = rand_range(spawning_area.get_position().y - area_extents.y,
+#         spawning_area.get_position().y + area_extents.y)
+#     agent.set_position(Vector2(pos_x, pos_y))
+#     agent.rotation = rand_range(-PI, PI)
+#
+#     agent.timer = timer
+#     agent.nn_activated_inputs = input_names
+#     assert(population.genomes[i] != null)
+#     agent.set_genome(population.genomes[i])
+#     agent.modulate = agent.genome.tint
+#
+#     agents.append(agent)
+#     agent.add_to_group("agents")
+#     agents_node.add_child(agent)
+#
 
 func change_generation():
   agents_alive = get_tree().get_nodes_in_group("agents")
