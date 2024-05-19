@@ -23,7 +23,7 @@ var tint: Color = Color(1.0, 1.0, 1.0)
 # var gen_num # the gen of the species
 var genome_id: int
 # var species_id: int
-var adjusted_fitness
+# var adjusted_fitness
 var random = RandomNumberGenerator.new()
 var weight_mutation_rate := WEIGHT_MUTATION_RATE
 var add_link_rate := ADD_LINK_RATE
@@ -48,6 +48,17 @@ func _init(_population, _input_nodes=[], _hidden_nodes=[], _output_nodes=[],
   # add_node_rate = random.randf_range(0.0, 1.0)
 
 
+# func duplicate():
+#   return Genome.new(population, input_nodes, hidden_nodes, output_nodes, links, fitness)
+
+func duplicate(geno: Genome):
+  input_nodes = geno.input_nodes.duplicate()
+  hidden_nodes = geno.hidden_nodes.duplicate()
+  output_nodes = geno.output_nodes.duplicate()
+  links = geno.links.duplicate()
+  fitness = geno.fitness
+
+
 func init_io_nodes(input_names: Array, output_names: Array):
   var i := 1 # Because 0 is the bias node
   for i_name in input_names:
@@ -61,14 +72,14 @@ func init_io_nodes(input_names: Array, output_names: Array):
 # Mutate this specific genome
 func mutate():
   random.randomize()
-  var fraction := genome_fraction()
-  var mut_multiplier: float
-  if fraction > 0.0:
-    mut_multiplier = 1 / (fraction * population.genomes.size())
-  else:
-    mut_multiplier = 8.0
-  mut_multiplier = clamp(mut_multiplier, 0.8, 1.0)
-  # mut_multiplier = 1.0
+  # var fraction := genome_fraction()
+  # var mut_multiplier: float
+  # if fraction > 0.0:
+  #   mut_multiplier = 1 / (fraction * population.genomes.size())
+  # else:
+  #   mut_multiplier = 8.0
+  # mut_multiplier = clamp(mut_multiplier, 0.8, 1.0)
+  var mut_multiplier = 1.0
 
   if random.randf() < MUTATION_RATE:
     # Change the meta weight mutation rate

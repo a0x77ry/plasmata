@@ -6,8 +6,9 @@ export (float) var rotation_speed = 0.5 # was 1.5
 export (float) var speed_limit = 300.0
 export (float) var rotation_speed_limit = 8.0
 export (int) var penalty_for_hidden_nodes = 0 # was 5
-export(PackedScene) var Agent
+export(PackedScene) var Agent = load("res://agent.tscn")
 
+# const Genome = preload("res://scripts/genome.gd")
 const NN = preload("res://scripts/neural_network.gd")
 
 onready var ray_forward = get_node("ray_forward")
@@ -34,11 +35,13 @@ var penalty := 0.0
 var crashed := false
 var finish_time_bonus: float
 var current_pos: Vector2
-# var population: Population
+var population
+var game
 
 
 func _ready():
   randomize()
+  assert(Agent != null, "Agent need to be set in Agent Scene")
   var total_level_length = curve.get_baked_length()
   finish_time_bonus = total_level_length / 17
   current_pos = position
@@ -66,11 +69,45 @@ func get_genome():
   return genome
 
 
-func spawn_children():
-  var new_agent = Agent.instance()
+func find_nearest_genome():
+  var agents = get_tree().get_nodes_in_group("agents")
+  var min_fit_dist := INF
+  var nearest_genome
+  for agent in agents:
+    if agent.genome.genome_id != genome.genome_id:
+      var dist = abs(agent.genome.fitness - genome.fitness)
+      if dist < min_fit_dist:
+        min_fit_dist = dist
+        nearest_genome = agent.genome
+  return nearest_genome
 
-func spawn_new_agent():
-  pass
+func get_alter_genome():
+  var crossed_genomes = population.couple_crossover([genome, find_nearest_genome()], 1)
+  # breakpoint
+  crossed_genomes[0].mutate()
+  return crossed_genomes[0]
+
+func spawn_new_agent(pos: Vector2, rot: float, inputs: Array, geno: Genome):
+  var new_agent = Agent.instance()
+  new_agent.position = pos
+  new_agent.rotation = rot
+  new_agent.nn_activated_inputs = inputs
+  new_agent.genome = geno
+  new_agent.game = game
+  new_agent.population = population
+
+  new_agent.add_to_group("agents")
+  var agents_node = game.get_node("Agents")
+  agents_node.add_child(new_agent)
+  population.genomes.append(new_agent.genome)
+
+func spawn_children():
+  var new_genome = Genome.new(population)
+  new_genome.duplicate(genome)
+  assert(new_genome != null)
+  spawn_new_agent(position, rotation, nn_activated_inputs, new_genome)
+  for i in 1:
+    spawn_new_agent(position, rotation, nn_activated_inputs, get_alter_genome())
 
 
 func assign_fitness():
@@ -226,5 +263,15 @@ func finish(time_left: float):
 
 
 func _on_SpawnTimer_timeout():
-	pass # Replace with function body.
+  var old_fitness = genome.fitness
+  assign_fitness()
+  print("Old fitness: %s, New fitness: %s" % [old_fitness, genome.fitness])
+  if old_fitness + 0.1 < genome.fitness:
+    spawn_children()
+  else:
+    queue_free()
+
+
+func _on_DeathTimer_timeout():
+  queue_free()
 

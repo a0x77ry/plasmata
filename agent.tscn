@@ -12,7 +12,6 @@ script = ExtResource( 2 )
 __meta__ = {
 "_edit_group_": true
 }
-Agent = null
 
 [node name="Sprite" type="Sprite" parent="."]
 rotation = 1.5708
@@ -52,4 +51,10 @@ wait_time = 5.0
 one_shot = true
 autostart = true
 
+[node name="DeathTimer" type="Timer" parent="."]
+wait_time = 7.0
+one_shot = true
+autostart = true
+
 [connection signal="timeout" from="SpawnTimer" to="." method="_on_SpawnTimer_timeout"]
+[connection signal="timeout" from="DeathTimer" to="." method="_on_DeathTimer_timeout"]
