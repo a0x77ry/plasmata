@@ -25,11 +25,11 @@ func _ready():
   do_pause_when_solved = pause_when_solved_button.pressed
 
 
-func generate_agent_population():
+func generate_agent_population(agent_pop = population_stream):
   agents = []
   var agent: Node2D
   var area_extents = spawning_area.get_node("CollisionShape2D").shape.extents
-  for i in number_of_agents:
+  for i in agent_pop:
     agent = Agent.instance()
     # Set the initial position and rotation of the agent
     var pos_x = rand_range(spawning_area.get_position().x - area_extents.x,

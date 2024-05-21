@@ -6,7 +6,7 @@ export(int, 400) var population_stream
 export(PackedScene) var Agent
 export(int, 10) var unpaused_time_scale = 0
 export(float, 10.0) var mut_std_dev = 2.0
-export(int, 400) var initial_population = 50
+export(int, 400) var initial_population = 20
 
 onready var timer = get_node("Timer")
 onready var pause_message = get_node("UI/Pause")
@@ -32,9 +32,9 @@ func init_population():
   if population != null:
     starting_gen = population.generation
   population = Population.new([], input_names, output_names,
-      starting_gen, population_stream)
+      starting_gen, initial_population)
   number_of_agents = population.population_stream
-  generate_agent_population()
+  generate_agent_population(initial_population)
 
 
 func restart_population():
@@ -43,13 +43,13 @@ func restart_population():
     agent.queue_free()
   population.genomes = []
   population = Population.new([], input_names, output_names,
-      0, population.population_stream)
+      0, initial_population)
   number_of_agents = population.population_stream
-  generate_agent_population()
+  generate_agent_population(initial_population)
   timer.start(0.1)
 
 
-func generate_agent_population():
+func generate_agent_population(agent_pop = population_stream):
   pass
 
 
@@ -63,7 +63,7 @@ func change_generation():
   # number_of_agents = population.genomes.size()
   # for agent in agents_alive:
   #   agent.queue_free()
-  # generate_agent_population()
+  # generate_agent_populatioa()
   # if number_of_agents > 0:
   #   timer.start(time)
   # else:

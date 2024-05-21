@@ -64,7 +64,7 @@ font_data = ExtResource( 3 )
 [node name="Game2" instance=ExtResource( 1 )]
 script = ExtResource( 2 )
 time = 20
-population_stream = 3
+population_stream = 5
 unpaused_time_scale = 3
 
 [node name="Walls" type="Node2D" parent="." index="1"]
@@ -325,7 +325,7 @@ enabled_focus_mode = 0
 text = "Pause when solved"
 
 [node name="SpawnTimer" type="Timer" parent="." index="7"]
-wait_time = 3.0
+wait_time = 2.0
 autostart = true
 
 [connection signal="body_entered" from="FinishLine" to="." method="_on_FinishLine_body_entered"]
