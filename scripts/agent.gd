@@ -10,6 +10,10 @@ export(PackedScene) var Agent = load("res://agent.tscn")
 
 # const Genome = preload("res://scripts/genome.gd")
 const NN = preload("res://scripts/neural_network.gd")
+const FITNESS_IMPROVEMENT_THRESHOLD = 0.0
+const FITNESS_MULTIPLIER = 1.0
+const FIT_GEN_HORIZON = 8
+const EXTRA_SPAWNS = 8
 
 onready var ray_forward = get_node("ray_forward")
 onready var ray_left = get_node("ray_left")
@@ -37,6 +41,8 @@ var finish_time_bonus: float
 var current_pos: Vector2
 var population
 var game
+var generation := 0
+var fitness_timeline := []
 
 
 func _ready():
@@ -46,8 +52,15 @@ func _ready():
   finish_time_bonus = total_level_length / 17
   current_pos = position
   assert(genome != null)
-  # var starting_link_id = nn_inputs.size() + nn_outputs.size()
   # modulate = genome.tint
+  # var cur_fit = get_fitness()
+  # for i in (FIT_GEN_HORIZON - 2):
+  #   fitness_timeline.append(cur_fit - 0.01)
+  # for i in 2:
+  #   fitness_timeline.append(get_fitness())
+  for i in FIT_GEN_HORIZON:
+    fitness_timeline.append(get_fitness())
+
   nn = NN.new(genome)
 
 
@@ -95,6 +108,8 @@ func spawn_new_agent(pos: Vector2, rot: float, inputs: Array, geno: Genome):
   new_agent.genome = geno
   new_agent.game = game
   new_agent.population = population
+  new_agent.generation = generation + 1
+  new_agent.fitness_timeline = fitness_timeline
 
   new_agent.add_to_group("agents")
   var agents_node = game.get_node("Agents")
@@ -106,14 +121,18 @@ func spawn_children():
   new_genome.duplicate(genome)
   assert(new_genome != null)
   spawn_new_agent(position, rotation, nn_activated_inputs, new_genome)
-  for i in 1:
+  for i in EXTRA_SPAWNS:
     spawn_new_agent(position, rotation, nn_activated_inputs, get_alter_genome())
 
 
-func assign_fitness():
-  genome.fitness = curve.get_closest_offset(position) \
+func get_fitness():
+  return curve.get_closest_offset(position) \
       + time_left_when_finished * finish_time_bonus
-  genome.fitness *= 0.1
+
+
+func assign_fitness():
+  genome.fitness = get_fitness()
+  genome.fitness *= FITNESS_MULTIPLIER
   var hidden_nodes_size = genome.hidden_nodes.size()
   genome.fitness -= hidden_nodes_size * penalty_for_hidden_nodes
   # genome.fitness = pow(genome.fitness, 2.0) / 3.0
@@ -263,10 +282,16 @@ func finish(time_left: float):
 
 
 func _on_SpawnTimer_timeout():
-  var old_fitness = genome.fitness
+  # var old_fitness = fitness_timeline[-1]
+  var total_fitness := 0.0
+  for i in range(1, FIT_GEN_HORIZON + 1):
+    total_fitness += fitness_timeline[-i]
+  var avg_fitness = total_fitness / FIT_GEN_HORIZON
   assign_fitness()
-  print("Old fitness: %s, New fitness: %s" % [old_fitness, genome.fitness])
-  if old_fitness + 0.1 < genome.fitness:
+  # print("Old fitness: %s, New fitness: %s" % [old_fitness, get_fitness()])
+  # if old_fitness + (FITNESS_IMPROVEMENT_THRESHOLD * pow(generation, 0.8)) < get_fitness():
+  # if old_fitness + FITNESS_IMPROVEMENT_THRESHOLD < get_fitness():
+  if avg_fitness + FITNESS_IMPROVEMENT_THRESHOLD < get_fitness():
     spawn_children()
   else:
     queue_free()
