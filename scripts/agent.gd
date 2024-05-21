@@ -14,6 +14,7 @@ const FITNESS_IMPROVEMENT_THRESHOLD = 0.0
 const FITNESS_MULTIPLIER = 1.0
 const FIT_GEN_HORIZON = 8
 const EXTRA_SPAWNS = 8
+const MATE_DISTRIBUTION_SPREAD = 0.2
 
 onready var ray_forward = get_node("ray_forward")
 onready var ray_left = get_node("ray_left")
@@ -25,6 +26,7 @@ onready var level_height = get_tree().get_root().size.y
 onready var curve = get_parent().get_parent().get_node("Path2D").curve
 onready var spawn_timer = get_node("SpawnTimer")
 
+var random = RandomNumberGenerator.new()
 var nn_rotation := 0.0
 var nn_speed := 0.0
 var velocity = Vector2()
@@ -46,7 +48,7 @@ var fitness_timeline := []
 
 
 func _ready():
-  randomize()
+  random.randomize()
   assert(Agent != null, "Agent need to be set in Agent Scene")
   var total_level_length = curve.get_baked_length()
   finish_time_bonus = total_level_length / 17
@@ -84,14 +86,25 @@ func get_genome():
 
 func find_nearest_genome():
   var agents = get_tree().get_nodes_in_group("agents")
-  var min_fit_dist := INF
   var nearest_genome
-  for agent in agents:
-    if agent.genome.genome_id != genome.genome_id:
-      var dist = abs(agent.genome.fitness - genome.fitness)
-      if dist < min_fit_dist:
-        min_fit_dist = dist
-        nearest_genome = agent.genome
+  # var min_fit_dist := INF
+  # for agent in agents:
+  #   if agent.genome.genome_id != genome.genome_id:
+  #     # var dist = abs(agent.genome.fitness - genome.fitness)
+  #     var dist = abs(agent.get_fitness() - get_fitness())
+  #     if dist < min_fit_dist:
+  #       min_fit_dist = dist
+  #       nearest_genome = agent.genome
+  agents.sort_custom(AgentSorter, "sort_ascenting")
+  var rnd = clamp(random.randfn(1.0, MATE_DISTRIBUTION_SPREAD), 0.0, 2.0)
+  if rnd > 1.0:
+    var rnd_fraction = floor(rnd) - rnd
+    rnd = clamp(1.0 - rnd_fraction, 0.0, 1.0)
+  var agent_index = round(rnd * agents.size())
+  # agent_index = round(range_lerp(rnd, 0.0, 1.0, 0.0, float(agents.size())))
+  # print(agent_index)
+  # nearest_genome = agents[random.randi_range(0, agents.size() - 1)].genome
+  nearest_genome = agents[agent_index - 1].genome
   return nearest_genome
 
 func get_alter_genome():
@@ -300,3 +313,9 @@ func _on_SpawnTimer_timeout():
 func _on_DeathTimer_timeout():
   queue_free()
 
+
+class AgentSorter:
+  static func sort_ascenting(a, b):
+    if a.get_fitness() < b.get_fitness():
+      return true
+    return false

@@ -20,3 +20,8 @@ func _enter_tree():
     "go_right",
     "go_forward"
   ]
+
+
+# func _on_SpawnTimer_timeout():
+# 	generate_agent_population()
+

@@ -11,13 +11,15 @@ onready var winning_color_panel = get_node("UI/SolvedMessage/HBox/BestTime/HBox/
 onready var time_scale_label = get_node("UI/TimeScale/TimeScaleLabel")
 onready var FF_slider = get_node("UI/TimeScale/FFSlider")
 onready var pause_when_solved_button = get_node("UI/PauseWhenSolved/CheckButton")
+onready var spawn_timer = get_node("SpawnTimer")
 
 var best_time = INF
 var do_pause_when_solved
+var random = RandomNumberGenerator.new()
 
 
 func _ready():
-  # randomize()
+  random.randomize()
   init_population()
   set_time_scale(unpaused_time_scale)
   do_pause_when_solved = pause_when_solved_button.pressed
@@ -99,4 +101,8 @@ func _on_CheckButton_toggled(button_pressed):
 
 func _on_FFSlider_value_changed(value):
   set_time_scale(value)
+
+func _on_SpawnTimer_timeout():
+  spawn_timer.wait_time += abs(random.randfn(0.0, 0.3))
+  generate_agent_population()
 

@@ -15,7 +15,7 @@ const Link = preload("res://scripts/genome.gd").Link
 var genomes
 
 var selection_rate
-var target_population
+var population_stream
 
 var random = RandomNumberGenerator.new()
 var max_IN_used := 0
@@ -25,14 +25,14 @@ var parent_genomes := []
 
 
 func _init(_genomes=[], input_names=[], output_names=[],
-    _generation=0, _target_population=0, _selection_rate=SELECTION_RATE):
+    _generation=0, _population_stream=0, _selection_rate=SELECTION_RATE):
   genomes = _genomes
   selection_rate = _selection_rate
-  target_population = _target_population
+  population_stream = _population_stream
   generation = _generation
   parent_genomes = genomes
   random.randomize()
-  for _i in range(0, target_population):
+  for _i in range(0, population_stream):
     var new_genome = Genome.new(self)
     new_genome.init_io_nodes(input_names, output_names)
     genomes.append(new_genome)
@@ -43,7 +43,7 @@ func _init(_genomes=[], input_names=[], output_names=[],
 func next_generation(agents: Array):
   initialize_genomes_with_fitness(agents) # Initializes genomes array with fitness values only
   select_parents(round(agents.size() * selection_rate))
-  genomes = crossover(target_population)
+  genomes = crossover(population_stream)
   mutate_all_genomes()
   generation += 1
 

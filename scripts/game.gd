@@ -2,10 +2,11 @@ extends Node2D
 
 # const TIME =
 export(int, 200) var time
-export(int, 400) var target_population
+export(int, 400) var population_stream
 export(PackedScene) var Agent
 export(int, 10) var unpaused_time_scale = 0
 export(float, 10.0) var mut_std_dev = 2.0
+export(int, 400) var initial_population = 50
 
 onready var timer = get_node("Timer")
 onready var pause_message = get_node("UI/Pause")
@@ -31,10 +32,9 @@ func init_population():
   if population != null:
     starting_gen = population.generation
   population = Population.new([], input_names, output_names,
-      starting_gen, target_population)
-  number_of_agents = population.target_population
+      starting_gen, population_stream)
+  number_of_agents = population.population_stream
   generate_agent_population()
-  # change_generation()
 
 
 func restart_population():
@@ -43,8 +43,8 @@ func restart_population():
     agent.queue_free()
   population.genomes = []
   population = Population.new([], input_names, output_names,
-      0, target_population)
-  number_of_agents = population.target_population
+      0, population.population_stream)
+  number_of_agents = population.population_stream
   generate_agent_population()
   timer.start(0.1)
 
