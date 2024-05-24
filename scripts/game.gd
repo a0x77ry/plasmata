@@ -40,6 +40,7 @@ func init_population():
 func restart_population():
   agents_alive = get_tree().get_nodes_in_group("agents")
   for agent in agents_alive:
+    decrement_agent_population()
     agent.queue_free()
   population.genomes = []
   population = Population.new([], input_names, output_names,
@@ -52,6 +53,11 @@ func restart_population():
 func generate_agent_population(agent_pop = population_stream):
   pass
 
+func decrement_agent_population(num: int = 1) -> void:
+  pass
+
+func increment_agent_population(num: int = 1) -> void:
+  pass
 
 func change_generation():
   pass
@@ -63,7 +69,7 @@ func change_generation():
   # number_of_agents = population.genomes.size()
   # for agent in agents_alive:
   #   agent.queue_free()
-  # generate_agent_populatioa()
+  # generate_agent_population()
   # if number_of_agents > 0:
   #   timer.start(time)
   # else:

@@ -64,10 +64,15 @@ font_data = ExtResource( 3 )
 [node name="Game2" instance=ExtResource( 1 )]
 script = ExtResource( 2 )
 time = 20
-population_stream = 5
+population_stream = 20
 unpaused_time_scale = 3
+initial_population = 100
 
-[node name="Walls" type="Node2D" parent="." index="1"]
+[node name="SpawnTimer" type="Timer" parent="." index="0"]
+wait_time = 15.0
+autostart = true
+
+[node name="Walls" type="Node2D" parent="." index="2"]
 
 [node name="Wall" parent="Walls" index="0" instance=ExtResource( 4 )]
 position = Vector2( 477, 438 )
@@ -122,7 +127,7 @@ position = Vector2( 1324, 267 )
 rotation = 1.5708
 scale = Vector2( 11.8, 1 )
 
-[node name="SpawningArea" type="Area2D" parent="." index="2"]
+[node name="SpawningArea" type="Area2D" parent="." index="3"]
 position = Vector2( 49, 252 )
 __meta__ = {
 "_edit_group_": true
@@ -131,7 +136,7 @@ __meta__ = {
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SpawningArea" index="0"]
 shape = SubResource( 7 )
 
-[node name="FinishLine" type="Area2D" parent="." index="3"]
+[node name="FinishLine" type="Area2D" parent="." index="4"]
 position = Vector2( 1285, 303 )
 __meta__ = {
 "_edit_group_": true
@@ -141,10 +146,10 @@ __meta__ = {
 position = Vector2( 0, -37.5 )
 shape = SubResource( 8 )
 
-[node name="Path2D" type="Path2D" parent="." index="5"]
+[node name="Path2D" type="Path2D" parent="." index="6"]
 curve = SubResource( 9 )
 
-[node name="UI" parent="." index="6"]
+[node name="UI" parent="." index="7"]
 rect_pivot_offset = Vector2( -299, 20 )
 
 [node name="Countdown" type="HBoxContainer" parent="UI" index="1"]
@@ -324,12 +329,8 @@ pressed = true
 enabled_focus_mode = 0
 text = "Pause when solved"
 
-[node name="SpawnTimer" type="Timer" parent="." index="7"]
-wait_time = 2.0
-autostart = true
-
+[connection signal="timeout" from="SpawnTimer" to="." method="_on_SpawnTimer_timeout"]
 [connection signal="body_entered" from="FinishLine" to="." method="_on_FinishLine_body_entered"]
 [connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]
 [connection signal="value_changed" from="UI/TimeScale/FFSlider" to="." method="_on_FFSlider_value_changed"]
 [connection signal="toggled" from="UI/PauseWhenSolved/CheckButton" to="." method="_on_CheckButton_toggled"]
-[connection signal="timeout" from="SpawnTimer" to="." method="_on_SpawnTimer_timeout"]

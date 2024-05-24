@@ -94,8 +94,8 @@ font_data = ExtResource( 3 )
 [node name="Game3" instance=ExtResource( 1 )]
 script = ExtResource( 2 )
 time = 20
-target_population = 200
 unpaused_time_scale = 3
+target_population = 200
 
 [node name="Walls" type="Node2D" parent="." index="1"]
 

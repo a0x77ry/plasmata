@@ -16,6 +16,7 @@ onready var spawn_timer = get_node("SpawnTimer")
 var best_time = INF
 var do_pause_when_solved
 var random = RandomNumberGenerator.new()
+var agent_population : int = 0
 
 
 func _ready():
@@ -25,35 +26,45 @@ func _ready():
   do_pause_when_solved = pause_when_solved_button.pressed
 
 
+func _process(_delta):
+  countdown.text = String("%.1f" % timer.time_left)
+
+
 func generate_agent_population(agent_pop = population_stream):
   agents = []
   var agent: Node2D
   var area_extents = spawning_area.get_node("CollisionShape2D").shape.extents
   for i in agent_pop:
-    agent = Agent.instance()
-    # Set the initial position and rotation of the agent
-    var pos_x = rand_range(spawning_area.get_position().x - area_extents.x,
-        spawning_area.get_position().x + area_extents.x)
-    var pos_y = rand_range(spawning_area.get_position().y - area_extents.y,
-        spawning_area.get_position().y + area_extents.y)
-    agent.set_position(Vector2(pos_x, pos_y))
-    agent.rotation = rand_range(-PI, PI)
+    if agent_population < Main.AGENT_LIMIT / 3:
+      agent = Agent.instance()
+      # Set the initial position and rotation of the agent
+      var pos_x = rand_range(spawning_area.get_position().x - area_extents.x,
+          spawning_area.get_position().x + area_extents.x)
+      var pos_y = rand_range(spawning_area.get_position().y - area_extents.y,
+          spawning_area.get_position().y + area_extents.y)
+      agent.set_position(Vector2(pos_x, pos_y))
+      agent.rotation = rand_range(-PI, PI)
 
-    agent.population = population
-    agent.timer = timer
-    agent.nn_activated_inputs = input_names
-    assert(population.genomes[i] != null)
-    agent.set_genome(population.genomes[i])
-    agent.modulate = agent.genome.tint
-    agent.game = self
+      agent.population = population
+      agent.timer = timer
+      agent.nn_activated_inputs = input_names
+      assert(population.genomes[i] != null)
+      agent.set_genome(population.genomes[i])
+      agent.modulate = agent.genome.tint
+      agent.game = self
 
-    agents.append(agent)
-    agent.add_to_group("agents")
-    agents_node.add_child(agent)
+      agents.append(agent)
+      agent.add_to_group("agents")
+      increment_agent_population()
+      # agents_node.add_child(agent)
+      agents_node.call_deferred("add_child", agent)
 
 
-func _process(_delta):
-  countdown.text = String("%.1f" % timer.time_left)
+func decrement_agent_population(num: int = 1) -> void:
+  agent_population -= num
+
+func increment_agent_population(num: int = 1) -> void:
+  agent_population += num
 
 
 func change_generation():
@@ -81,13 +92,13 @@ func _on_FinishLine_body_entered(body:Node):
   if body.is_in_group("agents"):
     var agent = body as Node2D
     agent.finish(timer.time_left)
-    solved_message_box.visible = true
+    # solved_message_box.visible = true
     var _time = time - timer.time_left
     if _time < best_time:
       best_time = _time
       solved_best_time.text = String("%.2f" % _time)
       winning_color_panel.bg_color = agent.genome.tint
-    if do_pause_when_solved:
+    if do_pause_when_solved && agent.is_original:
       pause()
 
 
@@ -103,6 +114,8 @@ func _on_FFSlider_value_changed(value):
   set_time_scale(value)
 
 func _on_SpawnTimer_timeout():
+  var agents = get_tree().get_nodes_in_group("agents")
   spawn_timer.wait_time += abs(random.randfn(0.0, 0.3))
-  generate_agent_population()
+  if agents.size() < Main.AGENT_LIMIT / 3:
+    generate_agent_population()
 
