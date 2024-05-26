@@ -12,9 +12,10 @@ export(PackedScene) var Agent = load("res://agent.tscn")
 const NN = preload("res://scripts/neural_network.gd")
 const FITNESS_IMPROVEMENT_THRESHOLD = 2.0
 const FITNESS_MULTIPLIER = 1.0
-const FIT_GEN_HORIZON = 4
+const FIT_GEN_HORIZON = 3
 const EXTRA_SPAWNS = 6 
-const MATE_DISTRIBUTION_SPREAD = 0.5
+const MATE_DISTRIBUTION_SPREAD = 0.2
+const REDUCTION_WHEN_FULL = 10
 
 onready var ray_forward = get_node("ray_forward")
 onready var ray_left = get_node("ray_left")
@@ -24,6 +25,7 @@ onready var ray_f_down_right = get_node("ray_f_down_right")
 onready var level_width = get_tree().get_root().size.x
 onready var level_height = get_tree().get_root().size.y
 onready var curve = get_parent().get_parent().get_node("Path2D").curve
+onready var spawn_timer = get_node("SpawnTimer")
 # onready var spawning_area = get_node("SpawningArea")
 
 var random = RandomNumberGenerator.new()
@@ -47,13 +49,19 @@ var generation := 0
 var fitness_timeline := []
 var is_original := true
 var spawning_area
+var total_level_length
+var times_finished: int
 
 
 func _ready():
   random.randomize()
   assert(Agent != null, "Agent need to be set in Agent Scene")
-  var total_level_length = curve.get_baked_length()
+  total_level_length = curve.get_baked_length()
   spawning_area = game.get_node("SpawningArea")
+
+  var inverse_fraction = 1.0 / get_fitness_fraction(self, get_tree().get_nodes_in_group("agents"))
+  # spawn_timer.wait_time = clamp(spawn_timer.wait_time + random.randfn(0.0, 0.3), 0.0, 8.0)
+  spawn_timer.wait_time = spawn_timer.wait_time * inverse_fraction
   finish_time_bonus = total_level_length / 17
   current_pos = position
   assert(genome != null)
@@ -63,8 +71,11 @@ func _ready():
   #   fitness_timeline.append(cur_fit - 0.01)
   # for i in 2:
   #   fitness_timeline.append(get_fitness())
-  for i in FIT_GEN_HORIZON:
-    fitness_timeline.append(get_fitness())
+  if fitness_timeline.size() == 0:
+    for i in FIT_GEN_HORIZON:
+      fitness_timeline.append(get_fitness())
+  # else:
+  #   fitness_timeline.append(get_fitness())
 
   nn = NN.new(genome)
 
@@ -87,6 +98,21 @@ func get_genome():
   return genome
 
 
+func get_fitness_fraction(agent, agents):
+  var total_fitness := 0.0
+  for ag in agents:
+    total_fitness += ag.get_fitness()
+  return agent.get_fitness() / total_fitness
+
+
+# func reduce_population(num: int) -> void:
+#   var agents = get_tree().get_nodes_in_group("agents")
+#   agents.sort_custom(AgentSorter, "sort_by_fitness_ascenting")
+#   for i in num:
+#     agents[i].queue_free()
+#   game.decrement_agent_population(num)
+
+
 func find_nearest_genome():
   var agents = get_tree().get_nodes_in_group("agents")
   var nearest_genome
@@ -101,7 +127,7 @@ func find_nearest_genome():
       #   min_fit_dist = dist
       #   nearest_agents.append([agent, dist])
 
-  nearest_agents.sort_custom(AgentSorter, "sort_ascenting")
+  nearest_agents.sort_custom(AgentSorter, "sort_by_dist_ascenting")
   var rnd = clamp(random.randfn(1.0, MATE_DISTRIBUTION_SPREAD), 0.0, 2.0)
   if rnd > 1.0:
     var rnd_fraction = floor(rnd) - rnd
@@ -119,56 +145,72 @@ func get_alter_genome():
   crossed_genomes[0].mutate()
   return crossed_genomes[0]
 
-func spawn_new_agent(pos: Vector2, rot: float, inputs: Array, geno: Genome, is_orig: bool):
-  var new_agent = Agent.instance()
+func spawn_new_agent(pos: Vector2, rot: float, inputs: Array, geno: Genome, is_orig: bool, t_finished: int):
+  if game.agent_population < Main.AGENT_LIMIT:
+    var new_agent = Agent.instance()
 
-  var area_extents = spawning_area.get_node("CollisionShape2D").shape.extents
-  if !is_orig:
-    new_agent.position = pos
-    new_agent.rotation = rot
-  else:
-    var pos_x = rand_range(spawning_area.position.x - area_extents.x,
-        spawning_area.position.x + area_extents.x)
-    var pos_y = rand_range(spawning_area.position.y - area_extents.y,
-        spawning_area.position.y + area_extents.y)
-    new_agent.position.x = pos_x
-    new_agent.position.y = pos_y
-    new_agent.rotation = rand_range(-PI, PI)
+    var area_extents = spawning_area.get_node("CollisionShape2D").shape.extents
+    if !is_orig:
+      new_agent.position = pos
+      new_agent.rotation = rot
+    else:
+      var pos_x = rand_range(spawning_area.position.x - area_extents.x,
+          spawning_area.position.x + area_extents.x)
+      var pos_y = rand_range(spawning_area.position.y - area_extents.y,
+          spawning_area.position.y + area_extents.y)
+      new_agent.position.x = pos_x
+      new_agent.position.y = pos_y
+      new_agent.rotation = rand_range(-PI, PI)
 
-  new_agent.nn_activated_inputs = inputs
-  new_agent.genome = geno
-  new_agent.game = game
-  new_agent.population = population
-  new_agent.generation = generation + 1
-  new_agent.fitness_timeline = fitness_timeline
-  new_agent.is_original = is_orig
+    new_agent.nn_activated_inputs = inputs
+    new_agent.genome = geno
+    new_agent.game = game
+    new_agent.population = population
+    new_agent.generation = generation + 1
+    new_agent.fitness_timeline = fitness_timeline
+    new_agent.is_original = is_orig
+    new_agent.times_finished = t_finished
 
-  new_agent.add_to_group("agents")
-  var agents_node = game.get_node("Agents")
-  # agents_node.add_child(new_agent)
-  game.increment_agent_population()
-  agents_node.call_deferred("add_child", new_agent)
-  population.genomes.append(new_agent.genome)
+    new_agent.add_to_group("agents")
+    var agents_node = game.get_node("Agents")
+    # agents_node.add_child(new_agent)
+    game.increment_agent_population()
+    agents_node.call_deferred("add_child", new_agent)
+    population.genomes.append(new_agent.genome)
 
-func spawn_children(is_orig: bool = false):
+func spawn_children(is_orig: bool = false, add_finished: bool = false):
   var new_genome = Genome.new(population)
-  var agents = get_tree().get_nodes_in_group("agents")
+  # var agents = get_tree().get_nodes_in_group("agents")
   new_genome.duplicate(genome)
   assert(new_genome != null)
-  var is_original_heir: bool = is_original
-  spawn_new_agent(position, rotation, nn_activated_inputs, new_genome, is_orig)
+  # var is_original_heir: bool = is_original
+  # spawn_new_agent(position, rotation, nn_activated_inputs, new_genome, is_orig)
   var extra_spawns: int = EXTRA_SPAWNS
+
   # if is_orig == true || agents.size() > AGENT_LIMIT:
   # if agents.size() >= Main.AGENT_LIMIT:
-  if game.agent_population >= Main.AGENT_LIMIT:
-    extra_spawns = 0
+  if game.agent_population >= Main.AGENT_LIMIT || is_queued_for_deletion():
+    # extra_spawns = 0
+    # reduce_population(REDUCTION_WHEN_FULL)
+    return
+    
+
+  # var total_fitness := 0
+  # for agent in agents:
+  #   total_fitness += agent.get_fitness()
+  # var avg_fitness = total_fitness / agents.size()
+  # if avg_fitness > get_fitness() && game.agent_population >= ceil(Main.AGENT_LIMIT / 2.0):
+  #   return
+
   for i in extra_spawns:
-    spawn_new_agent(position, rotation, nn_activated_inputs, get_alter_genome(), is_orig)
+    if add_finished:
+      spawn_new_agent(position, rotation, nn_activated_inputs, get_alter_genome(), is_orig, times_finished + 1)
+    else:
+      spawn_new_agent(position, rotation, nn_activated_inputs, get_alter_genome(), is_orig, times_finished)
 
 
 func get_fitness():
-  return curve.get_closest_offset(position) \
-      + time_left_when_finished * finish_time_bonus
+  return curve.get_closest_offset(position) + (times_finished * total_level_length)
 
 
 func assign_fitness():
@@ -321,38 +363,36 @@ func finish(time_left: float):
   if is_original:
     reached_the_end = true
   else:
-    spawn_children(true)
+    spawn_children(true, true)
   time_left_when_finished = time_left
 
 
 func _on_SpawnTimer_timeout():
-  # var old_fitness = fitness_timeline[-1]
+  fitness_timeline.append(get_fitness())
   var total_fitness := 0.0
   for i in range(1, FIT_GEN_HORIZON + 1):
     total_fitness += fitness_timeline[-i]
   var avg_fitness = total_fitness / FIT_GEN_HORIZON
   assign_fitness()
   if avg_fitness + FITNESS_IMPROVEMENT_THRESHOLD < get_fitness():
-  # var fitness = get_fitness()
-  # if avg_fitness + fitness / 55 < fitness:
-  # if avg_fitness + 2 < get_fitness():
     spawn_children()
-  else:
-    game.decrement_agent_population()
-    queue_free()
 
 
 func _on_DeathTimer_timeout():
   game.decrement_agent_population()
   queue_free()
+  remove_from_group("agents")
+  game.get_node("Agents").remove_child(self)
 
 
 class AgentSorter:
-  static func sort_ascenting(a, b):
+  static func sort_by_dist_ascenting(a, b):
     if a[1] < b[1]:
       return true
     return false
 
-    # if a.get_fitness() < b.get_fitness():
-    #   return true
-    # return false
+  static func sort_by_fitness_ascenting(a, b):
+    if a.get_fitness() < b.get_fitness():
+      return true
+    return false
+

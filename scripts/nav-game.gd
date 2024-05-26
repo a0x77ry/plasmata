@@ -35,7 +35,7 @@ func generate_agent_population(agent_pop = population_stream):
   var agent: Node2D
   var area_extents = spawning_area.get_node("CollisionShape2D").shape.extents
   for i in agent_pop:
-    if agent_population < Main.AGENT_LIMIT / 3:
+    if agent_population < ceil(Main.AGENT_LIMIT / 3.0):
       agent = Agent.instance()
       # Set the initial position and rotation of the agent
       var pos_x = rand_range(spawning_area.get_position().x - area_extents.x,
@@ -52,6 +52,7 @@ func generate_agent_population(agent_pop = population_stream):
       agent.set_genome(population.genomes[i])
       agent.modulate = agent.genome.tint
       agent.game = self
+      agent.times_finished = 0
 
       agents.append(agent)
       agent.add_to_group("agents")
@@ -115,7 +116,7 @@ func _on_FFSlider_value_changed(value):
 
 func _on_SpawnTimer_timeout():
   var agents = get_tree().get_nodes_in_group("agents")
-  spawn_timer.wait_time += abs(random.randfn(0.0, 0.3))
-  if agents.size() < Main.AGENT_LIMIT / 3:
+  # spawn_timer.wait_time += abs(random.randfn(0.0, 0.3))
+  if agents.size() < ceil(Main.AGENT_LIMIT / 3.0):
     generate_agent_population()
 
