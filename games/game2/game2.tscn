@@ -69,7 +69,7 @@ unpaused_time_scale = 3
 initial_population = 100
 
 [node name="SpawnTimer" type="Timer" parent="." index="0"]
-wait_time = 15.0
+wait_time = 10.0
 autostart = true
 
 [node name="Walls" type="Node2D" parent="." index="2"]

@@ -59,6 +59,7 @@ func generate_agent_population(agent_pop = population_stream):
       increment_agent_population()
       # agents_node.add_child(agent)
       agents_node.call_deferred("add_child", agent)
+      # agents_node.add_child(agent)
 
 
 func decrement_agent_population(num: int = 1) -> void:

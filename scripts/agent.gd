@@ -12,7 +12,7 @@ export(PackedScene) var Agent = load("res://agent.tscn")
 const NN = preload("res://scripts/neural_network.gd")
 const FITNESS_IMPROVEMENT_THRESHOLD = 2.0
 const FITNESS_MULTIPLIER = 1.0
-const FIT_GEN_HORIZON = 3
+const FIT_GEN_HORIZON = 2
 const EXTRA_SPAWNS = 6 
 const MATE_DISTRIBUTION_SPREAD = 0.2
 const REDUCTION_WHEN_FULL = 10
@@ -61,7 +61,7 @@ func _ready():
 
   var inverse_fraction = 1.0 / get_fitness_fraction(self, get_tree().get_nodes_in_group("agents"))
   # spawn_timer.wait_time = clamp(spawn_timer.wait_time + random.randfn(0.0, 0.3), 0.0, 8.0)
-  spawn_timer.wait_time = spawn_timer.wait_time * inverse_fraction
+  spawn_timer.wait_time = clamp(spawn_timer.wait_time * inverse_fraction, 1.0, 8.0)
   finish_time_bonus = total_level_length / 17
   current_pos = position
   assert(genome != null)
@@ -145,8 +145,17 @@ func get_alter_genome():
   crossed_genomes[0].mutate()
   return crossed_genomes[0]
 
+func get_active_agents_number():
+  var agents =  get_tree().get_nodes_in_group("agents")
+  var active_agents := 0
+  for agent in agents:
+    if !agent.is_queued_for_deletion():
+      active_agents += 1
+  return active_agents
+
 func spawn_new_agent(pos: Vector2, rot: float, inputs: Array, geno: Genome, is_orig: bool, t_finished: int):
-  if game.agent_population < Main.AGENT_LIMIT:
+  # if game.agent_population < Main.AGENT_LIMIT:
+  if get_active_agents_number() < Main.AGENT_LIMIT:
     var new_agent = Agent.instance()
 
     var area_extents = spawning_area.get_node("CollisionShape2D").shape.extents
@@ -175,32 +184,25 @@ func spawn_new_agent(pos: Vector2, rot: float, inputs: Array, geno: Genome, is_o
     var agents_node = game.get_node("Agents")
     # agents_node.add_child(new_agent)
     game.increment_agent_population()
-    agents_node.call_deferred("add_child", new_agent)
+    if is_orig:
+      agents_node.call_deferred("add_child", new_agent)
+    else:
+      agents_node.add_child(new_agent)
     population.genomes.append(new_agent.genome)
 
 func spawn_children(is_orig: bool = false, add_finished: bool = false):
   var new_genome = Genome.new(population)
-  # var agents = get_tree().get_nodes_in_group("agents")
   new_genome.duplicate(genome)
   assert(new_genome != null)
-  # var is_original_heir: bool = is_original
-  # spawn_new_agent(position, rotation, nn_activated_inputs, new_genome, is_orig)
+  if get_active_agents_number() >= Main.AGENT_LIMIT || is_queued_for_deletion():
+    return
+
+  if add_finished:
+    spawn_new_agent(position, rotation, nn_activated_inputs, get_alter_genome(), is_orig, times_finished + 1)
+  else:
+    spawn_new_agent(position, rotation, nn_activated_inputs, get_alter_genome(), is_orig, times_finished)
   var extra_spawns: int = EXTRA_SPAWNS
 
-  # if is_orig == true || agents.size() > AGENT_LIMIT:
-  # if agents.size() >= Main.AGENT_LIMIT:
-  if game.agent_population >= Main.AGENT_LIMIT || is_queued_for_deletion():
-    # extra_spawns = 0
-    # reduce_population(REDUCTION_WHEN_FULL)
-    return
-    
-
-  # var total_fitness := 0
-  # for agent in agents:
-  #   total_fitness += agent.get_fitness()
-  # var avg_fitness = total_fitness / agents.size()
-  # if avg_fitness > get_fitness() && game.agent_population >= ceil(Main.AGENT_LIMIT / 2.0):
-  #   return
 
   for i in extra_spawns:
     if add_finished:
