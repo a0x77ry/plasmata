@@ -2,7 +2,7 @@ extends Node2D
 
 const TIME_SCALE = 4
 const Population = preload("res://scripts/population.gd")
-const AGENT_LIMIT = 180
+const AGENT_LIMIT = 100
 
 var level
 var init_rot = rand_range(-PI, PI)
