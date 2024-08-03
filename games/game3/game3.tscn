@@ -95,7 +95,6 @@ font_data = ExtResource( 3 )
 script = ExtResource( 2 )
 time = 20
 unpaused_time_scale = 3
-target_population = 200
 
 [node name="Walls" type="Node2D" parent="." index="1"]
 

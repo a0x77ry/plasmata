@@ -94,9 +94,14 @@ func get_output() -> Dictionary:
   # thread.start(self, "get_out")
   # var res = thread.wait_to_finish()
   # return res
-  return get_out(null) # paramenter needed for thread compatibility
+  return get_out(null) # parameter needed for thread compatibility
 
 func get_out(_userdata) -> Dictionary:
+  # Reset all calculated values
+  var calculatable_nodes = hidden_layer + links
+  for node in calculatable_nodes:
+    node.reset_calculated()
+
   var output_dict = {}
   for node in output_layer:
     var node_name = node.get_name()
@@ -187,19 +192,25 @@ class HiddenNode:
   var incoming_links = []
   var outgoing_links = []
   var value: float
-  # var is_enabled: bool
+  var is_calculated: float
 
 
-  func _init(_inno_num, _name="", _value=randf()).(_inno_num, _name):
+  func _init(_inno_num, _name="", _value=randf(), _is_calculated=false).(_inno_num, _name):
     value = _value
     name = _name
+    is_calculated = _is_calculated
 
   func get_value():
-    var _value := 0.0
-    for link in incoming_links:
-      if link.is_enabled:
-        _value += link.get_value()
-    return _value
+    if !is_calculated:
+      var _value := 0.0
+      for link in incoming_links:
+        if link.is_enabled:
+          _value += link.get_value()
+      value = _value
+      is_calculated = true
+      return _value
+    else:
+      return value
 
 
   func add_incoming_link(link: Link):
@@ -209,6 +220,8 @@ class HiddenNode:
   func add_outgoing_link(link: Link):
     outgoing_links.append(link)
 
+  func reset_calculated():
+    is_calculated = false
 
 
 class Link:
@@ -219,10 +232,12 @@ class Link:
   var source_inno_num: int
   var target_inno_num: int
   var is_enabled: bool
+  var is_calculated: float
+  var value
 
 
   func _init(_inno_num, _source_node: NNNode, _target_node: NNNode, _weight,
-      _source_inno_num, _target_inno_num, _is_enabled: bool):
+      _source_inno_num, _target_inno_num, _is_enabled: bool, _is_calculated: bool=false):
     if _inno_num == NO_IN:
       print("Error in NN: no IN in link")
       # inno_num = population.generate_UID()
@@ -234,12 +249,23 @@ class Link:
     source_inno_num = _source_inno_num
     target_inno_num = _target_inno_num
     is_enabled = _is_enabled
+    is_calculated = _is_calculated
 
     source_node.add_outgoing_link(self)
     target_node.add_incoming_link(self)
 
 
   func get_value():
-    var val = source_node.get_value()
-    return val * weight
+    if !is_calculated:
+      var val = source_node.get_value()
+      val = val * weight
+      value = val
+      is_calculated = true
+      return val
+    else:
+      print("Link calculated: %s" % value)
+      return value
+
+  func reset_calculated():
+    is_calculated = false
 
