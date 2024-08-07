@@ -46,7 +46,7 @@ extents = Vector2( 10, 169.5 )
 [sub_resource type="Curve2D" id=9]
 resource_local_to_scene = true
 _data = {
-"points": PoolVector2Array( 0, 0, 0, 0, 18, 253, 0, 0, 0, 0, 189, 403, 0, 0, 0, 0, 959, 394, 0, 0, 0, 0, 1026, 250, 0, 0, 0, 0, 1287, 254 )
+"points": PoolVector2Array( 0, 0, 0, 0, -21, 180, 0, 0, 0, 0, 189, 403, 0, 0, 0, 0, 959, 394, 0, 0, 0, 0, 1026, 250, 0, 0, 0, 0, 1287, 254 )
 }
 
 [sub_resource type="DynamicFont" id=1]
@@ -96,7 +96,11 @@ script = ExtResource( 2 )
 time = 20
 unpaused_time_scale = 3
 
-[node name="Walls" type="Node2D" parent="." index="1"]
+[node name="SpawnTimer" type="Timer" parent="." index="0"]
+wait_time = 10.0
+autostart = true
+
+[node name="Walls" type="Node2D" parent="." index="2"]
 
 [node name="Wall" parent="Walls" index="0" instance=ExtResource( 4 )]
 position = Vector2( 477, 438 )
@@ -145,11 +149,11 @@ rotation = 1.5708
 scale = Vector2( 6.2, 10.409 )
 collision_layer = 3
 
-[node name="WallPlayer" type="AnimationPlayer" parent="." index="2"]
+[node name="WallPlayer" type="AnimationPlayer" parent="." index="3"]
 autoplay = "MovingWall"
 anims/MovingWall = SubResource( 10 )
 
-[node name="SpawningArea" type="Area2D" parent="." index="3"]
+[node name="SpawningArea" type="Area2D" parent="." index="4"]
 position = Vector2( 49, 252 )
 __meta__ = {
 "_edit_group_": true
@@ -158,7 +162,7 @@ __meta__ = {
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SpawningArea" index="0"]
 shape = SubResource( 7 )
 
-[node name="FinishLine" type="Area2D" parent="." index="4"]
+[node name="FinishLine" type="Area2D" parent="." index="5"]
 position = Vector2( 1285, 303 )
 __meta__ = {
 "_edit_group_": true
@@ -168,10 +172,12 @@ __meta__ = {
 position = Vector2( 0, -37.5 )
 shape = SubResource( 8 )
 
-[node name="Path2D" type="Path2D" parent="." index="6"]
+[node name="Path2D" type="Path2D" parent="." index="7"]
+position = Vector2( -74.7798, -191.561 )
+scale = Vector2( 1.0581, 1.47534 )
 curve = SubResource( 9 )
 
-[node name="UI" parent="." index="7"]
+[node name="UI" parent="." index="8"]
 rect_pivot_offset = Vector2( -299, 20 )
 
 [node name="Countdown" type="HBoxContainer" parent="UI" index="1"]

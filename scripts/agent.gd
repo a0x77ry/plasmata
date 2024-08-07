@@ -56,6 +56,7 @@ var spawning_area
 var total_level_length
 var times_finished: int
 var spawn_timer_to_set: float = 0.0
+var current_fitness: float = 0.1
 
 
 func _ready():
@@ -241,7 +242,8 @@ func spawn_children(is_orig: bool = false, add_finished: bool = false):
 
 
 func get_fitness() -> float:
-  return curve.get_closest_offset(position) + (times_finished * total_level_length)
+  # return curve.get_closest_offset(position) + (times_finished * total_level_length)
+  return current_fitness
 
 
 func assign_fitness():
@@ -423,6 +425,12 @@ func kill_agent():
   remove_from_group("agents")
   game.get_node("Agents").remove_child(self)
   queue_free()
+
+
+func _on_FitnessUpdateTimer_timeout():
+  current_fitness = curve.get_closest_offset(position) + (times_finished * total_level_length)
+  if current_fitness == 0:
+    breakpoint
 
 
 class AgentSorter:
