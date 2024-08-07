@@ -3,8 +3,10 @@ extends KinematicBody2D
 
 export (float) var speed = 20.0 # waa 50.0
 export (float) var rotation_speed = 0.5 # was 1.5
-export (float) var speed_limit = 300.0
-export (float) var rotation_speed_limit = 8.0
+# export (float) var speed_limit = 300.0
+export (float) var speed_limit = 100.0
+# export (float) var rotation_speed_limit = 8.0
+export (float) var rotation_speed_limit = 2.0
 export (int) var penalty_for_hidden_nodes = 0 # was 5
 export(PackedScene) var Agent = load("res://agent.tscn")
 
@@ -36,7 +38,8 @@ var velocity = Vector2()
 var rotation_dir = 0
 var nn: NN
 var nn_activated_inputs := [] # set by the level
-var genome setget set_genome, get_genome
+# var genome setget set_genome, get_genome
+var genome
 var reached_the_end := false
 var time_left_when_finished := 0.0
 var timer: Timer
@@ -72,6 +75,7 @@ func _ready():
       fitness_timeline.append(get_fitness())
 
   nn = NN.new(genome)
+  # agent_loop()
 
 
 func _physics_process(delta):
@@ -85,11 +89,30 @@ func _physics_process(delta):
     velocity = 0.0
 
 
-func set_genome(_genome):
-   genome = _genome
+# func _exit_tree():
+#   nn.init_ref()
+#   nn.unreference()
+#   genome.init_ref()
+#   genome.unreference()
 
-func get_genome():
-  return genome
+# func agent_loop():
+#   while true:
+#     yield(get_tree().create_timer(0.3), "timeout")
+#     if !reached_the_end && !crashed:
+#       # get_player_input()
+#       get_nn_controls(nn, get_sensor_input())
+#       rotation += nn_rotation * rotation_speed * 0.16
+#       velocity = move_and_slide(velocity)
+#     else:
+#       rotation = 0.0
+#       velocity = 0.0
+
+
+# func set_genome(_genome):
+#    genome = _genome
+#
+# func get_genome():
+#   return genome
 
 
 func get_relative_fitness(agent, agents):
@@ -102,16 +125,16 @@ func get_relative_fitness(agent, agents):
 
 
 func reduce_population(num: int) -> void:
-  # var agents = get_tree().get_nodes_in_group("agents")
-  var agents = get_active_agents()
+  var agents = game.get_active_agents()
   agents.sort_custom(AgentSorter, "sort_by_fitness_ascenting")
   for i in num:
-    agents[i].queue_free()
+    # agents[i].queue_free()
+    agents[i].kill_agent()
   game.decrement_agent_population(num)
 
 
 func find_nearest_genome():
-  var agents = get_active_agents()
+  var agents = game.get_active_agents()
   var nearest_genome
   var nearest_agents = []
 
@@ -138,18 +161,20 @@ func get_alter_genome():
   crossed_genomes[0].mutate()
   return crossed_genomes[0]
 
-func get_active_agents():
-  var agents =  get_tree().get_nodes_in_group("agents")
-  var active_agents := []
-  for agent in agents:
-    if !agent.is_queued_for_deletion():
-      active_agents.append(agent)
-  return active_agents
+# func get_active_agents():
+#   # if !is_inside_tree():
+#   #   free()
+#   var agents =  get_tree().get_nodes_in_group("agents")
+#   var active_agents := []
+#   for agent in agents:
+#     if !agent.is_queued_for_deletion():
+#       active_agents.append(agent)
+#   return active_agents
 
 func spawn_new_agent(pos: Vector2, rot: float, inputs: Array, geno: Genome, is_orig: bool, t_finished: int):
-  if get_active_agents().size() >= Main.AGENT_LIMIT:
+  if game.get_active_agents().size() >= Main.AGENT_LIMIT:
     reduce_population(2)
-  if get_active_agents().size() < Main.AGENT_LIMIT:
+  if game.get_active_agents().size() < Main.AGENT_LIMIT:
     var new_agent = Agent.instance()
 
     var area_extents = spawning_area.get_node("CollisionShape2D").shape.extents
@@ -166,15 +191,17 @@ func spawn_new_agent(pos: Vector2, rot: float, inputs: Array, geno: Genome, is_o
       # new_agent.rotation = rand_range(-PI, PI)
       new_agent.rotation = rot
 
-    new_agent.nn_activated_inputs = inputs
-    new_agent.genome = geno
+    new_agent.nn_activated_inputs = inputs.duplicate()
+    # new_agent.genome = geno
+    new_agent.genome = Genome.new(population)
+    new_agent.genome.duplicate(geno)
     new_agent.game = game
     new_agent.population = population
     new_agent.generation = generation + 1
-    new_agent.fitness_timeline = fitness_timeline
+    new_agent.fitness_timeline = fitness_timeline.duplicate()
     new_agent.is_original = is_orig
     new_agent.times_finished = t_finished
-    var inverse_fraction = 1.0 / get_relative_fitness(self, get_active_agents())
+    var inverse_fraction = 1.0 / get_relative_fitness(self, game.get_active_agents())
     new_agent.spawn_timer_to_set = clamp(SPAWN_CHILDREN_TIME * inverse_fraction, 1.0, 8.0)
 
     new_agent.add_to_group("agents")
@@ -191,7 +218,7 @@ func spawn_children(is_orig: bool = false, add_finished: bool = false):
   # var new_genome = Genome.new(population)
   # new_genome.duplicate(genome)
   # assert(new_genome != null)
-  if get_active_agents().size() >= Main.AGENT_LIMIT || is_queued_for_deletion():
+  if game.get_active_agents().size() >= Main.AGENT_LIMIT || is_queued_for_deletion():
     return
 
   if add_finished:
@@ -200,7 +227,7 @@ func spawn_children(is_orig: bool = false, add_finished: bool = false):
     spawn_new_agent(position, rotation, nn_activated_inputs, genome, is_orig, times_finished)
 
   var extra_spawns: int = EXTRA_SPAWNS
-  extra_spawns *= get_relative_fitness(self, get_active_agents()) 
+  extra_spawns *= get_relative_fitness(self, game.get_active_agents()) 
   for i in extra_spawns:
     if add_finished:
       spawn_new_agent(position, rotation, nn_activated_inputs, get_alter_genome(), is_orig, times_finished + 1)
@@ -208,7 +235,7 @@ func spawn_children(is_orig: bool = false, add_finished: bool = false):
       spawn_new_agent(position, rotation, nn_activated_inputs, get_alter_genome(), is_orig, times_finished)
 
 
-func get_fitness():
+func get_fitness() -> float:
   return curve.get_closest_offset(position) + (times_finished * total_level_length)
 
 
@@ -367,6 +394,8 @@ func finish(time_left: float):
 
 
 func _on_SpawnTimer_timeout():
+  # if !is_inside_tree():
+  #   return
   var total_fitness := 0.0
   for i in range(1, FIT_GEN_HORIZON + 1):
     total_fitness += fitness_timeline[-i]
@@ -378,11 +407,17 @@ func _on_SpawnTimer_timeout():
 
 
 func _on_DeathTimer_timeout():
+  kill_agent()
+
+func kill_agent():
+  # nn.unreference()
+  # genome.unreference()
+  # nn = null
+  # genome = null
   game.decrement_agent_population()
-  # TODO: Kill the genome
-  queue_free()
   remove_from_group("agents")
   game.get_node("Agents").remove_child(self)
+  queue_free()
 
 
 class AgentSorter:

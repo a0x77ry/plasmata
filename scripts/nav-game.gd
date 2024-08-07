@@ -49,8 +49,9 @@ func generate_agent_population(agent_pop = population_stream):
       agent.timer = timer
       agent.nn_activated_inputs = input_names
       assert(population.genomes[i] != null)
-      agent.set_genome(population.genomes[i])
-      agent.modulate = agent.genome.tint
+      # agent.set_genome(population.genomes[i])
+      agent.genome = population.genomes[i]
+      # agent.modulate = agent.genome.tint
       agent.game = self
       agent.times_finished = 0
 
@@ -116,8 +117,9 @@ func _on_FFSlider_value_changed(value):
   set_time_scale(value)
 
 func _on_SpawnTimer_timeout():
-  var agents = get_tree().get_nodes_in_group("agents")
+  # var agents = get_tree().get_nodes_in_group("agents")
+  var agents = get_active_agents()
   # spawn_timer.wait_time += abs(random.randfn(0.0, 0.3))
-  if agents.size() < ceil(Main.AGENT_LIMIT / 3.0):
+  if agents.size() < ceil(Main.AGENT_LIMIT / 5.0):
     generate_agent_population()
 

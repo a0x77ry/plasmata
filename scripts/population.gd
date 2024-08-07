@@ -58,7 +58,7 @@ func select_parents(parents_number):
 
   var genomes_temp = genomes.duplicate()
   for i in parents_number:
-    parent_genomes.append(genomes_temp.pop_back())
+    parent_genomes.append(genomes_temp.pop_back().duplicate())
 
 
 func crossover(noff_pop):
@@ -187,7 +187,7 @@ func initialize_genomes_with_fitness(agents: Array):
   var _genomes = []
   for agent in agents:
     agent.assign_fitness()
-    _genomes.append(agent.genome)
+    _genomes.append(agent.genome.duplicate())
   genomes = _genomes.duplicate()
   # if genomes.size() < 100:
   #   breakpoint
