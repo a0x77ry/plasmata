@@ -40,25 +40,27 @@ func _init(_genomes=[], input_names=[], output_names=[],
 
 
 # Changes genomes to the next generation
-func next_generation(agents: Array):
-  initialize_genomes_with_fitness(agents) # Initializes genomes array with fitness values only
-  select_parents(round(agents.size() * selection_rate))
-  genomes = crossover(population_stream)
-  mutate_all_genomes()
-  generation += 1
+# func next_generation(agents: Array):
+#   initialize_genomes_with_fitness(agents) # Initializes genomes array with fitness values only
+#   select_parents(round(agents.size() * selection_rate))
+#   genomes = crossover(population_stream)
+#   mutate_all_genomes()
+#   generation += 1
 
 # *** from species - begin ***
 
-func select_parents(parents_number):
-  parent_genomes = []
-
-  # Calculate the number of parents for each species
-  genomes.sort_custom(GenomeSorter, "sort_ascenting")
-  assert(genomes.size() > 0)
-
-  var genomes_temp = genomes.duplicate()
-  for i in parents_number:
-    parent_genomes.append(genomes_temp.pop_back().duplicate())
+# func select_parents(parents_number):
+#   parent_genomes = []
+#
+#   # Calculate the number of parents for each species
+#   genomes.sort_custom(GenomeSorter, "sort_ascenting")
+#   assert(genomes.size() > 0)
+#
+#   var genomes_temp = genomes.duplicate()
+#   for i in parents_number:
+#     parent_genomes.append(genomes_temp.pop_back().duplicate())
+#
+#   genomes_temp = []
 
 
 func crossover(noff_pop):

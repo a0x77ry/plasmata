@@ -90,6 +90,11 @@ func _physics_process(delta):
 
 
 # func _exit_tree():
+  # ray_left.queue_free()
+  # ray_right.queue_free()
+  # ray_forward.queue_free()
+  # ray_f_up_right.queue_free()
+  # ray_f_down_right.queue_free()
 #   nn.init_ref()
 #   nn.unreference()
 #   genome.init_ref()

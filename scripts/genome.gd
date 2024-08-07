@@ -52,10 +52,23 @@ func _init(_population, _input_nodes=[], _hidden_nodes=[], _output_nodes=[],
 #   return Genome.new(population, input_nodes, hidden_nodes, output_nodes, links, fitness)
 
 func duplicate(geno: Genome):
-  input_nodes = geno.input_nodes.duplicate()
-  hidden_nodes = geno.hidden_nodes.duplicate()
-  output_nodes = geno.output_nodes.duplicate()
-  links = geno.links.duplicate()
+  # input_nodes = geno.input_nodes.duplicate()
+  input_nodes = []
+  for node in geno.input_nodes:
+    input_nodes.append(node.dupl())
+  # hidden_nodes = geno.hidden_nodes.duplicate()
+  hidden_nodes = []
+  for node in geno.hidden_nodes:
+    hidden_nodes.append(node.dupl())
+  # output_nodes = geno.output_nodes.duplicate()
+  output_nodes = []
+  for node in geno.output_nodes:
+    output_nodes.append(node.dupl())
+  # links = geno.links.duplicate()
+  links = []
+  for link in geno.links:
+    links.append(link.dupl())
+
   fitness = geno.fitness
 
 
@@ -261,6 +274,9 @@ class InputNode:
     # outgoing_links.append(link)
     outgoing_link_inno_nums.append(link.inno_num)
 
+  func dupl():
+    return InputNode.new(inno_num, name, outgoing_link_inno_nums.duplicate())
+
 
 class HiddenNode:
   extends Gene
@@ -284,6 +300,9 @@ class HiddenNode:
     # outgoing_links.append(link)
     outgoing_link_inno_nums.append(link.inno_num)
 
+  func dupl():
+    return HiddenNode.new(inno_num, name,
+      incoming_link_inno_nums.duplicate(), outgoing_link_inno_nums.duplicate())
 
 
 class OutputNode:
@@ -299,6 +318,10 @@ class OutputNode:
 
   func add_incoming_link(link: Link):
     incoming_link_inno_nums.append(link.inno_num)
+
+  func dupl():
+    return OutputNode.new(inno_num, name,
+      incoming_link_inno_nums.duplicate())
 
 
 class Link:
@@ -316,4 +339,8 @@ class Link:
     source_inno_num = _source_inno_num
     target_inno_num = _target_inno_num
     is_enabled = _is_enabled
+
+  func dupl():
+    return Link.new(inno_num, weight, source_inno_num, target_inno_num,
+      is_enabled)
 
