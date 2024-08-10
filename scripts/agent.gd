@@ -27,7 +27,9 @@ onready var ray_f_up_right = get_node("ray_f_up_right")
 onready var ray_f_down_right = get_node("ray_f_down_right")
 onready var level_width = get_tree().get_root().size.x
 onready var level_height = get_tree().get_root().size.y
-onready var curve = get_parent().get_parent().get_node("Path2D").curve
+onready var path = get_parent().get_parent().get_node("Path2D")
+# onready var curve = get_parent().get_parent().get_node("Path2D").curve
+onready var curve = path.curve
 onready var spawn_timer = get_node("SpawnTimer")
 # onready var spawning_area = get_node("SpawningArea")
 
@@ -57,6 +59,7 @@ var total_level_length
 var times_finished: int
 var spawn_timer_to_set: float = 0.0
 var current_fitness: float = 0.1
+var simple_fitness: float = 0.1
 
 
 func _ready():
@@ -82,7 +85,7 @@ func _ready():
 func _physics_process(delta):
   if !reached_the_end && !crashed:
     # get_player_input()
-    get_nn_controls(nn, get_sensor_input())
+    # get_nn_controls(nn, get_sensor_input())
     rotation += nn_rotation * rotation_speed * delta
     velocity = move_and_slide(velocity)
   else:
@@ -326,7 +329,8 @@ func get_sensor_input():
       ray_f_down_right_distance = (ray_length - distance) / ray_length
 
   if nn_activated_inputs.has("fitness"):
-    fitness = curve.get_closest_offset(position) / curve.get_baked_length()
+    # fitness = curve.get_closest_offset(position) / total_level_length
+    fitness = simple_fitness / total_level_length
 
   if nn_activated_inputs.has("go_forward_input"):
     go_forward_input = clamp(nn_speed, 0, speed_limit) / speed_limit
@@ -421,6 +425,7 @@ func kill_agent():
   # genome.unreference()
   # nn = null
   # genome = null
+  nn.disolve_nn()
   game.decrement_agent_population()
   remove_from_group("agents")
   game.get_node("Agents").remove_child(self)
@@ -428,9 +433,22 @@ func kill_agent():
 
 
 func _on_FitnessUpdateTimer_timeout():
-  current_fitness = curve.get_closest_offset(position) + (times_finished * total_level_length)
+  var curve_local_pos = path.to_local(global_position)
+  var current_offset = curve.get_closest_offset(curve_local_pos)
+
+  var int_baked = curve.interpolate_baked(current_offset)
+  var dist_to_curve = int_baked.distance_to(curve_local_pos)
+
+  simple_fitness = current_offset - dist_to_curve
+  current_fitness = simple_fitness + (times_finished * total_level_length)
+
   if current_fitness == 0:
+    # current_fitness = 0.1
     breakpoint
+
+
+func _on_NNControlsUpdateTimer_timeout():
+  get_nn_controls(nn, get_sensor_input())
 
 
 class AgentSorter:

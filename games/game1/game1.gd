@@ -15,7 +15,7 @@ func _enter_tree():
     "ray_right_distance",
     "fitness",
     # "go_right_input",
-    "go_forward_input"
+    # "go_forward_input"
   ]
   output_names = [
     "go_right",

@@ -21,7 +21,7 @@ var random = RandomNumberGenerator.new()
 var max_IN_used := 0
 var generation
 
-var parent_genomes := []
+# var parent_genomes := []
 
 
 func _init(_genomes=[], input_names=[], output_names=[],
@@ -30,7 +30,7 @@ func _init(_genomes=[], input_names=[], output_names=[],
   selection_rate = _selection_rate
   population_stream = _population_stream
   generation = _generation
-  parent_genomes = genomes
+  # parent_genomes = genomes
   random.randomize()
   for _i in range(0, population_stream):
     var new_genome = Genome.new(self)
@@ -63,43 +63,43 @@ func _init(_genomes=[], input_names=[], output_names=[],
 #   genomes_temp = []
 
 
-func crossover(noff_pop):
-  var crossovered_genomes = []
-  assert(parent_genomes.size() > 0)
-  if parent_genomes.size() % 2 != 0:
-    parent_genomes.push_front(parent_genomes[0]) # add a genome to become even
-  # Calculate total biased fitness of parent genomes
-  var bias = INSPECIES_SELECTION_BIAS
-  var total_biased_fitness := 0
-  for parent_genome in parent_genomes:
-    total_biased_fitness += parent_genome.fitness + bias
-  # Crossover couples of parent_genomes in crossovered_genomes
-  var c_indices = []
-  var couple_genomes = []
-  for i in range(0, parent_genomes.size(), 2):
-    var noff := 0
-
-    if i == 0:
-      c_indices = [i, i]
-    else:
-      c_indices = [i-2, i-1]
-    couple_genomes = [parent_genomes[c_indices[0]], parent_genomes[c_indices[1]]]
-    # Couple's portion of the whole species' offspring
-    # var couple_fraction = (parent_genomes[c_indices[0]].fitness + parent_genomes[c_indices[1]].fitness + 2*bias) / total_biased_fitness
-    # Number of offspring for the couple
-    noff = round(((parent_genomes[c_indices[0]].fitness + parent_genomes[c_indices[1]].fitness + 2*bias) * noff_pop) / total_biased_fitness)
-
-    var couple_crossovered_genomes = [] 
-    if random.randf() < CROSSOVER_RATE:
-      couple_crossovered_genomes = couple_crossover(couple_genomes, noff)
-    else:
-      # for c in number_of_offspring_each_couple:
-      for c in noff:
-        var genome_to_append = couple_genomes[c % 2]
-        genome_to_append.fitness = 0.0
-        couple_crossovered_genomes.append(genome_to_append)
-    crossovered_genomes.append_array(couple_crossovered_genomes)
-  return crossovered_genomes
+# func crossover(noff_pop):
+#   var crossovered_genomes = []
+#   assert(parent_genomes.size() > 0)
+#   if parent_genomes.size() % 2 != 0:
+#     parent_genomes.push_front(parent_genomes[0]) # add a genome to become even
+#   # Calculate total biased fitness of parent genomes
+#   var bias = INSPECIES_SELECTION_BIAS
+#   var total_biased_fitness := 0
+#   for parent_genome in parent_genomes:
+#     total_biased_fitness += parent_genome.fitness + bias
+#   # Crossover couples of parent_genomes in crossovered_genomes
+#   var c_indices = []
+#   var couple_genomes = []
+#   for i in range(0, parent_genomes.size(), 2):
+#     var noff := 0
+#
+#     if i == 0:
+#       c_indices = [i, i]
+#     else:
+#       c_indices = [i-2, i-1]
+#     couple_genomes = [parent_genomes[c_indices[0]], parent_genomes[c_indices[1]]]
+#     # Couple's portion of the whole species' offspring
+#     # var couple_fraction = (parent_genomes[c_indices[0]].fitness + parent_genomes[c_indices[1]].fitness + 2*bias) / total_biased_fitness
+#     # Number of offspring for the couple
+#     noff = round(((parent_genomes[c_indices[0]].fitness + parent_genomes[c_indices[1]].fitness + 2*bias) * noff_pop) / total_biased_fitness)
+#
+#     var couple_crossovered_genomes = [] 
+#     if random.randf() < CROSSOVER_RATE:
+#       couple_crossovered_genomes = couple_crossover(couple_genomes, noff)
+#     else:
+#       # for c in number_of_offspring_each_couple:
+#       for c in noff:
+#         var genome_to_append = couple_genomes[c % 2]
+#         genome_to_append.fitness = 0.0
+#         couple_crossovered_genomes.append(genome_to_append)
+#     crossovered_genomes.append_array(couple_crossovered_genomes)
+#   return crossovered_genomes
 
 func couple_crossover(couple_genomes: Array, offspring_number: int) -> Array:
   var crossovered_genomes := []
@@ -185,14 +185,12 @@ func couple_crossover(couple_genomes: Array, offspring_number: int) -> Array:
 # *** from species - end ***
 
 # Initializes genomes array with fitness values only
-func initialize_genomes_with_fitness(agents: Array):
-  var _genomes = []
-  for agent in agents:
-    agent.assign_fitness()
-    _genomes.append(agent.genome.duplicate())
-  genomes = _genomes.duplicate()
-  # if genomes.size() < 100:
-  #   breakpoint
+# func initialize_genomes_with_fitness(agents: Array):
+#   var _genomes = []
+#   for agent in agents:
+#     agent.assign_fitness()
+#     _genomes.append(agent.genome.duplicate())
+#   genomes = _genomes.duplicate()
 
 
 func mutate_all_genomes():

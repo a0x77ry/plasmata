@@ -109,6 +109,23 @@ func get_out(_userdata) -> Dictionary:
 
   return output_dict
 
+
+func disolve_nn():
+  for node in input_layer:
+    node.outgoing_links = []
+
+  for node in hidden_layer:
+    node.incoming_links = []
+    node.outgoing_links = []
+
+  for node in output_layer:
+    node.incoming_links = []
+
+  for link in links:
+    link.source_node = null
+    link.target_node = null
+
+
 class NNNode:
   var name: String setget ,get_name
   var inno_num: int setget , get_inno_num

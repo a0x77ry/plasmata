@@ -31,7 +31,7 @@ func _process(_delta):
 
 
 func generate_agent_population(agent_pop = population_stream):
-  agents = []
+  var agents = []
   var agent: Node2D
   var area_extents = spawning_area.get_node("CollisionShape2D").shape.extents
   for i in agent_pop:
@@ -47,10 +47,16 @@ func generate_agent_population(agent_pop = population_stream):
 
       agent.population = population
       agent.timer = timer
-      agent.nn_activated_inputs = input_names
+      agent.nn_activated_inputs = input_names.duplicate()
       assert(population.genomes[i] != null)
       # agent.set_genome(population.genomes[i])
-      agent.genome = population.genomes[i]
+
+      var geno = Genome.new(population)
+      geno.duplicate(population.genomes[i])
+      agent.genome = geno
+
+      # agent.genome = population.genomes[i]
+
       # agent.modulate = agent.genome.tint
       agent.game = self
       agent.times_finished = 0

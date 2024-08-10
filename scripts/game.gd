@@ -14,7 +14,7 @@ onready var agents_node = get_node("Agents")
 
 var population
 var number_of_agents
-var agents = []
+# var agents = []
 var agents_alive = []
 var is_game_paused := false
 
@@ -41,7 +41,8 @@ func restart_population():
   agents_alive = get_tree().get_nodes_in_group("agents")
   for agent in agents_alive:
     decrement_agent_population()
-    agent.queue_free()
+    # agent.queue_free()
+    agent.kill_agent()
   population.genomes = []
   population = Population.new([], input_names, output_names,
       0, initial_population)

@@ -51,6 +51,12 @@ wait_time = 4.0
 autostart = true
 
 [node name="FitnessUpdateTimer" type="Timer" parent="."]
+physics_interpolation_mode = 2
+wait_time = 0.05
+autostart = true
+
+[node name="NNControlsUpdateTimer" type="Timer" parent="."]
+physics_interpolation_mode = 2
 wait_time = 0.05
 autostart = true
 
@@ -61,4 +67,5 @@ autostart = true
 
 [connection signal="timeout" from="SpawnTimer" to="." method="_on_SpawnTimer_timeout"]
 [connection signal="timeout" from="FitnessUpdateTimer" to="." method="_on_FitnessUpdateTimer_timeout"]
+[connection signal="timeout" from="NNControlsUpdateTimer" to="." method="_on_NNControlsUpdateTimer_timeout"]
 [connection signal="timeout" from="DeathTimer" to="." method="_on_DeathTimer_timeout"]

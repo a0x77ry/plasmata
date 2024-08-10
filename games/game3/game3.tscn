@@ -46,7 +46,7 @@ extents = Vector2( 10, 169.5 )
 [sub_resource type="Curve2D" id=9]
 resource_local_to_scene = true
 _data = {
-"points": PoolVector2Array( 0, 0, 0, 0, -21, 180, 0, 0, 0, 0, 189, 403, 0, 0, 0, 0, 959, 394, 0, 0, 0, 0, 1026, 250, 0, 0, 0, 0, 1287, 254 )
+"points": PoolVector2Array( 0, 0, 0, 0, 18.6936, 110.863, 0, 0, 0, 0, 27.1994, 213.213, 0, 0, 0, 0, 189, 403, 0, 0, 0, 0, 959, 394, 0, 0, 0, 0, 1026, 250, 0, 0, 0, 0, 1287, 254 )
 }
 
 [sub_resource type="DynamicFont" id=1]
@@ -97,6 +97,7 @@ time = 20
 unpaused_time_scale = 3
 
 [node name="SpawnTimer" type="Timer" parent="." index="0"]
+process_mode = 0
 wait_time = 10.0
 autostart = true
 
