@@ -21,10 +21,17 @@ var is_game_paused := false
 var input_names = []
 var output_names = []
 
+var sorted_agents = []
+
 
 func _process(_delta):
   if Input.is_action_just_pressed("pause"):
     pause()
+
+
+func _physics_process(_delta):
+  sorted_agents = get_active_agents()
+  sorted_agents.sort_custom(AgentSorter, "sort_by_fitness_ascenting")
 
 
 func init_population():
@@ -114,3 +121,16 @@ func _on_MainMenu_pressed():
   var err = get_tree().change_scene("res://menu/main-menu/main-menu.tscn")
   if err != OK:
     print("Cannot change scene")
+
+
+class AgentSorter:
+  static func sort_by_dist_ascenting(a, b):
+    if a[1] < b[1]:
+      return true
+    return false
+
+  static func sort_by_fitness_ascenting(a, b):
+    if a.get_fitness() < b.get_fitness():
+      return true
+    return false
+

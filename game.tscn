@@ -27,7 +27,6 @@ Agent = ExtResource( 3 )
 [node name="Timer" type="Timer" parent="."]
 wait_time = 20.0
 one_shot = true
-autostart = true
 
 [node name="UI" type="Control" parent="."]
 margin_right = 40.0

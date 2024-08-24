@@ -19,7 +19,7 @@ const EXTRA_SPAWNS = 6
 const MATE_DISTRIBUTION_SPREAD = 0.5
 const REDUCTION_WHEN_FULL = 10
 const SPAWN_CHILDREN_TIME = 2.0
-const SPAWNING_TIME_UPPER_LIMIT = 12.0
+const SPAWNING_TIME_UPPER_LIMIT = 14.0
 
 onready var ray_forward = get_node("ray_forward")
 onready var ray_left = get_node("ray_left")
@@ -101,14 +101,14 @@ func _physics_process(delta):
 func get_relative_fitness(agent, agents):
   var total_rel_fitness := 0.0
   var min_fitness = INF
-  var max_fitness = -INF
+  # var max_fitness = -INF
   for ag in agents:
     var ag_fit = ag.get_fitness()
 
     if ag_fit < min_fitness:
       min_fitness = ag_fit
-    if ag_fit > max_fitness:
-      max_fitness = ag_fit
+    # if ag_fit > max_fitness:
+    #   max_fitness = ag_fit
 
   for ag in agents:
     var rel_ag_fit = ag.get_fitness() - min_fitness
@@ -120,33 +120,49 @@ func get_relative_fitness(agent, agents):
 
 
 func reduce_population(num: int) -> void:
-  var agents = game.get_active_agents()
-  agents.sort_custom(AgentSorter, "sort_by_fitness_ascenting")
+  # var agents = game.get_active_agents()
+  # agents.sort_custom(AgentSorter, "sort_by_fitness_ascenting")
+  var agents_dead := 0
   for i in num:
-    agents[i].kill_agent()
+    var agent = game.sorted_agents[i]
+    if !is_instance_valid(agent):
+      agents_dead += 1
+  for i in num + agents_dead:
+    var agent = game.sorted_agents[i]
+    if is_instance_valid(agent):
+      continue
+    game.sorted_agents[i].kill_agent()
   game.decrement_agent_population(num)
 
 
 func find_nearest_genome():
-  var agents = game.get_active_agents()
+  # var agents = game.get_active_agents()
   var nearest_genome
   var nearest_agents = []
 
-  for agent in agents:
-    var dist = abs(agent.get_fitness() - get_fitness())
-    nearest_agents.append([agent, dist])
+  for agent in game.sorted_agents:
+    if is_instance_valid(agent):
+      var dist = abs(agent.get_fitness() - get_fitness())
+      nearest_agents.append([agent, dist])
 
-  # nearest_agents.sort_custom(AgentSorter, "sort_by_dist_ascenting")
-  agents.sort_custom(AgentSorter, "sort_by_fitness_ascenting")
+  # agents.sort_custom(AgentSorter, "sort_by_fitness_ascenting")
   var rnd = clamp(random.randfn(1.0, MATE_DISTRIBUTION_SPREAD), 0.0, 2.0)
   if rnd > 1.0:
     var rnd_fraction = floor(rnd) - rnd
     rnd = clamp(1.0 - rnd_fraction, 0.0, 1.0)
   # var agent_index = round(rnd * agents.size())
-  var agent_index = round(range_lerp(rnd, 0.0, 1.0, 0.0, float(agents.size() -  1)))
+  var agent_index = round(range_lerp(rnd, 0.0, 1.0, 0.0, float(game.sorted_agents.size() -  1)))
+  while !is_instance_valid(game.sorted_agents[agent_index]):
+    rnd = clamp(random.randfn(1.0, MATE_DISTRIBUTION_SPREAD), 0.0, 2.0)
+    if rnd > 1.0:
+      var rnd_fraction = floor(rnd) - rnd
+      rnd = clamp(1.0 - rnd_fraction, 0.0, 1.0)
+    agent_index = round(range_lerp(rnd, 0.0, 1.0, 0.0, float(game.sorted_agents.size() -  1)))
   # nearest_genome = agents[random.randi_range(0, agents.size() - 1)].genome
   # nearest_genome = nearest_agents[agent_index][0].genome
-  nearest_genome = agents[agent_index].genome
+  nearest_genome = Genome.new(population)
+  nearest_genome.duplicate(game.sorted_agents[agent_index].genome)
+  # nearest_genome = game.sorted_agents[agent_index].genome
   return nearest_genome
 
 func get_alter_genome():
@@ -437,35 +453,19 @@ func kill_agent():
   queue_free()
 
 
-func _on_FitnessUpdateTimer_timeout():
-  pass
-  # var curve_local_pos = path.to_local(global_position)
-  # var current_offset = curve.get_closest_offset(curve_local_pos)
-  #
-  # var int_baked = curve.interpolate_baked(current_offset)
-  # var dist_to_curve = int_baked.distance_to(curve_local_pos)
-  #
-  # simple_fitness = current_offset - dist_to_curve
-  # current_fitness = simple_fitness + (times_finished * total_level_length)
-  #
-  # if current_fitness == 0:
-  #   # current_fitness = 0.1
-  #   breakpoint
-
-
 func _on_NNControlsUpdateTimer_timeout():
   pass
   # get_nn_controls(nn, get_sensor_input())
 
 
-class AgentSorter:
-  static func sort_by_dist_ascenting(a, b):
-    if a[1] < b[1]:
-      return true
-    return false
-
-  static func sort_by_fitness_ascenting(a, b):
-    if a.get_fitness() < b.get_fitness():
-      return true
-    return false
+# class AgentSorter:
+#   static func sort_by_dist_ascenting(a, b):
+#     if a[1] < b[1]:
+#       return true
+#     return false
+#
+#   static func sort_by_fitness_ascenting(a, b):
+#     if a.get_fitness() < b.get_fitness():
+#       return true
+#     return false
 

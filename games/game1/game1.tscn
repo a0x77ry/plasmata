@@ -145,7 +145,7 @@ shape = SubResource( 8 )
 [node name="Path2D" type="Path2D" parent="." index="6"]
 curve = SubResource( 9 )
 
-[node name="UI" parent="." index="7"]
+[node name="UI" parent="." index="8"]
 rect_pivot_offset = Vector2( -299, 20 )
 
 [node name="Countdown" type="HBoxContainer" parent="UI" index="1"]
