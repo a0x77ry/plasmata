@@ -19,8 +19,7 @@ const EXTRA_SPAWNS = 6
 const MATE_DISTRIBUTION_SPREAD = 0.5
 const REDUCTION_WHEN_FULL = 10
 const SPAWN_CHILDREN_TIME = 2.0
-const INVERSE_FRACTION_MULTIPLIER = 1.0
-const SPAWNING_TIME_UPPER_LIMIT = 8.0
+const SPAWNING_TIME_UPPER_LIMIT = 12.0
 
 onready var ray_forward = get_node("ray_forward")
 onready var ray_left = get_node("ray_left")
@@ -100,11 +99,23 @@ func _physics_process(delta):
 
 
 func get_relative_fitness(agent, agents):
-  var total_fitness := 0.0
+  var total_rel_fitness := 0.0
+  var min_fitness = INF
+  var max_fitness = -INF
   for ag in agents:
-    total_fitness += ag.get_fitness()
-  var avg_fitness = total_fitness / agents.size()
-  var relative_fitness = agent.get_fitness() / avg_fitness
+    var ag_fit = ag.get_fitness()
+
+    if ag_fit < min_fitness:
+      min_fitness = ag_fit
+    if ag_fit > max_fitness:
+      max_fitness = ag_fit
+
+  for ag in agents:
+    var rel_ag_fit = ag.get_fitness() - min_fitness
+    total_rel_fitness += rel_ag_fit
+
+  var avg_fitness = total_rel_fitness / agents.size()
+  var relative_fitness = (agent.get_fitness() - min_fitness + 0.01) / avg_fitness
   return relative_fitness
 
 
@@ -186,8 +197,9 @@ func spawn_new_agent(pos: Vector2, rot: float, inputs: Array, geno: Genome, is_o
     new_agent.fitness_timeline = fitness_timeline.duplicate()
     new_agent.is_original = is_orig
     new_agent.times_finished = t_finished
-    # var inverse_fraction = 1.0 / get_relative_fitness(self, game.get_active_agents())
-    var inverse_fraction = INVERSE_FRACTION_MULTIPLIER / (get_relative_fitness(self, game.get_active_agents()) * INVERSE_FRACTION_MULTIPLIER)
+    var inverse_fraction = 1.0 / get_relative_fitness(self, game.get_active_agents())
+    inverse_fraction = pow(inverse_fraction, 1.5)
+    # print(SPAWN_CHILDREN_TIME * inverse_fraction)
     new_agent.spawn_timer_to_set = clamp(SPAWN_CHILDREN_TIME * inverse_fraction, 1.0, SPAWNING_TIME_UPPER_LIMIT)
 
     new_agent.add_to_group("agents")
