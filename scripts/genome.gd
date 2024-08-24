@@ -12,6 +12,7 @@ const ADD_NODE_RATE = 0.05 # original : 0.15
 const META_W_MUTATION_RATE = 0.05
 const META_ADD_LINK_MUTATION_RATE = 0.05
 const META_ADD_NODE_MUTATION_RATE = 0.05
+const DELETE_LINK_RATE = 0.1
 
 var input_nodes
 var hidden_nodes
@@ -35,10 +36,10 @@ func _init(_population, _input_nodes=[], _hidden_nodes=[], _output_nodes=[],
     _links=[], _fitness=0):
   random.randomize()
   population = _population
-  input_nodes = _input_nodes
-  hidden_nodes = _hidden_nodes
-  output_nodes = _output_nodes
-  links = _links
+  input_nodes = _input_nodes.duplicate()
+  hidden_nodes = _hidden_nodes.duplicate()
+  output_nodes = _output_nodes.duplicate()
+  links = _links.duplicate()
   fitness = _fitness
   # gen_num = population.generation
   genome_id = population.generate_UIN()
@@ -48,8 +49,14 @@ func _init(_population, _input_nodes=[], _hidden_nodes=[], _output_nodes=[],
   # add_node_rate = random.randf_range(0.0, 1.0)
 
 
-# func duplicate():
-#   return Genome.new(population, input_nodes, hidden_nodes, output_nodes, links, fitness)
+func disolve_genome():
+  # input_nodes = []
+  # hidden_nodes = []
+  # output_nodes = []
+  links = []
+  population = null
+  random = null
+
 
 func duplicate(geno: Genome):
   # input_nodes = geno.input_nodes.duplicate()
@@ -82,8 +89,15 @@ func init_io_nodes(input_names: Array, output_names: Array):
     i += 1
 
 
+func remove_disconnected_hidden_nodes():
+  for node in hidden_nodes:
+    if node.incoming_link_inno_nums.empty() \
+      && node.outgoing_link_inno_nums.empty():
+      hidden_nodes.erase(node)
+
 # Mutate this specific genome
 func mutate():
+  # remove_disconnected_hidden_nodes()
   random.randomize()
   # var fraction := genome_fraction()
   # var mut_multiplier: float
@@ -119,6 +133,19 @@ func mutate():
       # Disable link
       if random.randf() < DISABLING_RATE:
         link.is_enabled = !link.is_enabled
+      # Delete link
+      if random.randf() < DELETE_LINK_RATE:
+        var source_nodes = input_nodes + hidden_nodes
+        for source_node in source_nodes:
+          if link.source_inno_num in source_node.outgoing_link_inno_nums:
+            source_node.outgoing_link_inno_nums.erase(link.source_inno_num)
+
+        var target_nodes = hidden_nodes + output_nodes
+        for target_node in target_nodes:
+          if link.target_inno_num in target_node.incoming_link_inno_nums:
+            target_node.incoming_link_inno_nums.erase(link.target_inno_num)
+
+        links.erase(link)
 
     # Add a link
     # if random.randf() < add_link_rate * mut_multiplier:
@@ -169,6 +196,9 @@ func mutate():
           # new_hidden_node,
           # original_target_node,
           link_to_break.weight, new_hidden_node.inno_num, original_target_node.inno_num, true)
+      # original_source_node.outgoing_link_inno_nums.erase(link_to_break.inno_num)
+      # original_target_node.incoming_link_inno_nums.erase(link_to_break.inno_num)
+      # links.erase(link_to_break)
       links.append(link_a)
       links.append(link_b)
       new_hidden_node.add_incoming_link(link_a)
@@ -176,26 +206,28 @@ func mutate():
       original_source_node.add_outgoing_link(link_a)
       original_target_node.add_incoming_link(link_b)
 
-func genome_fraction() -> float:
-  var total_fitness := 0.0
-  for genome in population.genomes:
-    total_fitness += genome.fitness
-    # print("genome_fitness: %s, total: %s" % [genome.fitness, total_fitness])
-  var fraction: float
-  if total_fitness > 0.0:
-    fraction = fitness / total_fitness
-  else:
-    fraction = 1 / population.genomes.size()
-  return fraction
+# func genome_fraction() -> float:
+#   var total_fitness := 0.0
+#   for genome in population.genomes:
+#     total_fitness += genome.fitness
+#     # print("genome_fitness: %s, total: %s" % [genome.fitness, total_fitness])
+#   var fraction: float
+#   if total_fitness > 0.0:
+#     fraction = fitness / total_fitness
+#   else:
+#     fraction = 1 / population.genomes.size()
+#   return fraction
 
 func link_already_exists(source_node, target_node):
   # if target_node.incoming_links != null: # Because it can be an input node in the recursion
-  if "incoming_link_inno_nums" in target_node:
+  if "incoming_link_inno_nums" in target_node && links.size() > 0:
     for inlink_inno_num in target_node.incoming_link_inno_nums:
       var inlink
       for l in links:
         if l.inno_num == inlink_inno_num:
           inlink = l
+      if inlink == null:
+        return false
       if inlink.source_inno_num == source_node.inno_num:
         return true
   return false
@@ -213,6 +245,8 @@ func is_circular_loop(source_node, target_node):
       for l in links:
         if l.inno_num == outlink_inno_num:
           outlink = l
+      if outlink == null:
+        return true
 
       # In order to recurse we first have to find the target node of the target_node when it is not the source node
       var candidate_target_nodes = hidden_nodes
@@ -304,6 +338,11 @@ class HiddenNode:
     return HiddenNode.new(inno_num, name,
       incoming_link_inno_nums.duplicate(), outgoing_link_inno_nums.duplicate())
 
+  # func remove():
+  #   for incoming
+  #   incoming_link_inno_nums = []
+  #   outgoing_link_inno_nums = []
+
 
 class OutputNode:
   extends Gene
@@ -343,4 +382,3 @@ class Link:
   func dupl():
     return Link.new(inno_num, weight, source_inno_num, target_inno_num,
       is_enabled)
-

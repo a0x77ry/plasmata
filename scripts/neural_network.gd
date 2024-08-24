@@ -12,12 +12,14 @@ var output_layer = []
 var hidden_layer = [] 
 var links = []
 # var thread = Thread.new()
+var is_moribund := false
+var is_dissolved := false
 
-var genome
+# var genome
 # var starting_link_id: int
 
 func _init(_genome):
-  genome = _genome
+  var genome = _genome
   # starting_link_id = _starting_link_id
   random.randomize()
 
@@ -105,12 +107,16 @@ func get_out(_userdata) -> Dictionary:
   var output_dict = {}
   for node in output_layer:
     var node_name = node.get_name()
-    output_dict[node_name] = node.get_value()
+    if !is_moribund:
+      output_dict[node_name] = node.get_value()
+    else:
+      output_dict[node_name] = 0.0
 
   return output_dict
 
 
 func disolve_nn():
+  is_moribund = true
   for node in input_layer:
     node.outgoing_links = []
 
@@ -124,6 +130,14 @@ func disolve_nn():
   for link in links:
     link.source_node = null
     link.target_node = null
+
+  input_layer = []
+  output_layer = []
+  hidden_layer = []
+  links = []
+  random = null
+  is_dissolved = true
+
 
 
 class NNNode:
@@ -229,10 +243,8 @@ class HiddenNode:
     else:
       return value
 
-
   func add_incoming_link(link: Link):
     incoming_links.append(link)
-
 
   func add_outgoing_link(link: Link):
     outgoing_links.append(link)

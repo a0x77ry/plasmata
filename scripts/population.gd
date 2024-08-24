@@ -26,7 +26,7 @@ var generation
 
 func _init(_genomes=[], input_names=[], output_names=[],
     _generation=0, _population_stream=0, _selection_rate=SELECTION_RATE):
-  genomes = _genomes
+  genomes = _genomes.duplicate()
   selection_rate = _selection_rate
   population_stream = _population_stream
   generation = _generation
@@ -34,7 +34,7 @@ func _init(_genomes=[], input_names=[], output_names=[],
   random.randomize()
   for _i in range(0, population_stream):
     var new_genome = Genome.new(self)
-    new_genome.init_io_nodes(input_names, output_names)
+    new_genome.init_io_nodes(input_names.duplicate(), output_names.duplicate())
     genomes.append(new_genome)
   mutate_all_genomes()
 

@@ -7,7 +7,7 @@ export (float) var rotation_speed = 0.5 # was 1.5
 export (float) var speed_limit = 100.0
 # export (float) var rotation_speed_limit = 8.0
 export (float) var rotation_speed_limit = 2.0
-export (int) var penalty_for_hidden_nodes = 0 # was 5
+export (int) var penalty_for_hidden_nodes = 5 # was 5
 export(PackedScene) var Agent = load("res://agent.tscn")
 
 # const Genome = preload("res://scripts/genome.gd")
@@ -19,6 +19,8 @@ const EXTRA_SPAWNS = 6
 const MATE_DISTRIBUTION_SPREAD = 0.5
 const REDUCTION_WHEN_FULL = 10
 const SPAWN_CHILDREN_TIME = 2.0
+const INVERSE_FRACTION_MULTIPLIER = 1.0
+const SPAWNING_TIME_UPPER_LIMIT = 8.0
 
 onready var ray_forward = get_node("ray_forward")
 onready var ray_left = get_node("ray_left")
@@ -60,6 +62,7 @@ var times_finished: int
 var spawn_timer_to_set: float = 0.0
 var current_fitness: float = 0.1
 var simple_fitness: float = 0.1
+var is_dead := false
 
 
 func _ready():
@@ -79,49 +82,21 @@ func _ready():
       fitness_timeline.append(get_fitness())
 
   nn = NN.new(genome)
-  # agent_loop()
 
 
 func _physics_process(delta):
-  if !reached_the_end && !crashed:
+  update_current_fitness()
+  if !reached_the_end && !crashed && !is_dead:
     # get_player_input()
-    # get_nn_controls(nn, get_sensor_input())
+    get_nn_controls(nn, get_sensor_input())
     rotation += nn_rotation * rotation_speed * delta
     velocity = move_and_slide(velocity)
   else:
+    if nn != null && nn.is_dissolved:
+      nn = null
+      # genome = null
     rotation = 0.0
     velocity = 0.0
-
-
-# func _exit_tree():
-  # ray_left.queue_free()
-  # ray_right.queue_free()
-  # ray_forward.queue_free()
-  # ray_f_up_right.queue_free()
-  # ray_f_down_right.queue_free()
-#   nn.init_ref()
-#   nn.unreference()
-#   genome.init_ref()
-#   genome.unreference()
-
-# func agent_loop():
-#   while true:
-#     yield(get_tree().create_timer(0.3), "timeout")
-#     if !reached_the_end && !crashed:
-#       # get_player_input()
-#       get_nn_controls(nn, get_sensor_input())
-#       rotation += nn_rotation * rotation_speed * 0.16
-#       velocity = move_and_slide(velocity)
-#     else:
-#       rotation = 0.0
-#       velocity = 0.0
-
-
-# func set_genome(_genome):
-#    genome = _genome
-#
-# func get_genome():
-#   return genome
 
 
 func get_relative_fitness(agent, agents):
@@ -137,7 +112,6 @@ func reduce_population(num: int) -> void:
   var agents = game.get_active_agents()
   agents.sort_custom(AgentSorter, "sort_by_fitness_ascenting")
   for i in num:
-    # agents[i].queue_free()
     agents[i].kill_agent()
   game.decrement_agent_population(num)
 
@@ -165,7 +139,9 @@ func find_nearest_genome():
   return nearest_genome
 
 func get_alter_genome():
-  var crossed_genomes = population.couple_crossover([genome, find_nearest_genome()], 1)
+  var new_genome = Genome.new(population)
+  new_genome.duplicate(genome)
+  var crossed_genomes = population.couple_crossover([new_genome, find_nearest_genome()], 1)
   # breakpoint
   crossed_genomes[0].mutate()
   return crossed_genomes[0]
@@ -183,7 +159,7 @@ func get_alter_genome():
 func spawn_new_agent(pos: Vector2, rot: float, inputs: Array, geno: Genome, is_orig: bool, t_finished: int):
   if game.get_active_agents().size() >= Main.AGENT_LIMIT:
     reduce_population(2)
-  if game.get_active_agents().size() < Main.AGENT_LIMIT:
+  if true: #game.get_active_agents().size() < Main.AGENT_LIMIT:
     var new_agent = Agent.instance()
 
     var area_extents = spawning_area.get_node("CollisionShape2D").shape.extents
@@ -210,30 +186,30 @@ func spawn_new_agent(pos: Vector2, rot: float, inputs: Array, geno: Genome, is_o
     new_agent.fitness_timeline = fitness_timeline.duplicate()
     new_agent.is_original = is_orig
     new_agent.times_finished = t_finished
-    var inverse_fraction = 1.0 / get_relative_fitness(self, game.get_active_agents())
-    new_agent.spawn_timer_to_set = clamp(SPAWN_CHILDREN_TIME * inverse_fraction, 1.0, 8.0)
+    # var inverse_fraction = 1.0 / get_relative_fitness(self, game.get_active_agents())
+    var inverse_fraction = INVERSE_FRACTION_MULTIPLIER / (get_relative_fitness(self, game.get_active_agents()) * INVERSE_FRACTION_MULTIPLIER)
+    new_agent.spawn_timer_to_set = clamp(SPAWN_CHILDREN_TIME * inverse_fraction, 1.0, SPAWNING_TIME_UPPER_LIMIT)
 
     new_agent.add_to_group("agents")
     var agents_node = game.get_node("Agents")
-    # agents_node.add_child(new_agent)
     game.increment_agent_population()
+
     if is_orig:
       agents_node.call_deferred("add_child", new_agent)
     else:
       agents_node.add_child(new_agent)
-    # population.genomes.append(new_agent.genome)
 
 func spawn_children(is_orig: bool = false, add_finished: bool = false):
-  # var new_genome = Genome.new(population)
-  # new_genome.duplicate(genome)
+  var new_genome = Genome.new(population)
+  new_genome.duplicate(genome)
   # assert(new_genome != null)
-  if game.get_active_agents().size() >= Main.AGENT_LIMIT || is_queued_for_deletion():
+  if game.get_active_agents().size() >= Main.AGENT_LIMIT || is_queued_for_deletion() || is_dead:
     return
 
   if add_finished:
-    spawn_new_agent(position, rotation, nn_activated_inputs, genome, is_orig, times_finished + 1)
+    spawn_new_agent(position, rotation, nn_activated_inputs, new_genome, is_orig, times_finished + 1)
   else:
-    spawn_new_agent(position, rotation, nn_activated_inputs, genome, is_orig, times_finished)
+    spawn_new_agent(position, rotation, nn_activated_inputs, new_genome, is_orig, times_finished)
 
   var extra_spawns: int = EXTRA_SPAWNS
   extra_spawns *= get_relative_fitness(self, game.get_active_agents()) 
@@ -246,6 +222,19 @@ func spawn_children(is_orig: bool = false, add_finished: bool = false):
 
 func get_fitness() -> float:
   # return curve.get_closest_offset(position) + (times_finished * total_level_length)
+  return current_fitness
+
+
+func update_current_fitness():
+  var curve_local_pos = path.to_local(global_position)
+  var current_offset = curve.get_closest_offset(curve_local_pos)
+
+  var int_baked = curve.interpolate_baked(current_offset)
+  var dist_to_curve = int_baked.distance_to(curve_local_pos)
+
+  simple_fitness = current_offset - dist_to_curve
+  current_fitness = simple_fitness + (times_finished * total_level_length)
+
   return current_fitness
 
 
@@ -402,11 +391,12 @@ func finish(time_left: float):
   else:
     spawn_children(true, true)
   time_left_when_finished = time_left
+  kill_agent()
 
 
 func _on_SpawnTimer_timeout():
-  # if !is_inside_tree():
-  #   return
+  if is_dead:
+    return
   var total_fitness := 0.0
   for i in range(1, FIT_GEN_HORIZON + 1):
     total_fitness += fitness_timeline[-i]
@@ -414,41 +404,46 @@ func _on_SpawnTimer_timeout():
   assign_fitness()
   fitness_timeline.append(get_fitness())
   if avg_fitness + FITNESS_IMPROVEMENT_THRESHOLD < get_fitness():
-    spawn_children()
+    # spawn_children()
+    call_deferred("spawn_children")
 
 
 func _on_DeathTimer_timeout():
   kill_agent()
 
 func kill_agent():
-  # nn.unreference()
-  # genome.unreference()
-  # nn = null
-  # genome = null
+  if is_dead:
+    return
+  is_dead = true
+  # yield(get_tree(), "idle_frame")
   nn.disolve_nn()
+  genome.disolve_genome()
+
   game.decrement_agent_population()
-  remove_from_group("agents")
-  game.get_node("Agents").remove_child(self)
+  # remove_from_group("agents")
+  # game.get_node("Agents").remove_child(self)
   queue_free()
 
 
 func _on_FitnessUpdateTimer_timeout():
-  var curve_local_pos = path.to_local(global_position)
-  var current_offset = curve.get_closest_offset(curve_local_pos)
-
-  var int_baked = curve.interpolate_baked(current_offset)
-  var dist_to_curve = int_baked.distance_to(curve_local_pos)
-
-  simple_fitness = current_offset - dist_to_curve
-  current_fitness = simple_fitness + (times_finished * total_level_length)
-
-  if current_fitness == 0:
-    # current_fitness = 0.1
-    breakpoint
+  pass
+  # var curve_local_pos = path.to_local(global_position)
+  # var current_offset = curve.get_closest_offset(curve_local_pos)
+  #
+  # var int_baked = curve.interpolate_baked(current_offset)
+  # var dist_to_curve = int_baked.distance_to(curve_local_pos)
+  #
+  # simple_fitness = current_offset - dist_to_curve
+  # current_fitness = simple_fitness + (times_finished * total_level_length)
+  #
+  # if current_fitness == 0:
+  #   # current_fitness = 0.1
+  #   breakpoint
 
 
 func _on_NNControlsUpdateTimer_timeout():
-  get_nn_controls(nn, get_sensor_input())
+  pass
+  # get_nn_controls(nn, get_sensor_input())
 
 
 class AgentSorter:

@@ -57,7 +57,7 @@ func get_active_agents():
   var all_agents =  get_tree().get_nodes_in_group("agents")
   var active_agents := []
   for agent in all_agents:
-    if !agent.is_queued_for_deletion():
+    if !agent.is_queued_for_deletion() && !agent.is_dead:
       active_agents.append(agent)
   return active_agents
 
