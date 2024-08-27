@@ -59,8 +59,6 @@ func restart_population():
 
 
 func get_active_agents():
-  # if !is_inside_tree():
-  #   free()
   var all_agents =  get_tree().get_nodes_in_group("agents")
   var active_agents := []
   for agent in all_agents:

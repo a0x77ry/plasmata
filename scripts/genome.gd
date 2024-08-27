@@ -12,7 +12,7 @@ const ADD_NODE_RATE = 0.05 # original : 0.15
 const META_W_MUTATION_RATE = 0.05
 const META_ADD_LINK_MUTATION_RATE = 0.05
 const META_ADD_NODE_MUTATION_RATE = 0.05
-const DELETE_LINK_RATE = 0.1
+const DELETE_LINK_RATE = 0.10
 
 var input_nodes
 var hidden_nodes

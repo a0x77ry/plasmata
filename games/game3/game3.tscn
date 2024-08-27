@@ -178,7 +178,7 @@ position = Vector2( -74.7798, -191.561 )
 scale = Vector2( 1.0581, 1.47534 )
 curve = SubResource( 9 )
 
-[node name="UI" parent="." index="9"]
+[node name="UI" parent="." index="8"]
 rect_pivot_offset = Vector2( -299, 20 )
 
 [node name="Countdown" type="HBoxContainer" parent="UI" index="1"]

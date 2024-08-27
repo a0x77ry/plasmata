@@ -16,7 +16,7 @@ extents = Vector2( 10, 169.5 )
 [sub_resource type="Curve2D" id=9]
 resource_local_to_scene = true
 _data = {
-"points": PoolVector2Array( 0, 0, 0, 0, -54, 73, 0, 0, 0, 0, 47, 249, 0, 0, 0, 0, 121, 391, 0, 0, 0, 0, 337, 391, 0, 0, 0, 0, 372, 188, 0, 0, 0, 0, 575, 184, 0, 0, 0, 0, 649, 376, 0, 0, 0, 0, 858, 371, 0, 0, 0, 0, 933, 145, 0, 0, 0, 0, 1162, 147, 0, 0, 0, 0, 1285, 173 )
+"points": PoolVector2Array( 0, 0, 0, 0, -54, 73, 0, 0, 0, 0, 47, 249, 0, 0, 0, 0, 121, 391, 0, 0, 0, 0, 337, 391, 0, 0, 0, 0, 372, 188, 0, 0, 0, 0, 575, 184, 0, 0, 0, 0, 649, 376, 0, 0, 0, 0, 858, 371, 0, 0, 0, 0, 933, 145, 0, 0, 0, 0, 1162, 147, 0, 0, 0, 0, 1284, 259 )
 }
 
 [sub_resource type="DynamicFont" id=1]
@@ -136,6 +136,7 @@ __meta__ = {
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SpawningArea" index="0"]
 shape = SubResource( 7 )
+disabled = true
 
 [node name="FinishLine" type="Area2D" parent="." index="4"]
 position = Vector2( 1285, 303 )

@@ -7,7 +7,7 @@ export (float) var rotation_speed = 0.5 # was 1.5
 export (float) var speed_limit = 100.0
 # export (float) var rotation_speed_limit = 8.0
 export (float) var rotation_speed_limit = 2.0
-export (int) var penalty_for_hidden_nodes = 5 # was 5
+export (int) var penalty_for_hidden_nodes = 0 # was 5
 export(PackedScene) var Agent = load("res://agent.tscn")
 
 # const Genome = preload("res://scripts/genome.gd")
@@ -62,6 +62,8 @@ var spawn_timer_to_set: float = 0.0
 var current_fitness: float = 0.1
 var simple_fitness: float = 0.1
 var is_dead := false
+var area_extents
+var spawning_area_position
 
 
 func _ready():
@@ -69,6 +71,8 @@ func _ready():
   assert(Agent != null, "Agent need to be set in Agent Scene")
   total_level_length = curve.get_baked_length()
   spawning_area = game.get_node("SpawningArea")
+  spawning_area_position = spawning_area.position
+  area_extents = spawning_area.get_node("CollisionShape2D").shape.extents
 
   if spawn_timer_to_set != 0.0:
     spawn_timer.wait_time = spawn_timer_to_set
@@ -129,9 +133,9 @@ func reduce_population(num: int) -> void:
       agents_dead += 1
   for i in num + agents_dead:
     var agent = game.sorted_agents[i]
-    if is_instance_valid(agent):
+    if !is_instance_valid(agent):
       continue
-    game.sorted_agents[i].kill_agent()
+    agent.kill_agent()
   game.decrement_agent_population(num)
 
 
@@ -185,21 +189,19 @@ func get_alter_genome():
 
 func spawn_new_agent(pos: Vector2, rot: float, inputs: Array, geno: Genome, is_orig: bool, t_finished: int):
   if game.get_active_agents().size() >= Main.AGENT_LIMIT:
-    reduce_population(2)
+    reduce_population(1)
   if true: #game.get_active_agents().size() < Main.AGENT_LIMIT:
     var new_agent = Agent.instance()
 
-    var area_extents = spawning_area.get_node("CollisionShape2D").shape.extents
     if !is_orig:
       new_agent.position = pos
       new_agent.rotation = rot
     else:
-      var pos_x = rand_range(spawning_area.position.x - area_extents.x,
-          spawning_area.position.x + area_extents.x)
-      var pos_y = rand_range(spawning_area.position.y - area_extents.y,
-          spawning_area.position.y + area_extents.y)
-      new_agent.position.x = pos_x
-      new_agent.position.y = pos_y
+      # var pos_x = rand_range(spawning_area_position.x - area_extents.x,
+      #     spawning_area.position.x + area_extents.x)
+      # var pos_y = rand_range(spawning_area_position.y - area_extents.y,
+      #     spawning_area.position.y + area_extents.y)
+      new_agent.position = Vector2(spawning_area_position.x, pos.y)
       # new_agent.rotation = rand_range(-PI, PI)
       new_agent.rotation = rot
 
@@ -214,7 +216,7 @@ func spawn_new_agent(pos: Vector2, rot: float, inputs: Array, geno: Genome, is_o
     new_agent.is_original = is_orig
     new_agent.times_finished = t_finished
     var inverse_fraction = 1.0 / get_relative_fitness(self, game.get_active_agents())
-    inverse_fraction = pow(inverse_fraction, 1.5)
+    inverse_fraction = pow(inverse_fraction, 2.0)
     # print(SPAWN_CHILDREN_TIME * inverse_fraction)
     new_agent.spawn_timer_to_set = clamp(SPAWN_CHILDREN_TIME * inverse_fraction, 1.0, SPAWNING_TIME_UPPER_LIMIT)
 
@@ -224,6 +226,7 @@ func spawn_new_agent(pos: Vector2, rot: float, inputs: Array, geno: Genome, is_o
 
     if is_orig:
       agents_node.call_deferred("add_child", new_agent)
+      # agents_node.add_child(new_agent)
     else:
       agents_node.add_child(new_agent)
 
@@ -231,7 +234,10 @@ func spawn_children(is_orig: bool = false, add_finished: bool = false):
   var new_genome = Genome.new(population)
   new_genome.duplicate(genome)
   # assert(new_genome != null)
-  if game.get_active_agents().size() >= Main.AGENT_LIMIT || is_queued_for_deletion() || is_dead:
+  if game.get_active_agents().size() >= Main.AGENT_LIMIT:
+    reduce_population(2)
+  if game.get_active_agents().size() >= Main.AGENT_LIMIT || ((is_queued_for_deletion() || is_dead) && add_finished == false):
+  # if (is_queued_for_deletion() || is_dead) && add_finished == false:
     return
 
   if add_finished:
