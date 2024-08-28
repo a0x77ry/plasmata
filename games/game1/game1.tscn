@@ -67,6 +67,7 @@ __meta__ = {
 "_edit_lock_": true
 }
 time = 20
+population_stream = 20
 unpaused_time_scale = 3
 
 [node name="SpawnTimer" type="Timer" parent="." index="0"]

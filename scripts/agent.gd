@@ -173,71 +173,58 @@ func get_alter_genome():
   var new_genome = Genome.new(population)
   new_genome.duplicate(genome)
   var crossed_genomes = population.couple_crossover([new_genome, find_nearest_genome()], 1)
-  # breakpoint
   crossed_genomes[0].mutate()
   return crossed_genomes[0]
 
-# func get_active_agents():
-#   # if !is_inside_tree():
-#   #   free()
-#   var agents =  get_tree().get_nodes_in_group("agents")
-#   var active_agents := []
-#   for agent in agents:
-#     if !agent.is_queued_for_deletion():
-#       active_agents.append(agent)
-#   return active_agents
 
 func spawn_new_agent(pos: Vector2, rot: float, inputs: Array, geno: Genome, is_orig: bool, t_finished: int):
   if game.get_active_agents().size() >= Main.AGENT_LIMIT:
     reduce_population(1)
-  if true: #game.get_active_agents().size() < Main.AGENT_LIMIT:
-    var new_agent = Agent.instance()
 
-    if !is_orig:
-      new_agent.position = pos
-      new_agent.rotation = rot
-    else:
-      # var pos_x = rand_range(spawning_area_position.x - area_extents.x,
-      #     spawning_area.position.x + area_extents.x)
-      # var pos_y = rand_range(spawning_area_position.y - area_extents.y,
-      #     spawning_area.position.y + area_extents.y)
-      new_agent.position = Vector2(spawning_area_position.x, pos.y)
-      # new_agent.rotation = rand_range(-PI, PI)
-      new_agent.rotation = rot
+  var new_agent = Agent.instance()
+  if !is_orig:
+    new_agent.position = pos
+    new_agent.rotation = rot
+  else:
+    # var pos_x = rand_range(spawning_area_position.x - area_extents.x,
+    #     spawning_area.position.x + area_extents.x)
+    # var pos_y = rand_range(spawning_area_position.y - area_extents.y,
+    #     spawning_area.position.y + area_extents.y)
+    new_agent.position = Vector2(spawning_area_position.x, pos.y)
+    # new_agent.rotation = rand_range(-PI, PI)
+    new_agent.rotation = rot
 
-    new_agent.nn_activated_inputs = inputs.duplicate()
-    # new_agent.genome = geno
-    new_agent.genome = Genome.new(population)
-    new_agent.genome.duplicate(geno)
-    new_agent.game = game
-    new_agent.population = population
-    new_agent.generation = generation + 1
-    new_agent.fitness_timeline = fitness_timeline.duplicate()
-    new_agent.is_original = is_orig
-    new_agent.times_finished = t_finished
-    var inverse_fraction = 1.0 / get_relative_fitness(self, game.get_active_agents())
-    inverse_fraction = pow(inverse_fraction, 2.0)
-    # print(SPAWN_CHILDREN_TIME * inverse_fraction)
-    new_agent.spawn_timer_to_set = clamp(SPAWN_CHILDREN_TIME * inverse_fraction, 1.0, SPAWNING_TIME_UPPER_LIMIT)
+  new_agent.nn_activated_inputs = inputs.duplicate()
+  new_agent.genome = Genome.new(population)
+  new_agent.genome.duplicate(geno)
+  new_agent.game = game
+  new_agent.population = population
+  new_agent.generation = generation + 1
+  new_agent.fitness_timeline = fitness_timeline.duplicate()
+  new_agent.is_original = is_orig
+  new_agent.times_finished = t_finished
+  var inverse_fraction = 1.0 / get_relative_fitness(self, game.get_active_agents())
+  inverse_fraction = pow(inverse_fraction, 2.0)
+  new_agent.spawn_timer_to_set = clamp(SPAWN_CHILDREN_TIME * inverse_fraction, 1.0, SPAWNING_TIME_UPPER_LIMIT)
 
-    new_agent.add_to_group("agents")
-    var agents_node = game.get_node("Agents")
-    game.increment_agent_population()
+  new_agent.add_to_group("agents")
+  var agents_node = game.get_node("Agents")
 
-    if is_orig:
-      agents_node.call_deferred("add_child", new_agent)
-      # agents_node.add_child(new_agent)
-    else:
-      agents_node.add_child(new_agent)
+  if is_orig:
+    agents_node.call_deferred("add_child", new_agent)
+    # agents_node.add_child(new_agent)
+  else:
+    agents_node.add_child(new_agent)
+
+  game.increment_agent_population()
 
 func spawn_children(is_orig: bool = false, add_finished: bool = false):
   var new_genome = Genome.new(population)
   new_genome.duplicate(genome)
-  # assert(new_genome != null)
   if game.get_active_agents().size() >= Main.AGENT_LIMIT:
     reduce_population(2)
-  if game.get_active_agents().size() >= Main.AGENT_LIMIT || ((is_queued_for_deletion() || is_dead) && add_finished == false):
-  # if (is_queued_for_deletion() || is_dead) && add_finished == false:
+  # if game.get_active_agents().size() >= Main.AGENT_LIMIT + 2 || ((is_queued_for_deletion() || is_dead) && add_finished == false):
+  if game.get_active_agents().size() >= Main.AGENT_LIMIT + 2 || is_queued_for_deletion() || is_dead:
     return
 
   if add_finished:
@@ -419,12 +406,23 @@ func get_nn_controls(_nn: NN, sensor_input: Dictionary):
   velocity = Vector2(real_speed, 0).rotated(rotation)
 
 
+# Used in yield
+func spawn_children_idle(is_orig := false, add_finished := false):
+  yield(get_tree(), "idle_frame")
+  if !is_queued_for_deletion() && !is_dead:
+    spawn_children(is_orig, add_finished)
+
+
 func finish(time_left: float):
+  # death_lock = true
   if is_original:
     reached_the_end = true
   else:
-    spawn_children(true, true)
+    # spawn_children(true, true)
+    if is_queued_for_deletion() || !is_dead:
+      yield(spawn_children_idle(true, true), "completed")
   time_left_when_finished = time_left
+  # kill_agent(true)
   kill_agent()
 
 
@@ -449,7 +447,7 @@ func kill_agent():
   if is_dead:
     return
   is_dead = true
-  # yield(get_tree(), "idle_frame")
+  yield(get_tree(), "idle_frame")
   nn.disolve_nn()
   genome.disolve_genome()
 
