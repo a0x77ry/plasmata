@@ -62,10 +62,8 @@ size = 25
 font_data = ExtResource( 3 )
 
 [node name="Game1" instance=ExtResource( 1 )]
+position = Vector2( 251, 264 )
 script = ExtResource( 2 )
-__meta__ = {
-"_edit_lock_": true
-}
 time = 20
 population_stream = 20
 unpaused_time_scale = 3
@@ -108,21 +106,15 @@ scale = Vector2( 8.28, 12.602 )
 collision_layer = 3
 
 [node name="Wall4" parent="Walls" index="5" instance=ExtResource( 4 )]
-position = Vector2( 2, 273 )
+position = Vector2( -6, 262 )
 rotation = -1.57079
-scale = Vector2( 59.7816, -0.802072 )
+scale = Vector2( 11, -0.802 )
 collision_layer = 3
 
-[node name="Wall5" parent="Walls" index="6" instance=ExtResource( 4 )]
-position = Vector2( 2, 273 )
-rotation = -1.57079
-scale = Vector2( 59.7816, -0.802072 )
-collision_layer = 3
-
-[node name="Wall8" parent="Walls" index="7" instance=ExtResource( 4 )]
+[node name="Wall8" parent="Walls" index="6" instance=ExtResource( 4 )]
 position = Vector2( 1324, 267 )
 rotation = 1.5708
-scale = Vector2( 11.8, 1 )
+scale = Vector2( 11, 1 )
 
 [node name="SpawningArea" type="Area2D" parent="." index="3"]
 position = Vector2( 49, 252 )
@@ -147,9 +139,14 @@ shape = SubResource( 8 )
 curve = SubResource( 9 )
 
 [node name="UI" parent="." index="7"]
+margin_left = -252.0
+margin_top = -163.0
+margin_right = -212.0
+margin_bottom = -123.0
 rect_pivot_offset = Vector2( -299, 20 )
 
 [node name="Countdown" type="HBoxContainer" parent="UI" index="1"]
+visible = false
 margin_left = 992.0
 margin_top = 470.0
 margin_right = 1238.0
@@ -175,6 +172,7 @@ align = 1
 valign = 1
 
 [node name="Statistics" type="VBoxContainer" parent="UI" index="2"]
+visible = false
 margin_left = 41.0
 margin_top = 472.0
 margin_right = 310.0
