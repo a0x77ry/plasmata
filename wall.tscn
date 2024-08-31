@@ -11,6 +11,7 @@ resource_local_to_scene = true
 extents = Vector2( 15.534, 6.79612 )
 
 [node name="Wall" type="StaticBody2D"]
+collision_layer = 3
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_group_": true

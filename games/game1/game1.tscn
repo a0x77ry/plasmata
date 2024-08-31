@@ -69,7 +69,6 @@ population_stream = 20
 unpaused_time_scale = 3
 
 [node name="SpawnTimer" type="Timer" parent="." index="0"]
-process_mode = 0
 wait_time = 10.0
 autostart = true
 
@@ -79,37 +78,31 @@ autostart = true
 position = Vector2( 477, 438 )
 rotation = 3.14159
 scale = Vector2( 59.7816, -0.802072 )
-collision_layer = 3
 
 [node name="Wall2" parent="Walls" index="1" instance=ExtResource( 4 )]
 position = Vector2( 511, 92 )
 rotation = 3.14159
 scale = Vector2( 59.7816, -0.802072 )
-collision_layer = 3
 
 [node name="Wall3" parent="Walls" index="2" instance=ExtResource( 4 )]
 position = Vector2( 468, 326 )
 rotation = 1.5708
 scale = Vector2( 6.88, 11.122 )
-collision_layer = 3
 
 [node name="Wall6" parent="Walls" index="3" instance=ExtResource( 4 )]
 position = Vector2( 753, 207 )
 rotation = 1.5708
 scale = Vector2( 7.44, 11.482 )
-collision_layer = 3
 
 [node name="Wall7" parent="Walls" index="4" instance=ExtResource( 4 )]
 position = Vector2( 1057, 309 )
 rotation = 1.5708
 scale = Vector2( 8.28, 12.602 )
-collision_layer = 3
 
 [node name="Wall4" parent="Walls" index="5" instance=ExtResource( 4 )]
 position = Vector2( -6, 262 )
 rotation = -1.57079
 scale = Vector2( 11, -0.802 )
-collision_layer = 3
 
 [node name="Wall8" parent="Walls" index="6" instance=ExtResource( 4 )]
 position = Vector2( 1324, 267 )
@@ -324,6 +317,7 @@ pressed = true
 enabled_focus_mode = 0
 text = "Pause when solved"
 
+[connection signal="timeout" from="SpawnTimer" to="." method="_on_SpawnTimer_timeout"]
 [connection signal="body_entered" from="FinishLine" to="." method="_on_FinishLine_body_entered"]
 [connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]
 [connection signal="value_changed" from="UI/TimeScale/FFSlider" to="." method="_on_FFSlider_value_changed"]

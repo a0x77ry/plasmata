@@ -16,9 +16,9 @@ func _enter_tree():
     "ray_right_distance",
     "fitness",
     # "go_right_input",
-    "go_forward_input",
-    "mwall_1_pos",
-    "mwall_2_pos"
+    # "go_forward_input",
+    # "mwall_1_pos",
+    # "mwall_2_pos"
   ]
   output_names = [
     "go_right",

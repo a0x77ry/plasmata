@@ -426,6 +426,20 @@ func finish(time_left: float):
   kill_agent()
 
 
+func kill_agent():
+  if is_dead:
+    return
+  is_dead = true
+  yield(get_tree(), "idle_frame")
+  nn.disolve_nn()
+  genome.disolve_genome()
+
+  game.decrement_agent_population()
+  # remove_from_group("agents")
+  # game.get_node("Agents").remove_child(self)
+  queue_free()
+
+
 func _on_SpawnTimer_timeout():
   if is_dead:
     return
@@ -442,19 +456,6 @@ func _on_SpawnTimer_timeout():
 
 func _on_DeathTimer_timeout():
   kill_agent()
-
-func kill_agent():
-  if is_dead:
-    return
-  is_dead = true
-  yield(get_tree(), "idle_frame")
-  nn.disolve_nn()
-  genome.disolve_genome()
-
-  game.decrement_agent_population()
-  # remove_from_group("agents")
-  # game.get_node("Agents").remove_child(self)
-  queue_free()
 
 
 func _on_NNControlsUpdateTimer_timeout():
