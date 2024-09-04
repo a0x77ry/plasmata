@@ -278,6 +278,13 @@ func get_sensor_input():
   var ray_right_distance: float
   var ray_f_up_right_distance: float
   var ray_f_down_right_distance: float
+
+  var ray_f_distance_mw: float
+  var ray_left_distance_mw: float
+  var ray_right_distance_mw: float
+  var ray_f_up_right_distance_mw: float
+  var ray_f_down_right_distance_mw: float
+
   var fitness: float
   var go_forward_input: float
   var go_right_input: float
@@ -301,42 +308,65 @@ func get_sensor_input():
   if nn_activated_inputs.has("pos_y"):
     norm_pos_y = global_position.y / level_height
 
-  if nn_activated_inputs.has("ray_f_distance"):
+  if nn_activated_inputs.has("ray_f_distance") || nn_activated_inputs.has("ray_f_distance_mw"):
     ray_f_distance = 0.0 # is was 1.0
+    ray_f_distance_mw = 0.0 # is was 1.0
     if ray_forward.is_colliding():
       var distance = global_position.distance_to(ray_forward.get_collision_point())
-      # ray_f_distance = distance / ray_forward.cast_to.x
-      ray_f_distance = (ray_forward.cast_to.x - distance) / ray_forward.cast_to.x
+      var col = ray_forward.get_collider()
+      if col.is_in_group("normal_walls"):
+        # ray_f_distance = distance / ray_forward.cast_to.x
+        ray_f_distance = (ray_forward.cast_to.x - distance) / ray_forward.cast_to.x
+      elif col.is_in_group("moving_walls"):
+        ray_f_distance_mw = (ray_forward.cast_to.x - distance) / ray_forward.cast_to.x
 
-  if nn_activated_inputs.has("ray_left_distance"):
+  if nn_activated_inputs.has("ray_left_distance") || nn_activated_inputs.has("ray_left_distance_mw"):
     ray_left_distance = 0.0 # is was 1.0
+    ray_left_distance_mw = 0.0 # is was 1.0
     if ray_left.is_colliding():
       var distance = global_position.distance_to(ray_left.get_collision_point())
-      ray_left_distance = (abs(ray_left.cast_to.y) - distance) / abs(ray_left.cast_to.y)
+      var col = ray_left.get_collider()
+      if col.is_in_group("normal_walls"):
+        ray_left_distance = (abs(ray_left.cast_to.y) - distance) / abs(ray_left.cast_to.y)
+      elif col.is_in_group("moving_walls"):
+        ray_left_distance_mw = (abs(ray_left.cast_to.y) - distance) / abs(ray_left.cast_to.y)
 
-  if nn_activated_inputs.has("ray_right_distance"):
+  if nn_activated_inputs.has("ray_right_distance") || nn_activated_inputs.has("ray_right_distance_mw"):
     ray_right_distance = 0.0 # is was 1.0
+    ray_right_distance_mw = 0.0 # is was 1.0
     if ray_right.is_colliding():
       var distance = global_position.distance_to(ray_right.get_collision_point())
-      ray_right_distance = (ray_right.cast_to.y - distance) / ray_right.cast_to.y
+      var col = ray_right.get_collider()
+      if col.is_in_group("normal_walls"):
+        ray_right_distance = (ray_right.cast_to.y - distance) / ray_right.cast_to.y
+      elif col.is_in_group("moving_walls"):
+        ray_right_distance_mw = (ray_right.cast_to.y - distance) / ray_right.cast_to.y
 
-  if nn_activated_inputs.has("ray_f_up_right_distance"):
+  if nn_activated_inputs.has("ray_f_up_right_distance") || nn_activated_inputs.has("ray_f_up_right_distance_mw"):
     ray_f_up_right_distance = 0.0
+    ray_f_up_right_distance_mw = 0.0
     if ray_f_up_right.is_colliding():
       var distance = global_position.distance_to(ray_f_up_right.get_collision_point())
       var ray_length = Vector2.ZERO.distance_to(Vector2(ray_f_up_right.cast_to.x,
           ray_f_up_right.cast_to.y))
-      # ray_f_up_distance = distance / ray_length
-      ray_f_up_right_distance = (ray_length - distance) / ray_length
+      var col = ray_f_up_right.get_collider()
+      if col.is_in_group("normal_walls"):
+        ray_f_up_right_distance = (ray_length - distance) / ray_length
+      elif col.is_in_group("moving_walls"):
+        ray_f_up_right_distance_mw = (ray_length - distance) / ray_length
 
-  if nn_activated_inputs.has("ray_f_down_right_distance"):
+  if nn_activated_inputs.has("ray_f_down_right_distance") || nn_activated_inputs.has("ray_f_down_right_distance_mw"):
     ray_f_down_right_distance = 0.0
+    ray_f_down_right_distance_mw = 0.0
     if ray_f_down_right.is_colliding():
       var distance = global_position.distance_to(ray_f_down_right.get_collision_point())
       var ray_length = Vector2.ZERO.distance_to(Vector2(ray_f_down_right.cast_to.x,
           ray_f_down_right.cast_to.y))
-      # ray_f_down_distance = distance / ray_length
-      ray_f_down_right_distance = (ray_length - distance) / ray_length
+      var col = ray_f_down_right.get_collider()
+      if col.is_in_group("normal_walls"):
+        ray_f_down_right_distance = (ray_length - distance) / ray_length
+      elif col.is_in_group("moving_walls"):
+        ray_f_down_right_distance_mw = (ray_length - distance) / ray_length
 
   if nn_activated_inputs.has("fitness"):
     # fitness = curve.get_closest_offset(position) / total_level_length
@@ -371,6 +401,13 @@ func get_sensor_input():
         "ray_f_down_right_distance": ray_f_down_right_distance,
         "ray_left_distance": ray_left_distance,
         "ray_right_distance": ray_right_distance,
+
+        "ray_f_distance_mw": ray_f_distance_mw,
+        "ray_f_up_right_distance_mw": ray_f_up_right_distance_mw,
+        "ray_f_down_right_distance_mw": ray_f_down_right_distance_mw,
+        "ray_left_distance_mw": ray_left_distance_mw,
+        "ray_right_distance_mw": ray_right_distance_mw,
+
         "fitness": fitness,
         "go_right_input": go_right_input,
         "go_forward_input": go_forward_input,

@@ -10,7 +10,8 @@ extents = Vector2( 39, 119 )
 resource_local_to_scene = true
 extents = Vector2( 39.802, 119.406 )
 
-[node name="MovingWall" type="KinematicBody2D"]
+[node name="MovingWall" type="KinematicBody2D" groups=["moving_walls"]]
+collision_layer = 3
 script = ExtResource( 1 )
 __meta__ = {
 "_edit_group_": true

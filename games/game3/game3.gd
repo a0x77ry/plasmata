@@ -14,6 +14,13 @@ func _enter_tree():
     "ray_f_down_right_distance",
     "ray_left_distance",
     "ray_right_distance",
+
+    "ray_f_distance_mw",
+    "ray_f_up_right_distance_mw",
+    "ray_f_down_right_distance_mw",
+    "ray_left_distance_mw",
+    "ray_right_distance_mw",
+
     "fitness",
     # "go_right_input",
     # "go_forward_input",
