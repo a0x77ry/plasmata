@@ -112,7 +112,7 @@ rotation = -1.57079
 scale = Vector2( 11, -0.802 )
 
 [node name="Wall8" parent="Walls" index="7" instance=ExtResource( 4 )]
-position = Vector2( 1324, 267 )
+position = Vector2( 1836, 260 )
 rotation = 1.5708
 scale = Vector2( 11, 1 )
 
@@ -127,7 +127,8 @@ shape = SubResource( 7 )
 disabled = true
 
 [node name="FinishLine" type="Area2D" parent="." index="4"]
-position = Vector2( 1285, 303 )
+position = Vector2( 1296, 304 )
+scale = Vector2( 2.04, 1 )
 __meta__ = {
 "_edit_group_": true
 }

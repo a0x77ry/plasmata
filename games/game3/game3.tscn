@@ -8,7 +8,7 @@
 
 [sub_resource type="Animation" id=10]
 resource_name = "MovingWall"
-length = 10.0
+length = 16.0
 loop = true
 tracks/0/type = "value"
 tracks/0/path = NodePath("Walls/MovingWall:position")
@@ -17,7 +17,7 @@ tracks/0/loop_wrap = true
 tracks/0/imported = false
 tracks/0/enabled = true
 tracks/0/keys = {
-"times": PoolRealArray( 0, 2.5, 5.1, 7.5, 10 ),
+"times": PoolRealArray( 0, 4, 8, 12, 16 ),
 "transitions": PoolRealArray( 1, 1, 1, 1, 1 ),
 "update": 0,
 "values": [ Vector2( 490, 216 ), Vector2( 490, 216 ), Vector2( 490, 316 ), Vector2( 490, 316 ), Vector2( 490, 216 ) ]
@@ -29,7 +29,7 @@ tracks/1/loop_wrap = true
 tracks/1/imported = false
 tracks/1/enabled = true
 tracks/1/keys = {
-"times": PoolRealArray( 0, 2.5, 5.1, 7.5, 10 ),
+"times": PoolRealArray( 0, 4, 8, 12, 16 ),
 "transitions": PoolRealArray( 1, 1, 1, 1, 1 ),
 "update": 0,
 "values": [ Vector2( 807, 320 ), Vector2( 807, 320 ), Vector2( 807, 216 ), Vector2( 807, 216 ), Vector2( 807, 320 ) ]
@@ -120,15 +120,15 @@ rotation = -1.57079
 scale = Vector2( 11, -0.802 )
 
 [node name="Wall8" parent="Walls" index="3" instance=ExtResource( 4 )]
-position = Vector2( 1324, 267 )
+position = Vector2( 1750, 262 )
 rotation = 1.5708
 scale = Vector2( 11, 1 )
 
 [node name="MovingWall" parent="Walls" index="4" instance=ExtResource( 5 )]
-position = Vector2( 490, 316 )
+position = Vector2( 490, 216 )
 
 [node name="MovingWall2" parent="Walls" index="5" instance=ExtResource( 5 )]
-position = Vector2( 807, 216 )
+position = Vector2( 807, 320 )
 
 [node name="Wall9" parent="Walls" index="6" instance=ExtResource( 4 )]
 position = Vector2( 283, 202 )
@@ -142,6 +142,7 @@ scale = Vector2( 6.2, 10.409 )
 
 [node name="WallPlayer" type="AnimationPlayer" parent="." index="3"]
 autoplay = "MovingWall"
+playback_speed = 0.5
 anims/MovingWall = SubResource( 10 )
 
 [node name="SpawningArea" type="Area2D" parent="." index="4"]
@@ -154,7 +155,8 @@ __meta__ = {
 shape = SubResource( 7 )
 
 [node name="FinishLine" type="Area2D" parent="." index="5"]
-position = Vector2( 1285, 303 )
+position = Vector2( 1294, 302 )
+scale = Vector2( 1.96001, 1 )
 __meta__ = {
 "_edit_group_": true
 }

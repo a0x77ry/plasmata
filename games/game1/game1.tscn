@@ -119,7 +119,8 @@ __meta__ = {
 shape = SubResource( 7 )
 
 [node name="FinishLine" type="Area2D" parent="." index="4"]
-position = Vector2( 1285, 303 )
+position = Vector2( 1294, 304 )
+scale = Vector2( 2.52001, 1 )
 __meta__ = {
 "_edit_group_": true
 }
