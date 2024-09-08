@@ -46,7 +46,7 @@ extents = Vector2( 10, 169.5 )
 [sub_resource type="Curve2D" id=9]
 resource_local_to_scene = true
 _data = {
-"points": PoolVector2Array( 0, 0, 0, 0, 18.6936, 110.863, 0, 0, 0, 0, 27.1994, 213.213, 0, 0, 0, 0, 189, 403, 0, 0, 0, 0, 959, 394, 0, 0, 0, 0, 1026, 250, 0, 0, 0, 0, 1287, 254 )
+"points": PoolVector2Array( 0, 0, 0, 0, 18.6936, 110.863, 0, 0, 0, 0, 27.1994, 213.213, 0, 0, 0, 0, 189, 403, 0, 0, 0, 0, 707.665, 395.543, 0, 0, 0, 0, 989.302, 394.188, 0, 0, 0, 0, 1026, 250, 0, 0, 0, 0, 1287, 254 )
 }
 
 [sub_resource type="DynamicFont" id=1]
@@ -142,7 +142,6 @@ scale = Vector2( 6.2, 10.409 )
 
 [node name="WallPlayer" type="AnimationPlayer" parent="." index="3"]
 autoplay = "MovingWall"
-playback_speed = 0.5
 anims/MovingWall = SubResource( 10 )
 
 [node name="SpawningArea" type="Area2D" parent="." index="4"]
@@ -157,6 +156,7 @@ shape = SubResource( 7 )
 [node name="FinishLine" type="Area2D" parent="." index="5"]
 position = Vector2( 1294, 302 )
 scale = Vector2( 1.96001, 1 )
+collision_layer = 5
 __meta__ = {
 "_edit_group_": true
 }

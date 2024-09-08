@@ -12,11 +12,15 @@ onready var time_scale_label = get_node("UI/TimeScale/TimeScaleLabel")
 onready var FF_slider = get_node("UI/TimeScale/FFSlider")
 onready var pause_when_solved_button = get_node("UI/PauseWhenSolved/CheckButton")
 onready var spawn_timer = get_node("SpawnTimer")
+onready var finish_area = get_node("FinishLine")
 
 var best_time = INF
 var do_pause_when_solved
 var random = RandomNumberGenerator.new()
 var agent_population : int = 0
+var start_finish_distance: float
+var fa_collision_mask
+var fa_col_result
 
 
 func _ready():
@@ -24,10 +28,18 @@ func _ready():
   init_population()
   set_time_scale(unpaused_time_scale)
   do_pause_when_solved = pause_when_solved_button.pressed
+  start_finish_distance = spawning_area.global_position.distance_to(finish_area.global_position)
+  fa_collision_mask = 0b100
 
 
 func _process(_delta):
   countdown.text = String("%.1f" % timer.time_left)
+
+
+func _physics_process(_delta):
+  var space_state = get_world_2d().direct_space_state
+  fa_col_result = space_state.intersect_ray(global_position, finish_area.global_position,
+      [self], fa_collision_mask, true, true)
 
 
 func generate_agent_population(agent_pop = population_stream):

@@ -2,9 +2,9 @@ extends KinematicBody2D
 
 
 export (float) var speed = 20.0 # waa 50.0
-export (float) var rotation_speed = 0.5 # was 1.5
-# export (float) var speed_limit = 300.0
-export (float) var speed_limit = 100.0
+export (float) var rotation_speed = 1.0 # was 0.5
+export (float) var speed_limit = 110.0
+# export (float) var speed_limit = 100.0
 # export (float) var rotation_speed_limit = 8.0
 export (float) var rotation_speed_limit = 2.0
 export (int) var penalty_for_hidden_nodes = 0 # was 5
@@ -303,6 +303,9 @@ func get_sensor_input():
   var rfu_col_normal_angle: float
   var rfd_col_normal_angle: float
 
+  var finish_distance: float
+  var finish_angle: float
+
   var fitness: float
   var go_forward_input: float
   var go_right_input: float
@@ -325,9 +328,16 @@ func get_sensor_input():
   if nn_activated_inputs.has("pos_y"):
     norm_pos_y = global_position.y / level_height
 
-  if nn_activated_inputs.has("ray_f_distance") || nn_activated_inputs.has("ray_f_distance_mw"):
-    ray_f_distance = 0.0 # is was 1.0
-    ray_f_distance_mw = 0.0 # is was 1.0
+  if nn_activated_inputs.has("finish_distance") || nn_activated_inputs.has("finish_angle"):
+    var fa_pos = game.fa_col_result["collider"].global_position
+    finish_distance = 0.0
+    finish_distance = global_position.distance_to(fa_pos) / game.start_finish_distance
+    finish_angle = 0.0
+    finish_angle = global_position.angle_to(fa_pos) / PI
+
+  if nn_activated_inputs.has("ray_f_distance") || nn_activated_inputs.has("rf_col_normal_angle"):
+    ray_f_distance = 0.0
+    ray_f_distance_mw = 0.0
     rf_col_normal_angle = 0.0
     if ray_forward.is_colliding():
       var distance = global_position.distance_to(ray_forward.get_collision_point())
@@ -343,7 +353,7 @@ func get_sensor_input():
       elif col.is_in_group("moving_walls"):
         ray_f_distance_mw = (ray_forward.cast_to.x - distance) / ray_forward.cast_to.x
 
-  if nn_activated_inputs.has("ray_left_distance") || nn_activated_inputs.has("ray_left_distance_mw"):
+  if nn_activated_inputs.has("ray_left_distance") || nn_activated_inputs.has("rl_col_normal_angle"):
     ray_left_distance = 0.0 # is was 1.0
     ray_left_distance_mw = 0.0 # is was 1.0
     rl_col_normal_angle = 0.0
@@ -355,12 +365,15 @@ func get_sensor_input():
         var col_normal = ray_left.get_collision_normal()
         rl_col_normal_angle = col_normal.angle() / PI
 
-      if col.is_in_group("normal_walls"):
-        ray_left_distance = (abs(ray_left.cast_to.y) - distance) / abs(ray_left.cast_to.y)
-      elif col.is_in_group("moving_walls"):
+      # if col.is_in_group("normal_walls"):
+      #   ray_left_distance = (abs(ray_left.cast_to.y) - distance) / abs(ray_left.cast_to.y)
+      # elif col.is_in_group("moving_walls"):
+      #   ray_left_distance_mw = (abs(ray_left.cast_to.y) - distance) / abs(ray_left.cast_to.y)
+      ray_left_distance = (abs(ray_left.cast_to.y) - distance) / abs(ray_left.cast_to.y)
+      if col.is_in_group("moving_walls"):
         ray_left_distance_mw = (abs(ray_left.cast_to.y) - distance) / abs(ray_left.cast_to.y)
 
-  if nn_activated_inputs.has("ray_right_distance") || nn_activated_inputs.has("ray_right_distance_mw"):
+  if nn_activated_inputs.has("ray_right_distance") || nn_activated_inputs.has("rr_col_normal_angle"):
     ray_right_distance = 0.0 # is was 1.0
     ray_right_distance_mw = 0.0 # is was 1.0
     rr_col_normal_angle = 0.0
@@ -372,12 +385,15 @@ func get_sensor_input():
         var col_normal = ray_right.get_collision_normal()
         rr_col_normal_angle = col_normal.angle() / PI
 
-      if col.is_in_group("normal_walls"):
-        ray_right_distance = (ray_right.cast_to.y - distance) / ray_right.cast_to.y
-      elif col.is_in_group("moving_walls"):
+      # if col.is_in_group("normal_walls"):
+      #   ray_right_distance = (ray_right.cast_to.y - distance) / ray_right.cast_to.y
+      # elif col.is_in_group("moving_walls"):
+      #   ray_right_distance_mw = (ray_right.cast_to.y - distance) / ray_right.cast_to.y
+      ray_right_distance = (ray_right.cast_to.y - distance) / ray_right.cast_to.y
+      if col.is_in_group("moving_walls"):
         ray_right_distance_mw = (ray_right.cast_to.y - distance) / ray_right.cast_to.y
 
-  if nn_activated_inputs.has("ray_f_up_right_distance") || nn_activated_inputs.has("ray_f_up_right_distance_mw"):
+  if nn_activated_inputs.has("ray_f_up_right_distance") || nn_activated_inputs.has("rfu_col_normal_angle"):
     ray_f_up_right_distance = 0.0
     ray_f_up_right_distance_mw = 0.0
     rfu_col_normal_angle = 0.0
@@ -391,12 +407,15 @@ func get_sensor_input():
         var col_normal = ray_f_up_right.get_collision_normal()
         rfu_col_normal_angle = col_normal.angle() / PI
 
-      if col.is_in_group("normal_walls"):
-        ray_f_up_right_distance = (ray_length - distance) / ray_length
-      elif col.is_in_group("moving_walls"):
+      # if col.is_in_group("normal_walls"):
+      #   ray_f_up_right_distance = (ray_length - distance) / ray_length
+      # elif col.is_in_group("moving_walls"):
+      #   ray_f_up_right_distance_mw = (ray_length - distance) / ray_length
+      ray_f_up_right_distance = (ray_length - distance) / ray_length
+      if col.is_in_group("moving_walls"):
         ray_f_up_right_distance_mw = (ray_length - distance) / ray_length
 
-  if nn_activated_inputs.has("ray_f_down_right_distance") || nn_activated_inputs.has("ray_f_down_right_distance_mw"):
+  if nn_activated_inputs.has("ray_f_down_right_distance") || nn_activated_inputs.has("rfd_col_normal_angle"):
     ray_f_down_right_distance = 0.0
     ray_f_down_right_distance_mw = 0.0
     rfd_col_normal_angle = 0.0
@@ -410,9 +429,12 @@ func get_sensor_input():
         var col_normal = ray_f_down_right.get_collision_normal()
         rfu_col_normal_angle = col_normal.angle() / PI
 
-      if col.is_in_group("normal_walls"):
-        ray_f_down_right_distance = (ray_length - distance) / ray_length
-      elif col.is_in_group("moving_walls"):
+      # if col.is_in_group("normal_walls"):
+      #   ray_f_down_right_distance = (ray_length - distance) / ray_length
+      # elif col.is_in_group("moving_walls"):
+      #   ray_f_down_right_distance_mw = (ray_length - distance) / ray_length
+      ray_f_down_right_distance = (ray_length - distance) / ray_length
+      if col.is_in_group("moving_walls"):
         ray_f_down_right_distance_mw = (ray_length - distance) / ray_length
 
   if nn_activated_inputs.has("fitness"):
@@ -429,7 +451,7 @@ func get_sensor_input():
     # var w_starting_y = 216
     # var w_ending_y = 316
     # var w_distance = abs(w_starting_y - w_ending_y)
-    mwall_1_pos = abs(mw1_starting_y - mwall_1.position.y) / mw_distance
+    mwall_1_pos = 1.0 - (abs(mw1_starting_y - mwall_1.position.y) / mw_distance)
 
   if nn_activated_inputs.has("mwall_2_pos"):
     # var mwall_2 = get_parent().get_parent().get_node("Walls/MovingWall2")
@@ -460,6 +482,9 @@ func get_sensor_input():
         "rr_col_normal_angle": rr_col_normal_angle,
         "rfu_col_normal_angle": rfu_col_normal_angle,
         "rfd_col_normal_angle": rfd_col_normal_angle,
+
+        "finish_distance": finish_distance,
+        "finish_angle": finish_angle,
 
         "fitness": fitness,
         "go_right_input": go_right_input,

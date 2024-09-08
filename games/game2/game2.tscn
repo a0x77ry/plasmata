@@ -127,8 +127,10 @@ shape = SubResource( 7 )
 disabled = true
 
 [node name="FinishLine" type="Area2D" parent="." index="4"]
+modulate = Color( 0.231373, 0.027451, 0.027451, 1 )
 position = Vector2( 1296, 304 )
 scale = Vector2( 2.04, 1 )
+collision_layer = 5
 __meta__ = {
 "_edit_group_": true
 }

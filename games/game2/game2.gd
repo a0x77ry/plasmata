@@ -13,11 +13,14 @@ func _enter_tree():
     "ray_left_distance",
     "ray_right_distance",
 
-    "rf_col_normal_angle",
-    "rl_col_normal_angle",
-    "rr_col_normal_angle",
-    "rfu_col_normal_angle",
-    "rfd_col_normal_angle",
+    # "rf_col_normal_angle",
+    # "rl_col_normal_angle",
+    # "rr_col_normal_angle",
+    # "rfu_col_normal_angle",
+    # "rfd_col_normal_angle",
+
+    "finish_distance",
+    "finish_angle",
 
     "fitness",
     # "go_right_input",

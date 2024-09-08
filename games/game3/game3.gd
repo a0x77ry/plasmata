@@ -29,6 +29,9 @@ func _enter_tree():
     "rfu_col_normal_angle",
     "rfd_col_normal_angle",
 
+    "finish_distance",
+    "finish_angle",
+
     "fitness",
     # "go_right_input",
     "go_forward_input",
