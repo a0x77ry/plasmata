@@ -32,8 +32,8 @@ func _ready():
   fa_collision_mask = 0b100
 
 
-func _process(_delta):
-  countdown.text = String("%.1f" % timer.time_left)
+# func _process(_delta):
+#   countdown.text = String("%.1f" % timer.time_left)
 
 
 func _physics_process(_delta):
@@ -58,7 +58,7 @@ func generate_agent_population(agent_pop = population_stream):
       agent.rotation = rand_range(-PI, PI)
 
       agent.population = population
-      agent.timer = timer
+      # agent.timer = timer
       agent.nn_activated_inputs = input_names.duplicate()
       assert(population.genomes[i] != null)
       # agent.set_genome(population.genomes[i])
@@ -112,19 +112,20 @@ func pause():
 func _on_FinishLine_body_entered(body:Node):
   if body.is_in_group("agents"):
     var agent = body as Node2D
-    agent.finish(timer.time_left)
+    # agent.finish(timer.time_left)
+    agent.finish()
     # solved_message_box.visible = true
-    var _time = time - timer.time_left
-    if _time < best_time:
-      best_time = _time
-      solved_best_time.text = String("%.2f" % _time)
-      winning_color_panel.bg_color = agent.genome.tint
+    # var _time = time - timer.time_left
+    # if _time < best_time:
+    #   best_time = _time
+    #   solved_best_time.text = String("%.2f" % _time)
+    #   winning_color_panel.bg_color = agent.genome.tint
     if do_pause_when_solved && agent.is_original:
       pause()
 
 
-func _on_Timer_timeout():
-  change_generation()
+# func _on_Timer_timeout():
+#   change_generation()
 
 
 func _on_CheckButton_toggled(button_pressed):

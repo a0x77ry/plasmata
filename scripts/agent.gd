@@ -71,9 +71,11 @@ var mw2_starting_y: float
 var mw_distance: float = 104.0
 var mwall_1
 var mwall_2
+var start_time: int
 
 
 func _ready():
+  start_time = OS.get_ticks_msec()
   random.randomize()
   assert(Agent != null, "Agent need to be set in Agent Scene")
   total_level_length = curve.get_baked_length()
@@ -101,8 +103,8 @@ func _ready():
 
 
 func _physics_process(delta):
-  update_current_fitness()
   if !reached_the_end && !crashed && !is_dead:
+    update_current_fitness()
     # get_player_input()
     get_nn_controls(nn, get_sensor_input())
     rotation += nn_rotation * rotation_speed * delta
@@ -529,17 +531,29 @@ func spawn_children_idle(is_orig := false, add_finished := false):
     spawn_children(is_orig, add_finished)
 
 
-func finish(time_left: float):
+# func finish(time_left: float):
+func finish():
+  var finish_time = OS.get_ticks_msec()
+  var time = finish_time - start_time
   # death_lock = true
   if is_original:
     reached_the_end = true
-    var solved_text = game.get_node("UI/Solved/SolvedText")
-    solved_text.visible = true
+    game.solved_message_box.visible = true
+    # var solved_text = game.get_node("UI/Solved/SolvedText")
+    # solved_text.visible = true
+    if time < game.best_time:
+      game.best_time = time
+      var mins = (time / 1000) / 60
+      var secs = (time / 1000) % 60
+      var msecs = time - ((mins * 60 * 1000) + (secs * 1000))
+      game.solved_best_time.text = String("%02d:%02d:%03d" % [mins, secs, msecs])
   else:
     # spawn_children(true, true)
+    # call_deferred("spawn_children", true, true)
     if is_queued_for_deletion() || !is_dead:
       yield(spawn_children_idle(true, true), "completed")
-  time_left_when_finished = time_left
+      # call_deferred("spawn_children", true, true)
+  # time_left_when_finished = time_left
   # kill_agent(true)
   kill_agent()
 
@@ -576,8 +590,8 @@ func _on_DeathTimer_timeout():
   kill_agent()
 
 
-func _on_NNControlsUpdateTimer_timeout():
-  pass
+# func _on_NNControlsUpdateTimer_timeout():
+#   pass
   # get_nn_controls(nn, get_sensor_input())
 
 

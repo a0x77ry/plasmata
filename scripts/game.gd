@@ -8,7 +8,7 @@ export(int, 10) var unpaused_time_scale = 0
 export(float, 10.0) var mut_std_dev = 2.0
 export(int, 400) var initial_population = 20
 
-onready var timer = get_node("Timer")
+# onready var timer = get_node("Timer")
 onready var pause_message = get_node("UI/Pause")
 onready var agents_node = get_node("Agents")
 
@@ -55,7 +55,7 @@ func restart_population():
       0, initial_population)
   number_of_agents = population.population_stream
   generate_agent_population(initial_population)
-  timer.start(0.1)
+  # timer.start(0.1)
 
 
 func get_active_agents():

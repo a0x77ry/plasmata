@@ -1,6 +1,6 @@
 [gd_scene load_steps=17 format=2]
 
-[ext_resource path="res://game.tscn" type="PackedScene" id=1]
+[ext_resource path="res://games/game.tscn" type="PackedScene" id=1]
 [ext_resource path="res://fonts/Jura-Light.ttf" type="DynamicFontData" id=2]
 [ext_resource path="res://wall.tscn" type="PackedScene" id=3]
 [ext_resource path="res://images/finish-line.png" type="Texture" id=4]
