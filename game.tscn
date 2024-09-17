@@ -1,8 +1,9 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://fonts/Workbench-Regular.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://scripts/game.gd" type="Script" id=2]
 [ext_resource path="res://agent.tscn" type="PackedScene" id=3]
+[ext_resource path="res://fonts/Jura-Light.ttf" type="DynamicFontData" id=4]
 
 [sub_resource type="StyleBoxFlat" id=9]
 bg_color = Color( 0.184314, 0.0745098, 0.0745098, 0.168627 )
@@ -16,6 +17,11 @@ font_data = ExtResource( 1 )
 size = 20
 use_filter = true
 font_data = ExtResource( 1 )
+
+[sub_resource type="DynamicFont" id=12]
+size = 60
+use_filter = true
+font_data = ExtResource( 4 )
 
 [node name="Game" type="Node2D" groups=["level"]]
 position = Vector2( -1, 100 )
@@ -94,6 +100,19 @@ margin_top = 166.0
 margin_right = 371.0
 margin_bottom = 186.0
 text = "Quit"
+
+[node name="Solved" type="Control" parent="UI"]
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="SolvedText" type="Label" parent="UI/Solved"]
+visible = false
+margin_left = 902.0
+margin_top = -46.0
+margin_right = 1067.0
+margin_bottom = 23.0
+custom_fonts/font = SubResource( 12 )
+text = "Solved"
 
 [connection signal="pressed" from="UI/Pause/VBoxContainer/Resume" to="." method="_on_Resume_pressed"]
 [connection signal="pressed" from="UI/Pause/VBoxContainer/MainMenu" to="." method="_on_MainMenu_pressed"]

@@ -33,6 +33,7 @@ onready var path = get_parent().get_parent().get_node("Path2D")
 onready var curve = path.curve
 onready var spawn_timer = get_node("SpawnTimer")
 # onready var spawning_area = get_node("SpawningArea")
+# onready var solved_text = get_node("UI/Soved/SolvedText")
 
 
 var random = RandomNumberGenerator.new()
@@ -532,6 +533,8 @@ func finish(time_left: float):
   # death_lock = true
   if is_original:
     reached_the_end = true
+    var solved_text = game.get_node("UI/Solved/SolvedText")
+    solved_text.visible = true
   else:
     # spawn_children(true, true)
     if is_queued_for_deletion() || !is_dead:
