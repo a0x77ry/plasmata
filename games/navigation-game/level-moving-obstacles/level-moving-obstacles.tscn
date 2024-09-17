@@ -1,10 +1,40 @@
-[gd_scene load_steps=15 format=2]
+[gd_scene load_steps=17 format=2]
 
 [ext_resource path="res://game.tscn" type="PackedScene" id=1]
-[ext_resource path="res://games/game2-testing/game2-testing.gd" type="Script" id=2]
-[ext_resource path="res://fonts/Jura-Light.ttf" type="DynamicFontData" id=3]
-[ext_resource path="res://wall.tscn" type="PackedScene" id=4]
-[ext_resource path="res://games/game2-testing/test-position.gd" type="Script" id=5]
+[ext_resource path="res://fonts/Jura-Light.ttf" type="DynamicFontData" id=2]
+[ext_resource path="res://wall.tscn" type="PackedScene" id=3]
+[ext_resource path="res://images/finish-line.png" type="Texture" id=4]
+[ext_resource path="res://games/navigation-game/level-moving-obstacles/level-moving-obstacles.gd" type="Script" id=5]
+[ext_resource path="res://moving-wall.tscn" type="PackedScene" id=6]
+
+[sub_resource type="Animation" id=10]
+resource_name = "MovingWall"
+length = 16.0
+loop = true
+tracks/0/type = "value"
+tracks/0/path = NodePath("Walls/MovingWall:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0, 4, 8, 12, 16 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( 490, 216 ), Vector2( 490, 216 ), Vector2( 490, 316 ), Vector2( 490, 316 ), Vector2( 490, 216 ) ]
+}
+tracks/1/type = "value"
+tracks/1/path = NodePath("Walls/MovingWall2:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/keys = {
+"times": PoolRealArray( 0, 4, 8, 12, 16 ),
+"transitions": PoolRealArray( 1, 1, 1, 1, 1 ),
+"update": 0,
+"values": [ Vector2( 807, 320 ), Vector2( 807, 320 ), Vector2( 807, 216 ), Vector2( 807, 216 ), Vector2( 807, 320 ) ]
+}
 
 [sub_resource type="RectangleShape2D" id=7]
 resource_local_to_scene = true
@@ -17,7 +47,7 @@ extents = Vector2( 10, 169.5 )
 [sub_resource type="Curve2D" id=9]
 resource_local_to_scene = true
 _data = {
-"points": PoolVector2Array( 0, 0, 0, 0, -65, 89, 0, 0, 0, 0, 47, 249, 0, 0, 0, 0, 132, 376, 0, 0, 0, 0, 328, 373, 0, 0, 0, 0, 348, 144, 0, 0, 0, 0, 570, 147, 0, 0, 0, 0, 633, 374, 0, 0, 0, 0, 889, 370, 0, 0, 0, 0, 930, 130, 0, 0, 0, 0, 1156, 140, 0, 0, 0, 0, 1286, 171 )
+"points": PoolVector2Array( 0, 0, 0, 0, 18.6936, 110.863, 0, 0, 0, 0, 27.1994, 213.213, 0, 0, 0, 0, 189, 403, 0, 0, 0, 0, 707.665, 395.543, 0, 0, 0, 0, 989.302, 394.188, 0, 0, 0, 0, 1026, 250, 0, 0, 0, 0, 1287, 254 )
 }
 
 [sub_resource type="DynamicFont" id=1]
@@ -26,25 +56,25 @@ size = 28
 outline_size = 1
 outline_color = Color( 0.0117647, 0, 0, 1 )
 use_filter = true
-font_data = ExtResource( 3 )
+font_data = ExtResource( 2 )
 
 [sub_resource type="DynamicFont" id=2]
 size = 50
 outline_size = 1
 outline_color = Color( 0.0352941, 0, 0, 1 )
-font_data = ExtResource( 3 )
+font_data = ExtResource( 2 )
 
 [sub_resource type="DynamicFont" id=3]
 size = 25
 outline_size = 1
 outline_color = Color( 0.0352941, 0, 0, 1 )
-font_data = ExtResource( 3 )
+font_data = ExtResource( 2 )
 
 [sub_resource type="DynamicFont" id=4]
 size = 35
 outline_size = 1
 outline_color = Color( 0.0352941, 0, 0, 1 )
-font_data = ExtResource( 3 )
+font_data = ExtResource( 2 )
 
 [sub_resource type="StyleBoxFlat" id=5]
 bg_color = Color( 0.788235, 0.105882, 0.105882, 1 )
@@ -60,66 +90,62 @@ corner_radius_bottom_left = 2
 
 [sub_resource type="DynamicFont" id=6]
 size = 25
-font_data = ExtResource( 3 )
+font_data = ExtResource( 2 )
 
-[node name="Game2" instance=ExtResource( 1 )]
-script = ExtResource( 2 )
+[node name="Game3" instance=ExtResource( 1 )]
+position = Vector2( 283, 254 )
+script = ExtResource( 5 )
+time = 20
+population_stream = 20
+unpaused_time_scale = 3
 
 [node name="SpawnTimer" type="Timer" parent="." index="0"]
-process_mode = 0
 wait_time = 10.0
+autostart = true
 
-[node name="Walls" type="Node2D" parent="." index="2"]
+[node name="Finish-line" type="Sprite" parent="." index="2"]
+position = Vector2( 1304, 266 )
+scale = Vector2( 0.55, 0.55 )
+texture = ExtResource( 4 )
 
-[node name="Wall" parent="Walls" index="0" instance=ExtResource( 4 )]
+[node name="Walls" type="Node2D" parent="." index="3"]
+
+[node name="Wall" parent="Walls" index="0" instance=ExtResource( 3 )]
 position = Vector2( 477, 438 )
 rotation = 3.14159
 scale = Vector2( 59.7816, -0.802072 )
-script = null
 
-[node name="Wall2" parent="Walls" index="1" instance=ExtResource( 4 )]
+[node name="Wall2" parent="Walls" index="1" instance=ExtResource( 3 )]
 position = Vector2( 511, 92 )
 rotation = 3.14159
 scale = Vector2( 59.7816, -0.802072 )
-script = null
 
-[node name="Wall3" parent="Walls" index="2" instance=ExtResource( 4 )]
-position = Vector2( 481, 325 )
-rotation = 1.5708
-scale = Vector2( 6.88, 11.122 )
-script = null
+[node name="Wall5" parent="Walls" index="2" instance=ExtResource( 3 )]
+position = Vector2( -7, 268 )
+rotation = -1.57079
+scale = Vector2( 11, -0.802 )
 
-[node name="Wall9" parent="Walls" index="3" instance=ExtResource( 4 )]
-position = Vector2( 219, 208 )
+[node name="MovingWall" parent="Walls" index="3" instance=ExtResource( 6 )]
+position = Vector2( 490, 216 )
+
+[node name="MovingWall2" parent="Walls" index="4" instance=ExtResource( 6 )]
+position = Vector2( 807, 320 )
+
+[node name="Wall9" parent="Walls" index="5" instance=ExtResource( 3 )]
+position = Vector2( 283, 202 )
 rotation = 1.5708
 scale = Vector2( 6.98628, 10.4094 )
-script = null
 
-[node name="Wall6" parent="Walls" index="4" instance=ExtResource( 4 )]
-position = Vector2( 753, 207 )
+[node name="Wall10" parent="Walls" index="6" instance=ExtResource( 3 )]
+position = Vector2( 1140, 407 )
 rotation = 1.5708
-scale = Vector2( 7.44, 11.482 )
-script = null
+scale = Vector2( 6.2, 10.409 )
 
-[node name="Wall7" parent="Walls" index="5" instance=ExtResource( 4 )]
-position = Vector2( 1057, 309 )
-rotation = 1.5708
-scale = Vector2( 8.28, 12.602 )
-script = null
+[node name="WallPlayer" type="AnimationPlayer" parent="." index="4"]
+autoplay = "MovingWall"
+anims/MovingWall = SubResource( 10 )
 
-[node name="Wall4" parent="Walls" index="6" instance=ExtResource( 4 )]
-position = Vector2( 2, 273 )
-rotation = -1.57079
-scale = Vector2( 59.7816, -0.802072 )
-script = null
-
-[node name="Wall8" parent="Walls" index="7" instance=ExtResource( 4 )]
-position = Vector2( 1324, 267 )
-rotation = 1.5708
-scale = Vector2( 11.8, 1 )
-script = null
-
-[node name="SpawningArea" type="Area2D" parent="." index="3"]
+[node name="SpawningArea" type="Area2D" parent="." index="5"]
 position = Vector2( 49, 252 )
 __meta__ = {
 "_edit_group_": true
@@ -128,8 +154,10 @@ __meta__ = {
 [node name="CollisionShape2D" type="CollisionShape2D" parent="SpawningArea" index="0"]
 shape = SubResource( 7 )
 
-[node name="FinishLine" type="Area2D" parent="." index="4"]
-position = Vector2( 1285, 303 )
+[node name="FinishLine" type="Area2D" parent="." index="6"]
+position = Vector2( 1294, 302 )
+scale = Vector2( 1.96001, 1 )
+collision_layer = 5
 __meta__ = {
 "_edit_group_": true
 }
@@ -138,13 +166,20 @@ __meta__ = {
 position = Vector2( 0, -37.5 )
 shape = SubResource( 8 )
 
-[node name="Path2D" type="Path2D" parent="." index="6"]
+[node name="Path2D" type="Path2D" parent="." index="8"]
+position = Vector2( -74.7798, -191.561 )
+scale = Vector2( 1.0581, 1.47534 )
 curve = SubResource( 9 )
 
-[node name="UI" parent="." index="7"]
+[node name="UI" parent="." index="9"]
+margin_left = -282.0
+margin_top = -155.0
+margin_right = -242.0
+margin_bottom = -115.0
 rect_pivot_offset = Vector2( -299, 20 )
 
 [node name="Countdown" type="HBoxContainer" parent="UI" index="1"]
+visible = false
 margin_left = 992.0
 margin_top = 470.0
 margin_right = 1238.0
@@ -170,6 +205,7 @@ align = 1
 valign = 1
 
 [node name="Statistics" type="VBoxContainer" parent="UI" index="2"]
+visible = false
 margin_left = 41.0
 margin_top = 472.0
 margin_right = 310.0
@@ -321,21 +357,8 @@ pressed = true
 enabled_focus_mode = 0
 text = "Pause when solved"
 
-[node name="TestPosition2D" type="Position2D" parent="." index="8"]
-position = Vector2( 109, 309 )
-script = ExtResource( 5 )
-__meta__ = {
-"_edit_lock_": true
-}
-
-[node name="UpdateFitnessTimer" type="Timer" parent="TestPosition2D" index="0"]
-wait_time = 0.1
-autostart = true
-
-[node name="Label" type="Label" parent="TestPosition2D" index="1"]
-margin_right = 40.0
-margin_bottom = 14.0
-
+[connection signal="timeout" from="SpawnTimer" to="." method="_on_SpawnTimer_timeout"]
+[connection signal="body_entered" from="FinishLine" to="." method="_on_FinishLine_body_entered"]
+[connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]
 [connection signal="value_changed" from="UI/TimeScale/FFSlider" to="." method="_on_FFSlider_value_changed"]
 [connection signal="toggled" from="UI/PauseWhenSolved/CheckButton" to="." method="_on_CheckButton_toggled"]
-[connection signal="timeout" from="TestPosition2D/UpdateFitnessTimer" to="TestPosition2D" method="_on_UpdateFitnessTimer_timeout"]
