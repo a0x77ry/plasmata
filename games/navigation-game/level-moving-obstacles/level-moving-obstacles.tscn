@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=2]
+[gd_scene load_steps=19 format=2]
 
 [ext_resource path="res://games/game.tscn" type="PackedScene" id=1]
 [ext_resource path="res://fonts/Jura-Light.ttf" type="DynamicFontData" id=2]
@@ -44,12 +44,6 @@ extents = Vector2( 21.5, 40 )
 resource_local_to_scene = true
 extents = Vector2( 10, 169.5 )
 
-[sub_resource type="Curve2D" id=9]
-resource_local_to_scene = true
-_data = {
-"points": PoolVector2Array( 0, 0, 0, 0, 18.6936, 110.863, 0, 0, 0, 0, 27.1994, 213.213, 0, 0, 0, 0, 189, 403, 0, 0, 0, 0, 707.665, 395.543, 0, 0, 0, 0, 989.302, 394.188, 0, 0, 0, 0, 1026, 250, 0, 0, 0, 0, 1287, 254 )
-}
-
 [sub_resource type="DynamicFont" id=1]
 resource_local_to_scene = true
 size = 28
@@ -88,9 +82,27 @@ corner_radius_top_right = 2
 corner_radius_bottom_right = 2
 corner_radius_bottom_left = 2
 
+[sub_resource type="DynamicFont" id=11]
+size = 25
+outline_size = 1
+outline_color = Color( 0.0352941, 0, 0, 1 )
+font_data = ExtResource( 2 )
+
+[sub_resource type="DynamicFont" id=12]
+size = 35
+outline_size = 1
+outline_color = Color( 0.0352941, 0, 0, 1 )
+font_data = ExtResource( 2 )
+
 [sub_resource type="DynamicFont" id=6]
 size = 25
 font_data = ExtResource( 2 )
+
+[sub_resource type="Curve2D" id=9]
+resource_local_to_scene = true
+_data = {
+"points": PoolVector2Array( 0, 0, 0, 0, 18.6936, 110.863, 0, 0, 0, 0, 27.1994, 213.213, 0, 0, 0, 0, 189, 403, 0, 0, 0, 0, 707.665, 395.543, 0, 0, 0, 0, 989.302, 394.188, 0, 0, 0, 0, 1026, 250, 0, 0, 0, 0, 1287, 254 )
+}
 
 [node name="Game3" instance=ExtResource( 1 )]
 position = Vector2( 283, 254 )
@@ -166,12 +178,7 @@ __meta__ = {
 position = Vector2( 0, -37.5 )
 shape = SubResource( 8 )
 
-[node name="Path2D" type="Path2D" parent="." index="8"]
-position = Vector2( -74.7798, -191.561 )
-scale = Vector2( 1.0581, 1.47534 )
-curve = SubResource( 9 )
-
-[node name="UI" parent="." index="9"]
+[node name="UI" parent="." index="7"]
 margin_left = -282.0
 margin_top = -155.0
 margin_right = -242.0
@@ -315,6 +322,32 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 custom_styles/panel = SubResource( 5 )
 
+[node name="BAACT" type="VBoxContainer" parent="UI/SolvedMessage/HBox" index="2"]
+margin_left = 1092.0
+margin_right = 1172.0
+margin_bottom = 171.0
+alignment = 1
+
+[node name="BAACTLabel" type="Label" parent="UI/SolvedMessage/HBox/BAACT" index="0"]
+margin_top = 47.0
+margin_right = 80.0
+margin_bottom = 78.0
+custom_colors/font_color = Color( 0.843137, 0.772549, 0.764706, 1 )
+custom_fonts/font = SubResource( 11 )
+text = "BAACT:"
+
+[node name="HBox" type="HBoxContainer" parent="UI/SolvedMessage/HBox/BAACT" index="1"]
+margin_top = 82.0
+margin_right = 80.0
+margin_bottom = 124.0
+
+[node name="CompletionTimes" type="Label" parent="UI/SolvedMessage/HBox/BAACT/HBox" index="0"]
+margin_right = 21.0
+margin_bottom = 42.0
+custom_colors/font_color = Color( 0.843137, 0.772549, 0.764706, 1 )
+custom_fonts/font = SubResource( 12 )
+text = "0"
+
 [node name="TimeScale" type="VBoxContainer" parent="UI" index="4"]
 margin_left = 63.0
 margin_top = -82.0
@@ -357,8 +390,12 @@ pressed = true
 enabled_focus_mode = 0
 text = "Pause when solved"
 
+[node name="Path2D" type="Path2D" parent="." index="8"]
+position = Vector2( -74.7798, -191.561 )
+scale = Vector2( 1.0581, 1.47534 )
+curve = SubResource( 9 )
+
 [connection signal="timeout" from="SpawnTimer" to="." method="_on_SpawnTimer_timeout"]
 [connection signal="body_entered" from="FinishLine" to="." method="_on_FinishLine_body_entered"]
-[connection signal="timeout" from="Timer" to="." method="_on_Timer_timeout"]
 [connection signal="value_changed" from="UI/TimeScale/FFSlider" to="." method="_on_FFSlider_value_changed"]
 [connection signal="toggled" from="UI/PauseWhenSolved/CheckButton" to="." method="_on_CheckButton_toggled"]

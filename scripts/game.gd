@@ -55,6 +55,7 @@ func restart_population():
       0, initial_population)
   number_of_agents = population.population_stream
   generate_agent_population(initial_population)
+  restart_population_specific()
   # timer.start(0.1)
 
 
@@ -77,6 +78,9 @@ func increment_agent_population(num: int = 1) -> void:
   pass
 
 func change_generation():
+  pass
+
+func restart_population_specific():
   pass
 
 

@@ -7,6 +7,7 @@ onready var genome_counter = get_node("UI/Statistics/Genomes/GenomesNumber")
 onready var curve = get_node("Path2D").curve
 onready var solved_message_box = get_node("UI/SolvedMessage")
 onready var solved_best_time = get_node("UI/SolvedMessage/HBox/BestTime/HBox/Time")
+onready var BAACT = get_node("UI/SolvedMessage/HBox/BAACT/HBox/CompletionTimes")
 onready var winning_color_panel = get_node("UI/SolvedMessage/HBox/BestTime/HBox/WinningColor").get_stylebox("panel")
 onready var time_scale_label = get_node("UI/TimeScale/TimeScaleLabel")
 onready var FF_slider = get_node("UI/TimeScale/FFSlider")
@@ -86,6 +87,13 @@ func decrement_agent_population(num: int = 1) -> void:
 
 func increment_agent_population(num: int = 1) -> void:
   agent_population += num
+
+
+func restart_population_specific():
+  best_time = INF
+  solved_best_time.text = "-"
+  BAACT.text = "0"
+  solved_message_box.visible = false
 
 
 func change_generation():

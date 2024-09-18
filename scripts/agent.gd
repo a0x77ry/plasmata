@@ -525,10 +525,10 @@ func get_nn_controls(_nn: NN, sensor_input: Dictionary):
 
 
 # Used in yield
-func spawn_children_idle(is_orig := false, add_finished := false):
-  yield(get_tree(), "idle_frame")
-  if !is_queued_for_deletion() && !is_dead:
-    spawn_children(is_orig, add_finished)
+# func spawn_children_idle(is_orig := false, add_finished := false):
+#   yield(get_tree(), "idle_frame")
+#   if !is_queued_for_deletion() && !is_dead:
+#     spawn_children(is_orig, add_finished)
 
 
 # func finish(time_left: float):
@@ -536,8 +536,8 @@ func finish():
   var finish_time = OS.get_ticks_msec()
   var time = finish_time - start_time
   # death_lock = true
+  reached_the_end = true
   if is_original:
-    reached_the_end = true
     game.solved_message_box.visible = true
     # var solved_text = game.get_node("UI/Solved/SolvedText")
     # solved_text.visible = true
@@ -548,13 +548,10 @@ func finish():
       var msecs = time - ((mins * 60 * 1000) + (secs * 1000))
       game.solved_best_time.text = String("%02d:%02d:%03d" % [mins, secs, msecs])
   else:
-    # spawn_children(true, true)
-    # call_deferred("spawn_children", true, true)
-    if is_queued_for_deletion() || !is_dead:
-      yield(spawn_children_idle(true, true), "completed")
-      # call_deferred("spawn_children", true, true)
-  # time_left_when_finished = time_left
-  # kill_agent(true)
+    spawn_children(true, true)
+    # if is_queued_for_deletion() || !is_dead:
+    #   yield(spawn_children_idle(true, true), "completed")
+  game.BAACT.text = String(times_finished)
   kill_agent()
 
 
