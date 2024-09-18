@@ -210,8 +210,9 @@ func spawn_new_agent(pos: Vector2, rot: float, inputs: Array, geno: Genome, is_o
     new_agent.rotation = rot
 
   new_agent.nn_activated_inputs = inputs.duplicate()
-  new_agent.genome = Genome.new(population)
-  new_agent.genome.duplicate(geno)
+  # new_agent.genome = Genome.new(population)
+  # new_agent.genome.duplicate(geno)
+  new_agent.genome = geno
   new_agent.game = game
   new_agent.population = population
   new_agent.generation = generation + 1
