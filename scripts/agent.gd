@@ -180,13 +180,13 @@ func find_nearest_genome():
   # nearest_genome = agents[random.randi_range(0, agents.size() - 1)].genome
   # nearest_genome = nearest_agents[agent_index][0].genome
   nearest_genome = Genome.new(population)
-  nearest_genome.duplicate(game.sorted_agents[agent_index].genome)
+  nearest_genome.copy(game.sorted_agents[agent_index].genome)
   # nearest_genome = game.sorted_agents[agent_index].genome
   return nearest_genome
 
 func get_alter_genome():
   var new_genome = Genome.new(population)
-  new_genome.duplicate(genome)
+  new_genome.copy(genome)
   var crossed_genomes = population.couple_crossover([new_genome, find_nearest_genome()], 1)
   crossed_genomes[0].mutate()
   return crossed_genomes[0]
@@ -236,7 +236,7 @@ func spawn_new_agent(pos: Vector2, rot: float, inputs: Array, geno: Genome, is_o
 
 func spawn_children(is_orig: bool = false, add_finished: bool = false):
   var new_genome = Genome.new(population)
-  new_genome.duplicate(genome)
+  new_genome.copy(genome)
   if game.get_active_agents().size() >= Main.AGENT_LIMIT:
     reduce_population(2)
   # if game.get_active_agents().size() >= Main.AGENT_LIMIT + 2 || ((is_queued_for_deletion() || is_dead) && add_finished == false):

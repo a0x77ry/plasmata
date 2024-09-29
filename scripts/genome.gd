@@ -58,7 +58,7 @@ func disolve_genome():
   random = null
 
 
-func duplicate(geno: Genome):
+func copy(geno: Genome):
   # input_nodes = geno.input_nodes.duplicate()
   input_nodes = []
   for node in geno.input_nodes:
