@@ -49,6 +49,34 @@ func _init(_population, _input_nodes=[], _hidden_nodes=[], _output_nodes=[],
   # add_node_rate = random.randf_range(0.0, 1.0)
 
 
+func to_dict():
+  var dict = {}
+  var dict_input_nodes = []
+  var dict_hidden_nodes = []
+  var dict_output_nodes = []
+  var dict_links = []
+
+  for node in input_nodes:
+    dict_input_nodes.append(node.to_dict())
+  
+  for node in output_nodes:
+    dict_output_nodes.append(node.to_dict())
+
+  for node in hidden_nodes:
+    dict_hidden_nodes.append(node.to_dict())
+
+  for node in links:
+    dict_links.append(node.to_dict())
+
+  dict = {
+      "input_nodes": dict_input_nodes,
+      "hidden_nodes": dict_hidden_nodes,
+      "output_nodes": dict_output_nodes,
+      "links": dict_links
+  }
+  return dict
+
+
 func disolve_genome():
   # input_nodes = []
   # hidden_nodes = []
@@ -311,6 +339,15 @@ class InputNode:
   func dupl():
     return InputNode.new(inno_num, name, outgoing_link_inno_nums.duplicate())
 
+  func to_dict():
+    var dict = {} 
+    dict = {
+        "inno_num": inno_num,
+        "name": name,
+        "outgoing_link_inno_nums": outgoing_link_inno_nums
+        }
+    return dict
+
 
 class HiddenNode:
   extends Gene
@@ -338,10 +375,15 @@ class HiddenNode:
     return HiddenNode.new(inno_num, name,
       incoming_link_inno_nums.duplicate(), outgoing_link_inno_nums.duplicate())
 
-  # func remove():
-  #   for incoming
-  #   incoming_link_inno_nums = []
-  #   outgoing_link_inno_nums = []
+  func to_dict():
+    var dict = {} 
+    dict = {
+        "inno_num": inno_num,
+        "name": name,
+        "incoming_link_inno_nums": incoming_link_inno_nums,
+        "outgoing_link_inno_nums": outgoing_link_inno_nums
+        }
+    return dict
 
 
 class OutputNode:
@@ -361,6 +403,16 @@ class OutputNode:
   func dupl():
     return OutputNode.new(inno_num, name,
       incoming_link_inno_nums.duplicate())
+
+  
+  func to_dict():
+    var dict = {} 
+    dict = {
+        "inno_num": inno_num,
+        "name": name,
+        "incoming_link_inno_nums": incoming_link_inno_nums,
+        }
+    return dict
 
 
 class Link:
@@ -382,3 +434,16 @@ class Link:
   func dupl():
     return Link.new(inno_num, weight, source_inno_num, target_inno_num,
       is_enabled)
+
+
+  func to_dict():
+    var dict = {} 
+    dict = {
+        "inno_num": inno_num,
+        "weight": weight,
+        "source_inno_num": source_inno_num,
+        "target_inno_num": target_inno_num,
+        "is_enabled": is_enabled
+        }
+    return dict
+

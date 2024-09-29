@@ -91,10 +91,16 @@ margin_right = 371.0
 margin_bottom = 157.0
 text = "Restart"
 
-[node name="Quit" type="Button" parent="UI/Pause/VBoxContainer"]
+[node name="Save Best Agent" type="Button" parent="UI/Pause/VBoxContainer"]
 margin_top = 166.0
 margin_right = 371.0
 margin_bottom = 186.0
+text = "Save Best Agent"
+
+[node name="Quit" type="Button" parent="UI/Pause/VBoxContainer"]
+margin_top = 195.0
+margin_right = 371.0
+margin_bottom = 215.0
 text = "Quit"
 
 [node name="Solved" type="Control" parent="UI"]
@@ -113,4 +119,5 @@ text = "Solved"
 [connection signal="pressed" from="UI/Pause/VBoxContainer/Resume" to="." method="_on_Resume_pressed"]
 [connection signal="pressed" from="UI/Pause/VBoxContainer/MainMenu" to="." method="_on_MainMenu_pressed"]
 [connection signal="pressed" from="UI/Pause/VBoxContainer/Restart" to="." method="_on_Restart_pressed"]
+[connection signal="pressed" from="UI/Pause/VBoxContainer/Save Best Agent" to="." method="_on_Save_Best_Agent_pressed"]
 [connection signal="pressed" from="UI/Pause/VBoxContainer/Quit" to="." method="_on_Quit_pressed"]

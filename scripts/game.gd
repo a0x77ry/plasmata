@@ -44,6 +44,13 @@ func init_population():
   generate_agent_population(initial_population)
 
 
+func save(genome_dict, name):
+  var save_game = File.new()
+  save_game.open("user://{name}.save".format({"name": name}), File.WRITE)
+  save_game.store_line(to_json(genome_dict))
+  save_game.close()
+
+
 func restart_population():
   agents_alive = get_tree().get_nodes_in_group("agents")
   for agent in agents_alive:
@@ -82,6 +89,9 @@ func change_generation():
 
 func restart_population_specific():
   pass
+
+# func save_best_agent():
+#   pass
 
 
 func pause():
@@ -123,6 +133,12 @@ func _on_MainMenu_pressed():
   var err = get_tree().change_scene("res://menu/main-menu/main-menu.tscn")
   if err != OK:
     print("Cannot change scene")
+
+
+func _on_Save_Best_Agent_pressed():
+  var best_agent = sorted_agents[-1]
+  save(best_agent.genome.to_dict(), "testsave")
+
 
 
 class AgentSorter:
