@@ -43,23 +43,26 @@ func _physics_process(_delta):
       [self], fa_collision_mask, true, true)
 
 
+func get_initial_pos() -> Vector2:
+  var area_extents = spawning_area.get_node("CollisionShape2D").shape.extents
+  var pos_x = rand_range(spawning_area.get_position().x - area_extents.x,
+      spawning_area.get_position().x + area_extents.x)
+  var pos_y = rand_range(spawning_area.get_position().y - area_extents.y,
+      spawning_area.get_position().y + area_extents.y)
+  return Vector2(pos_x, pos_y)
+
 func generate_agent_population(agent_pop = population_stream):
   var agents = []
   var agent: Node2D
-  var area_extents = spawning_area.get_node("CollisionShape2D").shape.extents
+  # var area_extents = spawning_area.get_node("CollisionShape2D").shape.extents
   for i in agent_pop:
     if agent_population < ceil(Main.AGENT_LIMIT / 3.0):
       agent = Agent.instance()
       # Set the initial position and rotation of the agent
-      var pos_x = rand_range(spawning_area.get_position().x - area_extents.x,
-          spawning_area.get_position().x + area_extents.x)
-      var pos_y = rand_range(spawning_area.get_position().y - area_extents.y,
-          spawning_area.get_position().y + area_extents.y)
-      agent.set_position(Vector2(pos_x, pos_y))
+      agent.position = get_initial_pos()
       agent.rotation = rand_range(-PI, PI)
 
       agent.population = population
-      # agent.timer = timer
       agent.nn_activated_inputs = input_names.duplicate()
       assert(population.genomes[i] != null)
       # agent.set_genome(population.genomes[i])
@@ -80,6 +83,18 @@ func generate_agent_population(agent_pop = population_stream):
       # agents_node.add_child(agent)
       agents_node.call_deferred("add_child", agent)
       # agents_node.add_child(agent)
+
+
+func generate_from_save():
+  var agent = Agent.instance()
+  agent.position = get_initial_pos()
+  agent.rotation = Vector2(0, 0)
+  agent.population = population
+  agent.nn_activated_inputs = input_names.duplicate()
+  agent.game = self
+  agent.times_finished = 0
+  #TODO
+  # agent.genome = Genome.from_dict(game.load())
 
 
 func decrement_agent_population(num: int = 1) -> void:

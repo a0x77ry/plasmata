@@ -14,14 +14,12 @@ onready var agents_node = get_node("Agents")
 
 var population
 var number_of_agents
-# var agents = []
 var agents_alive = []
 var is_game_paused := false
-
 var input_names = []
 var output_names = []
-
 var sorted_agents = []
+var is_loading_mode_enabled := false
 
 
 func _process(_delta):
@@ -38,8 +36,12 @@ func init_population():
   var starting_gen = 0
   if population != null:
     starting_gen = population.generation
-  population = Population.new([], input_names, output_names,
-      starting_gen, initial_population)
+  if !is_loading_mode_enabled:
+    population = Population.new([], input_names, output_names,
+        starting_gen, initial_population)
+  else:
+    population = Population.new([], input_names, output_names,
+        starting_gen, initial_population, true)
   number_of_agents = population.population_stream
   generate_agent_population(initial_population)
 
@@ -49,6 +51,16 @@ func save(genome_dict, name):
   save_game.open("user://{name}.save".format({"name": name}), File.WRITE)
   save_game.store_line(to_json(genome_dict))
   save_game.close()
+
+
+func load_agent(name) -> Dictionary:
+  var saved_agent = File.new()
+  var filepath = "user://{name}.save".format({"name": name})
+  assert(saved_agent.file_exists(filepath))
+  saved_agent.open(filepath, File.READ)
+  var saved_agent_dict = parse_json(saved_agent.get_line())
+  saved_agent.close()
+  return saved_agent_dict
 
 
 func restart_population():

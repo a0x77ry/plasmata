@@ -25,7 +25,9 @@ var generation
 
 
 func _init(_genomes=[], input_names=[], output_names=[],
-    _generation=0, _population_stream=0, _selection_rate=SELECTION_RATE):
+    _generation=0, _population_stream=0, _selection_rate=SELECTION_RATE, is_dummy:=false):
+  if is_dummy:
+    return
   genomes = _genomes.duplicate()
   selection_rate = _selection_rate
   population_stream = _population_stream

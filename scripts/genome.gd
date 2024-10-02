@@ -77,6 +77,33 @@ func to_dict():
   return dict
 
 
+static func from_dict(agent_dict):
+  var new_input_nodes = []
+  var new_hidden_nodes = []
+  var new_output_nodes = []
+  var new_links = []
+
+  for dict_in in agent_dict["input_nodes"]:
+    var input_node = InputNode.new(dict_in["inno_num"], dict_in["name"],
+        dict_in["outgoing_link_inno_nums"])
+    new_input_nodes.append(input_node)
+  for dict_hid in agent_dict["hidden_nodes"]:
+    var hidden_node = HiddenNode.new(dict_hid["inno_num"], dict_hid["name"],
+        dict_hid["incoming_link_inno_nums"], dict_hid["outgoing_link_inno_nums"])
+    new_hidden_nodes.append(hidden_node)
+  for dict_out in agent_dict["output_nodes"]:
+    var output_node = OutputNode.new(dict_out["inno_num"], dict_out["name"],
+        dict_out["incoming_link_inno_nums"])
+    new_output_nodes.append(output_node)
+  for dict_link in agent_dict["links"]:
+    var link = Link.new(dict_link["inno_num"], dict_link["weight"],
+        dict_link["source_inno_num"], dict_link["target_inno_num"],
+        dict_link["is_enabled"])
+    new_links.append(link)
+
+    #TODO: Generate a new Genome instance
+
+
 func disolve_genome():
   # input_nodes = []
   # hidden_nodes = []
