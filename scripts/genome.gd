@@ -77,7 +77,7 @@ func to_dict():
   return dict
 
 
-static func from_dict(agent_dict):
+func from_dict(agent_dict):
   var new_input_nodes = []
   var new_hidden_nodes = []
   var new_output_nodes = []
@@ -101,7 +101,10 @@ static func from_dict(agent_dict):
         dict_link["is_enabled"])
     new_links.append(link)
 
-    #TODO: Generate a new Genome instance
+  input_nodes = new_input_nodes
+  hidden_nodes = new_hidden_nodes
+  output_nodes = new_output_nodes
+  links = new_links
 
 
 func disolve_genome():

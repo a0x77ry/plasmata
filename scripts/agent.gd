@@ -548,7 +548,8 @@ func finish():
       var secs = (time / 1000) % 60
       var msecs = time - ((mins * 60 * 1000) + (secs * 1000))
       game.solved_best_time.text = String("%02d:%02d:%03d" % [mins, secs, msecs])
-  else:
+  # else:
+  if !game.is_loading_mode_enabled:
     spawn_children(true, true)
     # if is_queued_for_deletion() || !is_dead:
     #   yield(spawn_children_idle(true, true), "completed")
@@ -571,7 +572,7 @@ func kill_agent():
 
 
 func _on_SpawnTimer_timeout():
-  if is_dead:
+  if is_dead || game.is_loading_mode_enabled:
     return
   var total_fitness := 0.0
   for i in range(1, FIT_GEN_HORIZON + 1):

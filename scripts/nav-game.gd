@@ -93,8 +93,9 @@ func generate_from_save():
   agent.nn_activated_inputs = input_names.duplicate()
   agent.game = self
   agent.times_finished = 0
-  #TODO
-  # agent.genome = Genome.from_dict(game.load())
+  var gen = Genome.new(population)
+  gen.from_dict(load_agent("testsave"))
+  agent.genome = gen
 
 
 func decrement_agent_population(num: int = 1) -> void:
@@ -163,6 +164,8 @@ func _on_FFSlider_value_changed(value):
   set_time_scale(value)
 
 func _on_SpawnTimer_timeout():
+  if is_loading_mode_enabled:
+    return
   var agents = get_active_agents()
   if agents.size() < ceil(Main.AGENT_LIMIT / 5.0):
     generate_agent_population()
