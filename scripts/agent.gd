@@ -540,6 +540,8 @@ func finish():
   reached_the_end = true
   if is_original:
     game.solved_message_box.visible = true
+    game.finished_agent = self.copy()
+    game.save_button.disabled = false
     # var solved_text = game.get_node("UI/Solved/SolvedText")
     # solved_text.visible = true
     if time < game.best_time:
@@ -554,7 +556,25 @@ func finish():
     # if is_queued_for_deletion() || !is_dead:
     #   yield(spawn_children_idle(true, true), "completed")
   game.BAACT.text = String(times_finished)
+  # if to_kill:
   kill_agent()
+  # if !is_original:
+  #   kill_agent()
+
+
+func copy():
+  var agent: Node2D
+  agent = Agent.instance()
+  agent.position = game.get_initial_pos()
+  agent.rotation = 0.0
+  agent.population = population
+  agent.nn_activated_inputs = game.input_names.duplicate()
+  agent.game = game
+  agent.times_finished = 0
+  var new_genome = Genome.new(population)
+  new_genome.copy(genome)
+  agent.genome = new_genome
+  return agent
 
 
 func kill_agent():

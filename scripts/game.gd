@@ -4,7 +4,7 @@ extends Node2D
 export(int, 200) var time
 export(int, 400) var population_stream
 export(PackedScene) var Agent
-export(int, 10) var unpaused_time_scale = 0
+export(int, 10) var unpaused_time_scale = 3
 export(float, 10.0) var mut_std_dev = 2.0
 export(int, 400) var initial_population = 20
 
@@ -20,6 +20,7 @@ var input_names = []
 var output_names = []
 var sorted_agents = []
 var is_loading_mode_enabled := false
+var finished_agent
 
 
 func _process(_delta):
@@ -43,7 +44,10 @@ func init_population():
     population = Population.new([], input_names, output_names,
         starting_gen, initial_population, true)
   number_of_agents = population.population_stream
-  generate_agent_population(initial_population)
+  if !is_loading_mode_enabled:
+    generate_agent_population(initial_population)
+  else:
+    generate_from_save()
 
 
 func save(genome_dict, name):
@@ -102,8 +106,8 @@ func change_generation():
 func restart_population_specific():
   pass
 
-# func save_best_agent():
-#   pass
+func generate_from_save():
+  pass
 
 
 func pause():
@@ -148,8 +152,9 @@ func _on_MainMenu_pressed():
 
 
 func _on_Save_Best_Agent_pressed():
-  var best_agent = sorted_agents[-1]
-  save(best_agent.genome.to_dict(), "testsave")
+  # var best_agent = sorted_agents[-1]
+  # save(best_agent.genome.to_dict(), "testsave")
+  save(finished_agent.genome.to_dict(), "testsave")
 
 
 

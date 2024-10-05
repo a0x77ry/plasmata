@@ -67,7 +67,6 @@ position = Vector2( 301, 232 )
 script = ExtResource( 5 )
 time = 20
 population_stream = 20
-unpaused_time_scale = 3
 initial_population = 100
 
 [node name="SpawnTimer" type="Timer" parent="." index="0"]

@@ -65,7 +65,6 @@ _data = {
 [node name="Game2" instance=ExtResource( 1 )]
 position = Vector2( 301, 232 )
 script = ExtResource( 5 )
-Agent = null
 
 [node name="SpawnTimer" type="Timer" parent="." index="0"]
 process_mode = 0

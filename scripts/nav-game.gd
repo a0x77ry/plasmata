@@ -12,6 +12,7 @@ onready var winning_color_panel = get_node("UI/SolvedMessage/HBox/BestTime/HBox/
 onready var time_scale_label = get_node("UI/TimeScale/TimeScaleLabel")
 onready var FF_slider = get_node("UI/TimeScale/FFSlider")
 onready var pause_when_solved_button = get_node("UI/PauseWhenSolved/CheckButton")
+onready var save_button = get_node("UI/Pause/VBoxContainer/SaveBestAgent")
 onready var spawn_timer = get_node("SpawnTimer")
 onready var finish_area = get_node("FinishLine")
 
@@ -86,16 +87,25 @@ func generate_agent_population(agent_pop = population_stream):
 
 
 func generate_from_save():
-  var agent = Agent.instance()
+  var agent: Node2D
+  agent = Agent.instance()
+
   agent.position = get_initial_pos()
-  agent.rotation = Vector2(0, 0)
+  agent.rotation = 0.0
   agent.population = population
   agent.nn_activated_inputs = input_names.duplicate()
   agent.game = self
   agent.times_finished = 0
+
   var gen = Genome.new(population)
   gen.from_dict(load_agent("testsave"))
   agent.genome = gen
+
+  agent.game = self
+  agent.times_finished = 0
+  agent.add_to_group("agents")
+  increment_agent_population()
+  agents_node.call_deferred("add_child", agent)
 
 
 func decrement_agent_population(num: int = 1) -> void:

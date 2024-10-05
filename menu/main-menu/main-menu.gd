@@ -1,6 +1,7 @@
 extends Control
 
 export(PackedScene) var level_4_obstacles
+export(PackedScene) var level_4_obstacles_lm
 export(PackedScene) var level_3_obstacles
 export(PackedScene) var level_moving_obstacles
 
@@ -30,3 +31,9 @@ func _on_Quit_pressed():
 
 func _on_GamePicker_item_selected(index:int):
   selected_game_id = game_picker.get_item_id(index)
+
+
+func _on_Load_Genome_pressed():
+  var err = get_tree().change_scene_to(level_4_obstacles_lm)
+  if err != OK:
+    print("Cannot change scene")
