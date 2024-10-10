@@ -4,7 +4,7 @@
 [ext_resource path="res://fonts/Jura-Light.ttf" type="DynamicFontData" id=2]
 [ext_resource path="res://wall.tscn" type="PackedScene" id=3]
 [ext_resource path="res://images/finish-line.png" type="Texture" id=4]
-[ext_resource path="res://games/navigation-game/level-moving-obstacles/level-moving-obstacles.gd" type="Script" id=5]
+[ext_resource path="res://games/navigation-game/level-moving-obstacles/level-moving-obstacles_lm.gd" type="Script" id=5]
 [ext_resource path="res://moving-wall.tscn" type="PackedScene" id=6]
 
 [sub_resource type="Animation" id=10]
@@ -107,8 +107,6 @@ _data = {
 [node name="Game3" instance=ExtResource( 1 )]
 position = Vector2( 283, 254 )
 script = ExtResource( 5 )
-time = 20
-population_stream = 20
 
 [node name="SpawnTimer" type="Timer" parent="." index="0"]
 wait_time = 10.0

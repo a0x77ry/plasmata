@@ -541,7 +541,8 @@ func finish():
   if is_original:
     game.solved_message_box.visible = true
     game.finished_agent = self.copy()
-    game.save_button.disabled = false
+    if !game.is_loading_mode_enabled:
+      game.save_button.disabled = false
     # var solved_text = game.get_node("UI/Solved/SolvedText")
     # solved_text.visible = true
     if time < game.best_time:

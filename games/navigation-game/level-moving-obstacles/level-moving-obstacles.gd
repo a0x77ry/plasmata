@@ -42,3 +42,6 @@ func _enter_tree():
     "go_right",
     "go_forward"
   ]
+
+  level_name = "level_moving_obstacles"
+

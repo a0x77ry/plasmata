@@ -32,5 +32,6 @@ func _enter_tree():
     "go_forward"
   ]
 
+  is_loading_mode_enabled = true
   level_name = "level_3_obstacles"
 

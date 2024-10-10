@@ -31,6 +31,8 @@ func _enter_tree():
     "go_forward"
   ]
 
+  level_name = "level_4_obstacles"
+
 
 # func _on_SpawnTimer_timeout():
 # 	generate_agent_population()

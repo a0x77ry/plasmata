@@ -3,13 +3,15 @@ extends Control
 export(PackedScene) var level_4_obstacles
 export(PackedScene) var level_4_obstacles_lm
 export(PackedScene) var level_3_obstacles
+export(PackedScene) var level_3_obstacles_lm
 export(PackedScene) var level_moving_obstacles
+export(PackedScene) var level_moving_obstacles_lm
 
 onready var game_picker  = get_node("GamePickerControl/GamePicker")
 onready var id_to_game = [
-  {"id": 1, "level": level_4_obstacles},
-  {"id": 2, "level": level_3_obstacles},
-  {"id": 3, "level": level_moving_obstacles},
+  {"id": 1, "level": level_4_obstacles, "loadlevel": level_4_obstacles_lm},
+  {"id": 2, "level": level_3_obstacles, "loadlevel": level_3_obstacles_lm},
+  {"id": 3, "level": level_moving_obstacles, "loadlevel": level_moving_obstacles_lm},
 ]
 
 var selected_game_id := 1
@@ -34,6 +36,11 @@ func _on_GamePicker_item_selected(index:int):
 
 
 func _on_Load_Genome_pressed():
-  var err = get_tree().change_scene_to(level_4_obstacles_lm)
+  var level_to_load
+  for g in id_to_game:
+    if selected_game_id == g["id"]:
+      level_to_load = g["loadlevel"]
+  print(level_to_load)
+  var err = get_tree().change_scene_to(level_to_load)
   if err != OK:
     print("Cannot change scene")

@@ -21,6 +21,8 @@ var output_names = []
 var sorted_agents = []
 var is_loading_mode_enabled := false
 var finished_agent
+var game_name
+var level_name
 
 
 func _process(_delta):
@@ -50,16 +52,27 @@ func init_population():
     generate_from_save()
 
 
-func save(genome_dict, name):
+func save(genome_dict, filename):
   var save_game = File.new()
-  save_game.open("user://{name}.save".format({"name": name}), File.WRITE)
+
+  var dir = Directory.new()
+  var dirpath = "user://{game_name}/{level_name}".format({"game_name": game_name, "level_name": level_name})
+  if !dir.dir_exists(dirpath):
+    if dir.make_dir_recursive(dirpath) != OK:
+      print("Cannot make save directory")
+
+  var filepath = "user://{game_name}/{level_name}/{filename}.save"\
+      .format({"game_name": game_name, "level_name": level_name, "filename": filename})
+  print(filepath)
+  save_game.open(filepath, File.WRITE)
   save_game.store_line(to_json(genome_dict))
   save_game.close()
 
 
 func load_agent(name) -> Dictionary:
   var saved_agent = File.new()
-  var filepath = "user://{name}.save".format({"name": name})
+  var filepath = "user://{game_name}/{level_name}/{name}.save"\
+      .format({"game_name": "nav_game", "level_name": level_name, "name": name})
   assert(saved_agent.file_exists(filepath))
   saved_agent.open(filepath, File.READ)
   var saved_agent_dict = parse_json(saved_agent.get_line())
@@ -76,8 +89,11 @@ func restart_population():
   population.genomes = []
   population = Population.new([], input_names, output_names,
       0, initial_population)
-  number_of_agents = population.population_stream
-  generate_agent_population(initial_population)
+  if is_loading_mode_enabled:
+    generate_from_save()
+  else:
+    number_of_agents = population.population_stream
+    generate_agent_population(initial_population)
   restart_population_specific()
   # timer.start(0.1)
 

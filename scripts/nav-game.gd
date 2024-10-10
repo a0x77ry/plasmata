@@ -32,6 +32,7 @@ func _ready():
   do_pause_when_solved = pause_when_solved_button.pressed
   start_finish_distance = spawning_area.global_position.distance_to(finish_area.global_position)
   fa_collision_mask = 0b100
+  game_name = "nav_game"
 
 
 # func _process(_delta):
