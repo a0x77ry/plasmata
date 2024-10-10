@@ -10,7 +10,10 @@ export(int, 400) var initial_population = 20
 
 # onready var timer = get_node("Timer")
 onready var pause_message = get_node("UI/Pause")
+onready var pause_ui = get_node("UI/Pause")
 onready var agents_node = get_node("Agents")
+onready var save_ui = get_node("UI/SaveUI")
+onready var save_ui_lineedit = get_node("UI/SaveUI/VBoxContainer/Filename")
 
 var population
 var number_of_agents
@@ -23,10 +26,11 @@ var is_loading_mode_enabled := false
 var finished_agent
 var game_name
 var level_name
+var is_in_save_menu := false
 
 
 func _process(_delta):
-  if Input.is_action_just_pressed("pause"):
+  if Input.is_action_just_pressed("pause") && !is_in_save_menu:
     pause()
 
 
@@ -168,9 +172,20 @@ func _on_MainMenu_pressed():
 
 
 func _on_Save_Best_Agent_pressed():
-  # var best_agent = sorted_agents[-1]
-  # save(best_agent.genome.to_dict(), "testsave")
-  save(finished_agent.genome.to_dict(), "testsave")
+  # save(finished_agent.genome.to_dict(), "testsave")
+  # pause_ui.visible = false
+  is_in_save_menu = true
+  save_ui.visible = true
+  save_ui_lineedit.grab_focus()
+  save_ui_lineedit.caret_blink = true
+  save_ui_lineedit.caret_blink_speed = 0.8
+
+
+func _on_Filename_text_entered(new_text:String):
+  save(finished_agent.genome.to_dict(), new_text)
+  is_in_save_menu = false
+  save_ui.visible = false
+  # pause_ui.visible = true
 
 
 

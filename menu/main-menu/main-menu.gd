@@ -40,7 +40,6 @@ func _on_Load_Genome_pressed():
   for g in id_to_game:
     if selected_game_id == g["id"]:
       level_to_load = g["loadlevel"]
-  print(level_to_load)
   var err = get_tree().change_scene_to(level_to_load)
   if err != OK:
     print("Cannot change scene")
