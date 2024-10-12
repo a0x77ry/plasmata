@@ -1,10 +1,11 @@
-[gd_scene load_steps=15 format=2]
+[gd_scene load_steps=16 format=2]
 
 [ext_resource path="res://games/game.tscn" type="PackedScene" id=1]
 [ext_resource path="res://fonts/Jura-Light.ttf" type="DynamicFontData" id=2]
 [ext_resource path="res://wall.tscn" type="PackedScene" id=3]
 [ext_resource path="res://images/finish-line.png" type="Texture" id=4]
 [ext_resource path="res://games/navigation-game/level-4-obstacles/level-4-obstacles_lm.gd" type="Script" id=5]
+[ext_resource path="res://agent.tscn" type="PackedScene" id=6]
 
 [sub_resource type="RectangleShape2D" id=7]
 resource_local_to_scene = true
@@ -65,6 +66,7 @@ _data = {
 [node name="Game2" instance=ExtResource( 1 )]
 position = Vector2( 301, 232 )
 script = ExtResource( 5 )
+Agent = ExtResource( 6 )
 
 [node name="SpawnTimer" type="Timer" parent="." index="0"]
 process_mode = 0
@@ -355,3 +357,5 @@ curve = SubResource( 9 )
 [connection signal="body_entered" from="FinishLine" to="." method="_on_FinishLine_body_entered"]
 [connection signal="value_changed" from="UI/TimeScale/FFSlider" to="." method="_on_FFSlider_value_changed"]
 [connection signal="toggled" from="UI/PauseWhenSolved/CheckButton" to="." method="_on_CheckButton_toggled"]
+
+[editable path="UI/SaveUI"]

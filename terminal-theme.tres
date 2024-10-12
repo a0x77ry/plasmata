@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=11 format=2]
+[gd_resource type="Theme" load_steps=13 format=2]
 
 [ext_resource path="res://fonts/Workbench-Regular.ttf" type="DynamicFontData" id=1]
 
@@ -13,7 +13,7 @@ font_data = ExtResource( 1 )
 [sub_resource type="StyleBoxEmpty" id=4]
 
 [sub_resource type="StyleBoxFlat" id=5]
-bg_color = Color( 0.705882, 0.564706, 0.564706, 0.235294 )
+bg_color = Color( 0.305882, 0.337255, 0.341176, 0.882353 )
 
 [sub_resource type="StyleBoxEmpty" id=2]
 
@@ -28,6 +28,13 @@ font_data = ExtResource( 1 )
 [sub_resource type="DynamicFont" id=9]
 size = 25
 use_filter = true
+font_data = ExtResource( 1 )
+
+[sub_resource type="StyleBoxFlat" id=10]
+bg_color = Color( 0.388235, 0.364706, 0.34902, 1 )
+
+[sub_resource type="DynamicFont" id=11]
+size = 20
 font_data = ExtResource( 1 )
 
 [resource]
@@ -47,3 +54,5 @@ Label/colors/font_color = Color( 0.564706, 0.658824, 0.219608, 1 )
 Label/fonts/font = SubResource( 7 )
 Label/styles/normal = SubResource( 8 )
 OptionButton/fonts/font = SubResource( 9 )
+OptionButton/styles/hover = SubResource( 10 )
+PopupMenu/fonts/font = SubResource( 11 )

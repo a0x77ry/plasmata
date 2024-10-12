@@ -1,7 +1,6 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=11 format=2]
 
 [ext_resource path="res://fonts/Workbench-Regular.ttf" type="DynamicFontData" id=1]
-[ext_resource path="res://menu/main-menu/game-picker.gd" type="Script" id=2]
 [ext_resource path="res://terminal-theme.tres" type="Theme" id=3]
 [ext_resource path="res://games/navigation-game/level-3-obstacles/level-3-obstacles.tscn" type="PackedScene" id=4]
 [ext_resource path="res://games/navigation-game/level-4-obstacles/level-4-obstacles.tscn" type="PackedScene" id=5]
@@ -46,29 +45,44 @@ margin_top = 248.0
 margin_right = 248.0
 margin_bottom = 446.0
 
-[node name="Run" type="Button" parent="ButtonsBox"]
-margin_right = 181.0
-margin_bottom = 31.0
+[node name="Train" type="Button" parent="ButtonsBox"]
+margin_right = 384.0
+margin_bottom = 40.0
+rect_min_size = Vector2( 0, 40 )
 focus_mode = 0
 theme = ExtResource( 3 )
 enabled_focus_mode = 0
-text = "run"
+text = "train"
 align = 0
 
-[node name="Load Genome" type="Button" parent="ButtonsBox"]
-margin_top = 35.0
-margin_right = 181.0
-margin_bottom = 66.0
+[node name="HBoxContainer" type="HBoxContainer" parent="ButtonsBox"]
+margin_top = 44.0
+margin_right = 384.0
+margin_bottom = 84.0
+rect_min_size = Vector2( 0, 40 )
+
+[node name="Load Genome" type="Button" parent="ButtonsBox/HBoxContainer"]
+margin_right = 180.0
+margin_bottom = 40.0
 focus_mode = 0
 theme = ExtResource( 3 )
 enabled_focus_mode = 0
-text = "load genome"
+text = "load genome:"
 align = 0
+
+[node name="SavesList" type="OptionButton" parent="ButtonsBox/HBoxContainer"]
+margin_left = 184.0
+margin_right = 384.0
+margin_bottom = 40.0
+rect_min_size = Vector2( 200, 0 )
+theme = ExtResource( 3 )
+text = "none"
 
 [node name="Quit" type="Button" parent="ButtonsBox"]
-margin_top = 70.0
-margin_right = 181.0
-margin_bottom = 101.0
+margin_top = 88.0
+margin_right = 384.0
+margin_bottom = 128.0
+rect_min_size = Vector2( 0, 40 )
 focus_mode = 0
 theme = ExtResource( 3 )
 enabled_focus_mode = 0
@@ -95,9 +109,8 @@ margin_right = 497.0
 margin_bottom = 204.0
 theme = ExtResource( 3 )
 text = "3 obstacles"
-script = ExtResource( 2 )
 
-[connection signal="pressed" from="ButtonsBox/Run" to="." method="_on_Run_pressed"]
-[connection signal="pressed" from="ButtonsBox/Load Genome" to="." method="_on_Load_Genome_pressed"]
+[connection signal="pressed" from="ButtonsBox/Train" to="." method="_on_Train_pressed"]
+[connection signal="pressed" from="ButtonsBox/HBoxContainer/Load Genome" to="." method="_on_Load_Genome_pressed"]
 [connection signal="pressed" from="ButtonsBox/Quit" to="." method="_on_Quit_pressed"]
 [connection signal="item_selected" from="GamePickerControl/GamePicker" to="." method="_on_GamePicker_item_selected"]
