@@ -32,6 +32,7 @@ onready var path = get_parent().get_parent().get_node("Path2D")
 # onready var curve = get_parent().get_parent().get_node("Path2D").curve
 onready var curve = path.curve
 onready var spawn_timer = get_node("SpawnTimer")
+onready var death_timer = get_node("DeathTimer")
 # onready var spawning_area = get_node("SpawningArea")
 # onready var solved_text = get_node("UI/Soved/SolvedText")
 
@@ -202,14 +203,10 @@ func spawn_new_agent(pos: Vector2, rot: float, inputs: Array, geno: Genome, is_o
   var new_agent = Agent.instance()
   if !is_orig:
     new_agent.position = pos
-    new_agent.rotation = rot
+    # new_agent.rotation = rot
+    new_agent.rotation = 0.0
   else:
-    # var pos_x = rand_range(spawning_area_position.x - area_extents.x,
-    #     spawning_area.position.x + area_extents.x)
-    # var pos_y = rand_range(spawning_area_position.y - area_extents.y,
-    #     spawning_area.position.y + area_extents.y)
     new_agent.position = Vector2(spawning_area_position.x, pos.y)
-    # new_agent.rotation = rand_range(-PI, PI)
     new_agent.rotation = rot
 
   new_agent.nn_activated_inputs = inputs.duplicate()
@@ -237,7 +234,8 @@ func spawn_new_agent(pos: Vector2, rot: float, inputs: Array, geno: Genome, is_o
 
   game.increment_agent_population()
 
-func spawn_children(is_orig: bool = false, add_finished: bool = false):
+# func spawn_children(is_orig: bool = false, add_finished: bool = false):
+func spawn_children(is_orig: bool = false):
   var new_genome = Genome.new(population)
   new_genome.copy(genome)
   if game.get_active_agents().size() >= Main.AGENT_LIMIT:
@@ -246,18 +244,20 @@ func spawn_children(is_orig: bool = false, add_finished: bool = false):
   if game.get_active_agents().size() >= Main.AGENT_LIMIT + 2 || is_queued_for_deletion() || is_dead:
     return
 
-  if add_finished:
-    spawn_new_agent(position, rotation, nn_activated_inputs, new_genome, is_orig, lineage_times_finished + 1)
-  else:
-    spawn_new_agent(position, rotation, nn_activated_inputs, new_genome, is_orig, lineage_times_finished)
+  # if add_finished:
+  #   spawn_new_agent(position, rotation, nn_activated_inputs, new_genome, is_orig, lineage_times_finished + 1)
+  # else:
+  #   spawn_new_agent(position, rotation, nn_activated_inputs, new_genome, is_orig, lineage_times_finished)
+  spawn_new_agent(position, rotation, nn_activated_inputs, new_genome, is_orig, lineage_times_finished)
 
   var extra_spawns: int = EXTRA_SPAWNS
   extra_spawns *= get_relative_fitness(self, game.get_active_agents()) 
   for i in extra_spawns:
-    if add_finished:
-      spawn_new_agent(position, rotation, nn_activated_inputs, get_alter_genome(), is_orig, lineage_times_finished + 1)
-    else:
-      spawn_new_agent(position, rotation, nn_activated_inputs, get_alter_genome(), is_orig, lineage_times_finished)
+    # if add_finished:
+    #   spawn_new_agent(position, rotation, nn_activated_inputs, get_alter_genome(), is_orig, lineage_times_finished + 1)
+    # else:
+    #   spawn_new_agent(position, rotation, nn_activated_inputs, get_alter_genome(), is_orig, lineage_times_finished)
+    spawn_new_agent(position, rotation, nn_activated_inputs, get_alter_genome(), is_orig, lineage_times_finished)
 
 
 func get_fitness() -> float:
@@ -525,7 +525,7 @@ func get_nn_controls(_nn: NN, sensor_input: Dictionary):
 func finish():
   var finish_time = OS.get_ticks_msec()
   var time = finish_time - start_time
-  reached_the_end = true
+  # reached_the_end = true
   if is_original:
     game.solved_message_box.visible = true
     if game.finished_agent == null || \
@@ -540,9 +540,14 @@ func finish():
       var msecs = time - ((mins * 60 * 1000) + (secs * 1000))
       game.solved_best_time.text = String("%02d:%02d:%03d" % [mins, secs, msecs])
   # else:
-  if !game.is_loading_mode_enabled:
-    spawn_children(true, true)
-  kill_agent()
+  #   if !game.is_loading_mode_enabled:
+  #     spawn_children(true, true)
+  #   kill_agent()
+
+  position = game.get_initial_pos()
+  death_timer.start()
+  lineage_times_finished += 1
+  is_original = true
   game.BAACT.text = String(lineage_times_finished)
 
 

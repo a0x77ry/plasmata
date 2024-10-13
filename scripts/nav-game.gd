@@ -53,6 +53,7 @@ func get_initial_pos() -> Vector2:
       spawning_area.get_position().y + area_extents.y)
   return Vector2(pos_x, pos_y)
 
+
 func generate_agent_population(agent_pop = population_stream):
   var agents = []
   var agent: Node2D
@@ -62,7 +63,8 @@ func generate_agent_population(agent_pop = population_stream):
       agent = Agent.instance()
       # Set the initial position and rotation of the agent
       agent.position = get_initial_pos()
-      agent.rotation = rand_range(-PI, PI)
+      # agent.rotation = rand_range(-PI, PI)
+      agent.rotation = 0.0
 
       agent.population = population
       agent.nn_activated_inputs = input_names.duplicate()
@@ -151,16 +153,9 @@ func pause():
 func _on_FinishLine_body_entered(body:Node):
   if body.is_in_group("agents"):
     var agent = body as Node2D
-    # agent.finish(timer.time_left)
     agent.finish()
-    # solved_message_box.visible = true
-    # var _time = time - timer.time_left
-    # if _time < best_time:
-    #   best_time = _time
-    #   solved_best_time.text = String("%.2f" % _time)
-    #   winning_color_panel.bg_color = agent.genome.tint
-    if do_pause_when_solved && agent.is_original:
-      pause()
+    # if do_pause_when_solved && agent.is_original:
+    #   pause()
 
 
 # func _on_Timer_timeout():

@@ -67,7 +67,6 @@ func save(genome_dict, filename):
 
   var filepath = "user://{game_name}/{level_name}/{filename}.save"\
       .format({"game_name": game_name, "level_name": level_name, "filename": filename})
-  print(filepath)
   save_game.open(filepath, File.WRITE)
   save_game.store_line(to_json(genome_dict))
   save_game.close()
