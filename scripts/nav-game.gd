@@ -77,7 +77,7 @@ func generate_agent_population(agent_pop = population_stream):
 
       # agent.modulate = agent.genome.tint
       agent.game = self
-      agent.times_finished = 0
+      agent.lineage_times_finished = 0
 
       agents.append(agent)
       agent.add_to_group("agents")
@@ -96,14 +96,14 @@ func generate_from_save():
   agent.population = population
   agent.nn_activated_inputs = input_names.duplicate()
   agent.game = self
-  agent.times_finished = 0
+  agent.lineage_times_finished = 0
 
   var gen = Genome.new(population)
   gen.from_dict(load_agent("testsave"))
   agent.genome = gen
 
   agent.game = self
-  agent.times_finished = 0
+  agent.lineage_times_finished = 0
   agent.add_to_group("agents")
   increment_agent_population()
   agents_node.call_deferred("add_child", agent)
