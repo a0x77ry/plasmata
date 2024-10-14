@@ -7,6 +7,7 @@ const AGENT_LIMIT = 100
 var level
 var init_rot = rand_range(-PI, PI)
 var is_paused = false
+var filename_to_load
 
 
 func _ready():

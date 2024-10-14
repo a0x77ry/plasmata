@@ -15,6 +15,7 @@ onready var pause_when_solved_button = get_node("UI/PauseWhenSolved/CheckButton"
 onready var save_button = get_node("UI/Pause/VBoxContainer/SaveBestAgent")
 onready var spawn_timer = get_node("SpawnTimer")
 onready var finish_area = get_node("FinishLine")
+onready var completion_times = get_node("UI/CompletionTimesBox/CompletionTimesValue")
 
 var best_time = INF
 var do_pause_when_solved
@@ -23,6 +24,7 @@ var agent_population : int = 0
 var start_finish_distance: float
 var fa_collision_mask
 var fa_col_result
+# var filename_to_load: String
 
 
 func _ready():
@@ -101,7 +103,7 @@ func generate_from_save():
   agent.lineage_times_finished = 0
 
   var gen = Genome.new(population)
-  gen.from_dict(load_agent("testsave"))
+  gen.from_dict(load_agent(Main.filename_to_load))
   agent.genome = gen
 
   agent.game = self

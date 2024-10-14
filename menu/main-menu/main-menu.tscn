@@ -46,7 +46,7 @@ margin_right = 248.0
 margin_bottom = 446.0
 
 [node name="Train" type="Button" parent="ButtonsBox"]
-margin_right = 384.0
+margin_right = 414.0
 margin_bottom = 40.0
 rect_min_size = Vector2( 0, 40 )
 focus_mode = 0
@@ -57,22 +57,22 @@ align = 0
 
 [node name="HBoxContainer" type="HBoxContainer" parent="ButtonsBox"]
 margin_top = 44.0
-margin_right = 384.0
+margin_right = 414.0
 margin_bottom = 84.0
 rect_min_size = Vector2( 0, 40 )
 
 [node name="Load Genome" type="Button" parent="ButtonsBox/HBoxContainer"]
-margin_right = 180.0
+margin_right = 210.0
 margin_bottom = 40.0
 focus_mode = 0
 theme = ExtResource( 3 )
 enabled_focus_mode = 0
-text = "load genome:"
+text = "load genome   "
 align = 0
 
 [node name="SavesList" type="OptionButton" parent="ButtonsBox/HBoxContainer"]
-margin_left = 184.0
-margin_right = 384.0
+margin_left = 214.0
+margin_right = 414.0
 margin_bottom = 40.0
 rect_min_size = Vector2( 200, 0 )
 theme = ExtResource( 3 )
@@ -80,7 +80,7 @@ text = "none"
 
 [node name="Quit" type="Button" parent="ButtonsBox"]
 margin_top = 88.0
-margin_right = 384.0
+margin_right = 414.0
 margin_bottom = 128.0
 rect_min_size = Vector2( 0, 40 )
 focus_mode = 0
@@ -102,7 +102,7 @@ theme = ExtResource( 3 )
 text = "choose a level:"
 valign = 2
 
-[node name="GamePicker" type="OptionButton" parent="GamePickerControl"]
+[node name="LevelPicker" type="OptionButton" parent="GamePickerControl"]
 margin_left = 302.0
 margin_top = 164.0
 margin_right = 497.0
@@ -112,5 +112,6 @@ text = "3 obstacles"
 
 [connection signal="pressed" from="ButtonsBox/Train" to="." method="_on_Train_pressed"]
 [connection signal="pressed" from="ButtonsBox/HBoxContainer/Load Genome" to="." method="_on_Load_Genome_pressed"]
+[connection signal="item_selected" from="ButtonsBox/HBoxContainer/SavesList" to="." method="_on_SavesList_item_selected"]
 [connection signal="pressed" from="ButtonsBox/Quit" to="." method="_on_Quit_pressed"]
-[connection signal="item_selected" from="GamePickerControl/GamePicker" to="." method="_on_GamePicker_item_selected"]
+[connection signal="item_selected" from="GamePickerControl/LevelPicker" to="." method="_on_LevelPicker_item_selected"]

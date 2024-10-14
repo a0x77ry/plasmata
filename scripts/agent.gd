@@ -57,13 +57,13 @@ var population
 var game
 var generation := 0
 var fitness_timeline := []
-var is_original := true
+# var is_original := true
 var spawning_area
 var total_level_length
 # lineage_times_finished refers to the lineage and not a single agent
 var lineage_times_finished: int
 # This refers to how many times a single agent has completed the level
-var agent_completion_counter: int
+var agent_completion_counter: int = 0
 var spawn_timer_to_set: float = 0.0
 var current_fitness: float = 0.1
 var simple_fitness: float = 0.1
@@ -196,28 +196,22 @@ func get_alter_genome():
   return crossed_genomes[0]
 
 
-func spawn_new_agent(pos: Vector2, rot: float, inputs: Array, geno: Genome, is_orig: bool, t_finished: int):
+# func spawn_new_agent(pos: Vector2, rot: float, inputs: Array, geno: Genome, t_finished: int):
+func spawn_new_agent(pos: Vector2, inputs: Array, geno: Genome, t_finished: int):
   if game.get_active_agents().size() >= Main.AGENT_LIMIT:
     reduce_population(1)
 
   var new_agent = Agent.instance()
-  if !is_orig:
-    new_agent.position = pos
-    # new_agent.rotation = rot
-    new_agent.rotation = 0.0
-  else:
-    new_agent.position = Vector2(spawning_area_position.x, pos.y)
-    new_agent.rotation = rot
+  new_agent.position = pos
+  # new_agent.rotation = rot
+  new_agent.rotation = 0.0
 
   new_agent.nn_activated_inputs = inputs.duplicate()
-  # new_agent.genome = Genome.new(population)
-  # new_agent.genome.duplicate(geno)
   new_agent.genome = geno
   new_agent.game = game
   new_agent.population = population
   new_agent.generation = generation + 1
   new_agent.fitness_timeline = fitness_timeline.duplicate()
-  new_agent.is_original = is_orig
   new_agent.lineage_times_finished = t_finished
   var inverse_fraction = 1.0 / get_relative_fitness(self, game.get_active_agents())
   inverse_fraction = pow(inverse_fraction, 2.0)
@@ -226,16 +220,12 @@ func spawn_new_agent(pos: Vector2, rot: float, inputs: Array, geno: Genome, is_o
   new_agent.add_to_group("agents")
   var agents_node = game.get_node("Agents")
 
-  if is_orig:
-    agents_node.call_deferred("add_child", new_agent)
-    # agents_node.add_child(new_agent)
-  else:
-    agents_node.add_child(new_agent)
+  agents_node.add_child(new_agent)
 
   game.increment_agent_population()
 
-# func spawn_children(is_orig: bool = false, add_finished: bool = false):
-func spawn_children(is_orig: bool = false):
+
+func spawn_children():
   var new_genome = Genome.new(population)
   new_genome.copy(genome)
   if game.get_active_agents().size() >= Main.AGENT_LIMIT:
@@ -244,20 +234,12 @@ func spawn_children(is_orig: bool = false):
   if game.get_active_agents().size() >= Main.AGENT_LIMIT + 2 || is_queued_for_deletion() || is_dead:
     return
 
-  # if add_finished:
-  #   spawn_new_agent(position, rotation, nn_activated_inputs, new_genome, is_orig, lineage_times_finished + 1)
-  # else:
-  #   spawn_new_agent(position, rotation, nn_activated_inputs, new_genome, is_orig, lineage_times_finished)
-  spawn_new_agent(position, rotation, nn_activated_inputs, new_genome, is_orig, lineage_times_finished)
+  spawn_new_agent(position,  nn_activated_inputs, new_genome, lineage_times_finished)
 
   var extra_spawns: int = EXTRA_SPAWNS
   extra_spawns *= get_relative_fitness(self, game.get_active_agents()) 
   for i in extra_spawns:
-    # if add_finished:
-    #   spawn_new_agent(position, rotation, nn_activated_inputs, get_alter_genome(), is_orig, lineage_times_finished + 1)
-    # else:
-    #   spawn_new_agent(position, rotation, nn_activated_inputs, get_alter_genome(), is_orig, lineage_times_finished)
-    spawn_new_agent(position, rotation, nn_activated_inputs, get_alter_genome(), is_orig, lineage_times_finished)
+    spawn_new_agent(position, nn_activated_inputs, get_alter_genome(), lineage_times_finished)
 
 
 func get_fitness() -> float:
@@ -273,7 +255,9 @@ func update_current_fitness():
   var dist_to_curve = int_baked.distance_to(curve_local_pos)
 
   simple_fitness = current_offset - dist_to_curve
-  current_fitness = simple_fitness + (lineage_times_finished * total_level_length)
+  current_fitness = simple_fitness \
+      + (lineage_times_finished * total_level_length) \
+      + (agent_completion_counter * (total_level_length * 0.3))
 
   return current_fitness
 
@@ -522,15 +506,30 @@ func get_nn_controls(_nn: NN, sensor_input: Dictionary):
   velocity = Vector2(real_speed, 0).rotated(rotation)
 
 
+func set_finished_agent():
+  game.finished_agent = self.copy()
+  game.completion_times.text = String(game.finished_agent.agent_completion_counter)
+
+
 func finish():
   var finish_time = OS.get_ticks_msec()
   var time = finish_time - start_time
-  # reached_the_end = true
-  if is_original:
+  # if is_original:
+  if agent_completion_counter > 0:
     game.solved_message_box.visible = true
-    if game.finished_agent == null || \
-        lineage_times_finished > game.finished_agent.lineage_times_finished:
-      game.finished_agent = self.copy()
+
+    var fin_agent = game.finished_agent
+    if fin_agent == null:
+      set_finished_agent()
+    else:
+      if agent_completion_counter > fin_agent.agent_completion_counter:
+        set_finished_agent()
+      else:
+        if agent_completion_counter == fin_agent.agent_completion_counter &&\
+            (lineage_times_finished > fin_agent.lineage_times_finished):
+          set_finished_agent()
+          # game.finished_agent = self.copy()
+
     if !game.is_loading_mode_enabled:
       game.save_button.disabled = false
     if time < game.best_time:
@@ -544,10 +543,14 @@ func finish():
   #     spawn_children(true, true)
   #   kill_agent()
 
+  agent_completion_counter += 1
+  # if agent_completion_counter >= 2:
+  #   print("counter: %s" % agent_completion_counter)
   position = game.get_initial_pos()
+  rotation = 0.0
   death_timer.start()
   lineage_times_finished += 1
-  is_original = true
+  # is_original = true
   game.BAACT.text = String(lineage_times_finished)
 
 
@@ -560,6 +563,7 @@ func copy():
   agent.nn_activated_inputs = game.input_names.duplicate()
   agent.game = game
   agent.lineage_times_finished = 0
+  agent.agent_completion_counter = agent_completion_counter
   var new_genome = Genome.new(population)
   new_genome.copy(genome)
   agent.genome = new_genome
@@ -569,6 +573,8 @@ func copy():
 func kill_agent():
   if is_dead:
     return
+  if game.is_loading_mode_enabled:
+    game.generate_from_save()
   is_dead = true
   yield(get_tree(), "idle_frame")
   nn.disolve_nn()

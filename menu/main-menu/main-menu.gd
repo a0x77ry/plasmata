@@ -7,7 +7,7 @@ export(PackedScene) var level_3_obstacles_lm
 export(PackedScene) var level_moving_obstacles
 export(PackedScene) var level_moving_obstacles_lm
 
-onready var game_picker  = get_node("GamePickerControl/GamePicker")
+onready var level_picker  = get_node("GamePickerControl/LevelPicker")
 onready var saves_list = get_node("ButtonsBox/HBoxContainer/SavesList")
 onready var id_to_game = [
   {"id": 1,
@@ -30,12 +30,13 @@ onready var id_to_game = [
    },
 ]
 
-var selected_game_id := 1
+var selected_level_id := 1
+var selected_filename_id := 1
 
 
 func _ready():
   for index in id_to_game.size():
-    game_picker.add_item(id_to_game[index]["level_name"], index + 1)
+    level_picker.add_item(id_to_game[index]["level_name"], index + 1)
   update_level_dir()
 
 
@@ -43,13 +44,16 @@ func update_level_dir():
   saves_list.clear()
   var level_dir
   for g in id_to_game:
-    if selected_game_id == g["id"]:
+    if selected_level_id == g["id"]:
       level_dir = g["level_dir"]
-      # print("Level id is %s" % selected_game_id)
   var path = "user://nav_game/{level_dir}".format({"level_dir": level_dir})
   var filenames = dir_contents(path)
+  var index = 0
   for filename in filenames:
-    saves_list.add_item(filename)
+    saves_list.add_item(filename, index)
+    index += 1
+  if saves_list.get_item_count() > 0:
+    Main.filename_to_load = saves_list.get_item_text(0)
 
 
 func dir_contents(path):
@@ -62,15 +66,13 @@ func dir_contents(path):
         if !dir.current_is_dir():
           filenames.append(file_name)
         file_name = dir.get_next()
-  else:
-      print("An error occurred when trying to access the path.")
   return filenames
 
 
 func _on_Train_pressed():
   var level_to_run
   for g in id_to_game:
-    if selected_game_id == g["id"]:
+    if selected_level_id == g["id"]:
       level_to_run = g["level"]
   var err = get_tree().change_scene_to(level_to_run)
   if err != OK:
@@ -81,16 +83,26 @@ func _on_Quit_pressed():
   get_tree().quit(0)
 
 
-func _on_GamePicker_item_selected(index:int):
-  selected_game_id = game_picker.get_item_id(index)
+func _on_LevelPicker_item_selected(index:int):
+  selected_level_id = level_picker.get_item_id(index)
+  selected_filename_id = 1
   update_level_dir()
+
+
+func _on_SavesList_item_selected(index:int):
+  selected_filename_id = saves_list.get_item_id(index)
+  Main.filename_to_load = saves_list.get_item_text(selected_filename_id)
 
 
 func _on_Load_Genome_pressed():
   var level_to_load
   for g in id_to_game:
-    if selected_game_id == g["id"]:
+    if selected_level_id == g["id"]:
       level_to_load = g["loadlevel"]
-  var err = get_tree().change_scene_to(level_to_load)
-  if err != OK:
-    print("Cannot change scene")
+  if saves_list.get_item_count() > 0:
+    var err = get_tree().change_scene_to(level_to_load)
+    if err != OK:
+      print("Cannot change scene")
+
+
+
