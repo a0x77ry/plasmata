@@ -127,15 +127,10 @@ func restart_population_specific():
   solved_message_box.visible = false
 
 
-func change_generation():
-  .change_generation()
-  gen_counter.text = str(population.generation)
-  genome_counter.text = str(population.genomes.size())
-
-
-func set_time_scale(value):
-  .set_time_scale(value)
-  time_scale_label.text = "Time Scale: %sx" % value
+# func change_generation():
+#   .change_generation()
+#   gen_counter.text = str(population.generation)
+#   genome_counter.text = str(population.genomes.size())
 
 
 func pause():
@@ -148,28 +143,27 @@ func pause():
     FF_slider.scrollable = true
 
 
-# func save_best_agent():
-#   pass
-
-
 func _on_FinishLine_body_entered(body:Node):
   if body.is_in_group("agents"):
     var agent = body as Node2D
     agent.finish()
-    # if do_pause_when_solved && agent.is_original:
-    #   pause()
-
-
-# func _on_Timer_timeout():
-#   change_generation()
+    if Main.pause_on_completion &&\
+          agent.agent_completion_counter > Main.number_of_completions_to_pause:
+      pause()
 
 
 func _on_CheckButton_toggled(button_pressed):
-  do_pause_when_solved = button_pressed 
+  # do_pause_when_solved = button_pressed 
+  Main.pause_on_completion = button_pressed 
 
+
+func set_time_scale(value):
+  .set_time_scale(value)
+  time_scale_label.text = "Time Scale: %sx" % value
 
 func _on_FFSlider_value_changed(value):
   set_time_scale(value)
+
 
 func _on_SpawnTimer_timeout():
   if is_loading_mode_enabled:

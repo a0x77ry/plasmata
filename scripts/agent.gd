@@ -514,7 +514,6 @@ func set_finished_agent():
 func finish():
   var finish_time = OS.get_ticks_msec()
   var time = finish_time - start_time
-  # if is_original:
   if agent_completion_counter > 0:
     game.solved_message_box.visible = true
 
@@ -573,8 +572,8 @@ func copy():
 func kill_agent():
   if is_dead:
     return
-  if game.is_loading_mode_enabled:
-    game.generate_from_save()
+  # if game.is_loading_mode_enabled:
+  #   game.generate_from_save()
   is_dead = true
   yield(get_tree(), "idle_frame")
   nn.disolve_nn()

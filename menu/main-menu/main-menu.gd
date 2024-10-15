@@ -8,7 +8,8 @@ export(PackedScene) var level_moving_obstacles
 export(PackedScene) var level_moving_obstacles_lm
 
 onready var level_picker  = get_node("GamePickerControl/LevelPicker")
-onready var saves_list = get_node("ButtonsBox/HBoxContainer/SavesList")
+onready var saves_list = get_node("SelectGenomeContainer/SavesList")
+onready var options = get_node("OptionsMenu")
 onready var id_to_game = [
   {"id": 1,
    "level": level_4_obstacles,
@@ -105,4 +106,18 @@ func _on_Load_Genome_pressed():
       print("Cannot change scene")
 
 
+func _on_Options_pressed():
+  options.visible = true
+
+
+func _on_RemoveGenome_pressed():
+  var dir = Directory.new()
+  var level_dir
+  for g in id_to_game:
+    if selected_level_id == g["id"]:
+      level_dir = g["level_dir"]
+  var path = "user://nav_game/{level_dir}/{filename}"\
+      .format({"level_dir": level_dir, "filename": Main.filename_to_load})
+  dir.remove(path)
+  update_level_dir()
 

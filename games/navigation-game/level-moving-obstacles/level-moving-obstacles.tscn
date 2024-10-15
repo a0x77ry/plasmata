@@ -396,15 +396,14 @@ margin_left = 31.0
 margin_right = 233.0
 margin_bottom = 40.0
 focus_mode = 0
-pressed = true
 enabled_focus_mode = 0
 text = "Pause when solved"
 
 [node name="CompletionTimesBox" type="HBoxContainer" parent="UI" index="8"]
-margin_left = 356.0
-margin_top = -50.0
-margin_right = 560.0
-margin_bottom = 15.0
+margin_left = 60.0
+margin_top = 96.0
+margin_right = 264.0
+margin_bottom = 161.0
 
 [node name="CompletionTimesLabel" type="Label" parent="UI/CompletionTimesBox" index="0"]
 margin_top = 6.0
