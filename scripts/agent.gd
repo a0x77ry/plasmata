@@ -601,6 +601,8 @@ func _on_SpawnTimer_timeout():
 
 func _on_DeathTimer_timeout():
   kill_agent()
+  if game.is_loading_mode_enabled:
+    game.generate_from_save()
 
 
 # func _on_NNControlsUpdateTimer_timeout():
