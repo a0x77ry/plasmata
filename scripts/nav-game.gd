@@ -35,10 +35,7 @@ func _ready():
   start_finish_distance = spawning_area.global_position.distance_to(finish_area.global_position)
   fa_collision_mask = 0b100
   game_name = "nav_game"
-
-
-# func _process(_delta):
-#   countdown.text = String("%.1f" % timer.time_left)
+  pause_when_solved_button.pressed = Main.pause_on_completion
 
 
 func _physics_process(_delta):
@@ -71,11 +68,6 @@ func generate_agent_population(agent_pop = population_stream):
       agent.population = population
       agent.nn_activated_inputs = input_names.duplicate()
       assert(population.genomes[i] != null)
-      # agent.set_genome(population.genomes[i])
-
-      # var geno = Genome.new(population)
-      # geno.duplicate(population.genomes[i])
-      # agent.genome = geno
 
       agent.genome = population.genomes[i]
 
@@ -86,9 +78,10 @@ func generate_agent_population(agent_pop = population_stream):
       agents.append(agent)
       agent.add_to_group("agents")
       increment_agent_population()
-      # agents_node.add_child(agent)
+
+      agent.connect("agent_removed", self, "decrement_agent_population")
       agents_node.call_deferred("add_child", agent)
-      # agents_node.add_child(agent)
+
 
 
 func generate_from_save():
@@ -110,6 +103,7 @@ func generate_from_save():
   agent.lineage_times_finished = 0
   agent.add_to_group("agents")
   increment_agent_population()
+  agent.connect("agent_removed", self, "decrement_agent_population")
   agents_node.call_deferred("add_child", agent)
 
 

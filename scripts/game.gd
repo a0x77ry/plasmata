@@ -10,7 +10,7 @@ export(int, 400) var initial_population = 20
 
 # onready var timer = get_node("Timer")
 onready var pause_message = get_node("UI/Pause")
-onready var pause_ui = get_node("UI/Pause")
+# onready var pause_ui = get_node("UI/Pause")
 onready var agents_node = get_node("Agents")
 onready var save_ui = get_node("UI/SaveUI")
 onready var save_ui_lineedit = get_node("UI/SaveUI/VBoxContainer/Filename")

@@ -1,11 +1,10 @@
 extends KinematicBody2D
 
+signal agent_removed(value)
 
 export (float) var speed = 20.0 # waa 50.0
 export (float) var rotation_speed = 1.0 # was 0.5
 export (float) var speed_limit = 110.0
-# export (float) var speed_limit = 100.0
-# export (float) var rotation_speed_limit = 8.0
 export (float) var rotation_speed_limit = 2.0
 export (int) var penalty_for_hidden_nodes = 0 # was 5
 export(PackedScene) var Agent = load("res://agent.tscn")
@@ -41,7 +40,7 @@ var random = RandomNumberGenerator.new()
 var nn_rotation := 0.0
 var nn_speed := 0.0
 var velocity = Vector2()
-var rotation_dir = 0
+# var rotation_dir = 0
 var nn: NN
 var nn_activated_inputs := [] # set by the level
 # var genome setget set_genome, get_genome
@@ -58,7 +57,7 @@ var game
 var generation := 0
 var fitness_timeline := []
 # var is_original := true
-var spawning_area
+# var spawning_area
 var total_level_length
 # lineage_times_finished refers to the lineage and not a single agent
 var lineage_times_finished: int
@@ -68,8 +67,8 @@ var spawn_timer_to_set: float = 0.0
 var current_fitness: float = 0.1
 var simple_fitness: float = 0.1
 var is_dead := false
-var area_extents
-var spawning_area_position
+# var area_extents
+# var spawning_area_position
 var mw1_starting_y: float
 var mw2_starting_y: float
 var mw_distance: float = 104.0
@@ -83,9 +82,9 @@ func _ready():
   random.randomize()
   assert(Agent != null, "Agent need to be set in Agent Scene")
   total_level_length = curve.get_baked_length()
-  spawning_area = game.get_node("SpawningArea")
-  spawning_area_position = spawning_area.position
-  area_extents = spawning_area.get_node("CollisionShape2D").shape.extents
+  # spawning_area = game.get_node("SpawningArea")
+  # spawning_area_position = spawning_area.position
+  # area_extents = spawning_area.get_node("CollisionShape2D").shape.extents
   if nn_activated_inputs.has("mwall_1_pos"):
     mwall_1 = get_parent().get_parent().get_node("Walls/MovingWall")
     mw1_starting_y = mwall_1.position.y
@@ -122,7 +121,7 @@ func _physics_process(delta):
 
 
 func get_relative_fitness(agent, agents):
-  var total_rel_fitness := 0.0
+  var total_rel_fitness := 10.0 # so that is can't divide by zero
   var min_fitness = INF
   # var max_fitness = -INF
   for ag in agents:
@@ -143,19 +142,21 @@ func get_relative_fitness(agent, agents):
 
 
 func reduce_population(num: int) -> void:
-  # var agents = game.get_active_agents()
-  # agents.sort_custom(AgentSorter, "sort_by_fitness_ascenting")
-  var agents_dead := 0
+  # var agents_dead := 0
+  # for i in num:
+    # var agent = game.sorted_agents[i]
+    # if !is_instance_valid(agent):
+    #   agents_dead += 1
+  # for i in num + agents_dead:
   for i in num:
-    var agent = game.sorted_agents[i]
-    if !is_instance_valid(agent):
-      agents_dead += 1
-  for i in num + agents_dead:
     var agent = game.sorted_agents[i]
     if !is_instance_valid(agent):
       continue
     agent.kill_agent()
-  game.decrement_agent_population(num)
+  # if agents_dead > 0:
+  #   print(agents_dead)
+  # game.decrement_agent_population(num)
+  # game.decrement_agent_population(agents_dead)
 
 
 func find_nearest_genome():
@@ -198,8 +199,8 @@ func get_alter_genome():
 
 # func spawn_new_agent(pos: Vector2, rot: float, inputs: Array, geno: Genome, t_finished: int):
 func spawn_new_agent(pos: Vector2, inputs: Array, geno: Genome, t_finished: int):
-  if game.get_active_agents().size() >= Main.AGENT_LIMIT:
-    reduce_population(1)
+  if game.get_active_agents().size() > Main.AGENT_LIMIT:
+    reduce_population(2)
 
   var new_agent = Agent.instance()
   new_agent.position = pos
@@ -220,6 +221,8 @@ func spawn_new_agent(pos: Vector2, inputs: Array, geno: Genome, t_finished: int)
   new_agent.add_to_group("agents")
   var agents_node = game.get_node("Agents")
 
+  new_agent.connect("agent_removed", game, "decrement_agent_population")
+
   agents_node.add_child(new_agent)
 
   game.increment_agent_population()
@@ -229,9 +232,10 @@ func spawn_children():
   var new_genome = Genome.new(population)
   new_genome.copy(genome)
   if game.get_active_agents().size() >= Main.AGENT_LIMIT:
-    reduce_population(2)
+    reduce_population(0)
   # if game.get_active_agents().size() >= Main.AGENT_LIMIT + 2 || ((is_queued_for_deletion() || is_dead) && add_finished == false):
-  if game.get_active_agents().size() >= Main.AGENT_LIMIT + 2 || is_queued_for_deletion() || is_dead:
+  if game.get_active_agents().size() > Main.AGENT_LIMIT + 2 ||\
+      is_queued_for_deletion() || is_dead:
     return
 
   spawn_new_agent(position,  nn_activated_inputs, new_genome, lineage_times_finished)
@@ -314,6 +318,7 @@ func get_sensor_input():
 
   if nn_activated_inputs.has("time_since_birth"):
     time_since_birth = (timer.wait_time - timer.time_left) / timer.wait_time
+
   if nn_activated_inputs.has("pos_x"):
     norm_pos_x = global_position.x / level_width
   if nn_activated_inputs.has("pos_y"):
@@ -434,6 +439,7 @@ func get_sensor_input():
 
   if nn_activated_inputs.has("go_forward_input"):
     go_forward_input = clamp(nn_speed, 0, speed_limit) / speed_limit
+
   if nn_activated_inputs.has("go_right_input"):
     go_right_input = nn_rotation
 
@@ -492,7 +498,6 @@ func get_sensor_input():
 
 
 func get_nn_controls(_nn: NN, sensor_input: Dictionary):
-  rotation_dir = 0
   velocity = Vector2()
   _nn.set_input(sensor_input)
   var nn_output = _nn.get_output() # a dict
@@ -579,9 +584,8 @@ func kill_agent():
   nn.disolve_nn()
   genome.disolve_genome()
 
-  game.decrement_agent_population()
-  # remove_from_group("agents")
-  # game.get_node("Agents").remove_child(self)
+  # game.decrement_agent_population()
+  emit_signal("agent_removed", 1)
   queue_free()
 
 

@@ -1,5 +1,7 @@
 extends Node2D
 
+enum Side {LEFT, RIGHT}
+
 # const TIME_SCALE = 4
 const Population = preload("res://scripts/population.gd")
 const AGENT_LIMIT = 100
@@ -10,7 +12,7 @@ var is_paused = false
 var filename_to_load
 var pause_on_completion: bool = false
 var number_of_completions_to_pause: int = 1
-var time_scale := 3
+var time_scale := 1
 
 
 func _ready():
