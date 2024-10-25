@@ -163,9 +163,11 @@ func get_sensor_input():
     go_right_input = nn_rotation
 
 
-  var inp_dict = {"rotation": newrot,
+  var inp_dict = {
+        "rotation": newrot,
         "pos_x": norm_pos_x,
         "pos_y": norm_pos_y,
+
         "ray_f_distance": ray_f_distance,
         "ray_f_up_right_distance": ray_f_up_right_distance,
         "ray_f_down_right_distance": ray_f_down_right_distance,

@@ -53,7 +53,7 @@ func get_initial_pos() -> Vector2:
   return Vector2(pos_x, pos_y)
 
 
-func generate_agent_population(agent_pop = population_stream):
+func generate_agent_population(agent_pop = initial_population):
   var agents = []
   var agent: Node2D
   # var area_extents = spawning_area.get_node("CollisionShape2D").shape.extents

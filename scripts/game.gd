@@ -2,7 +2,6 @@ extends Node2D
 
 # const TIME =
 export(int, 200) var time
-export(int, 400) var population_stream
 export(PackedScene) var Agent
 export(int, 10) var unpaused_time_scale = 3
 export(float, 10.0) var mut_std_dev = 2.0
@@ -16,7 +15,6 @@ onready var save_ui = get_node("UI/SaveUI")
 onready var save_ui_lineedit = get_node("UI/SaveUI/VBoxContainer/Filename")
 
 var population
-var number_of_agents
 var agents_alive = []
 var is_game_paused := false
 var input_names = []
@@ -49,7 +47,6 @@ func init_population():
   else:
     population = Population.new([], input_names, output_names,
         starting_gen, initial_population, true)
-  number_of_agents = population.population_stream
   if !is_loading_mode_enabled:
     generate_agent_population(initial_population)
   else:
@@ -87,7 +84,6 @@ func restart_population():
   agents_alive = get_tree().get_nodes_in_group("agents")
   for agent in agents_alive:
     decrement_agent_population()
-    # agent.queue_free()
     agent.kill_agent()
   population.genomes = []
   population = Population.new([], input_names, output_names,
@@ -95,10 +91,8 @@ func restart_population():
   if is_loading_mode_enabled:
     generate_from_save()
   else:
-    number_of_agents = population.population_stream
     generate_agent_population(initial_population)
   restart_population_specific()
-  # timer.start(0.1)
 
 
 func get_active_agents():
@@ -110,7 +104,7 @@ func get_active_agents():
   return active_agents
 
 
-func generate_agent_population(agent_pop = population_stream):
+func generate_agent_population(agent_pop = initial_population):
   pass
 
 func decrement_agent_population(num: int = 1) -> void:

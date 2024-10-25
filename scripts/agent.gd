@@ -457,7 +457,8 @@ func get_sensor_input():
     # var w_distance = abs(w_starting_y - w_ending_y)
     mwall_2_pos = abs(mw1_starting_y - mwall_2.position.y) / mw_distance
 
-  var inp_dict = {"rotation": newrot,
+  var inp_dict = {
+        "rotation": newrot,
         "inverse_rotation": invrot,
         "time_since_birth": time_since_birth,
         "pos_x": norm_pos_x,
