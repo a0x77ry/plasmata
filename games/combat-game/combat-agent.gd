@@ -23,6 +23,9 @@ var battle_cage_height = 590
 # var battle_cage
 # var side
 
+var population
+var game
+var lineage_times_finished: int
 var velocity = Vector2()
 var nn_rotation := 0.0
 var nn_speed := 0.0

@@ -53,34 +53,31 @@ func get_initial_pos() -> Vector2:
   return Vector2(pos_x, pos_y)
 
 
-func generate_agent_population(agent_pop = initial_population):
-  var agents = []
+func generate_agent_population():
+  # var agents = []
   var agent: Node2D
-  # var area_extents = spawning_area.get_node("CollisionShape2D").shape.extents
-  for i in agent_pop:
-    if agent_population < ceil(Main.AGENT_LIMIT / 3.0):
-      agent = Agent.instance()
-      # Set the initial position and rotation of the agent
-      agent.position = get_initial_pos()
-      # agent.rotation = rand_range(-PI, PI)
-      agent.rotation = 0.0
+  for i in initial_population:
+    # if agent_population < ceil(Main.AGENT_LIMIT / 3.0):
+    agent = Agent.instance()
+    agent.position = get_initial_pos()
+    agent.rotation = 0.0
 
-      agent.population = population
-      agent.nn_activated_inputs = input_names.duplicate()
-      assert(population.genomes[i] != null)
+    agent.population = population
+    agent.nn_activated_inputs = input_names.duplicate()
+    assert(population.genomes[i] != null)
 
-      agent.genome = population.genomes[i]
+    agent.genome = population.genomes[i]
 
-      # agent.modulate = agent.genome.tint
-      agent.game = self
-      agent.lineage_times_finished = 0
+    # agent.modulate = agent.genome.tint
+    agent.game = self
+    agent.lineage_times_finished = 0
 
-      agents.append(agent)
-      agent.add_to_group("agents")
-      increment_agent_population()
+    # agents.append(agent)
+    agent.add_to_group("agents")
+    increment_agent_population()
 
-      agent.connect("agent_removed", self, "decrement_agent_population")
-      agents_node.call_deferred("add_child", agent)
+    agent.connect("agent_removed", self, "decrement_agent_population")
+    agents_node.call_deferred("add_child", agent)
 
 
 

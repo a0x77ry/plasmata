@@ -2,7 +2,7 @@ extends "res://scripts/nav-game.gd"
 
 
 func _enter_tree():
-  randomize()
+  # randomize()
   input_names = [
     "rotation",
 

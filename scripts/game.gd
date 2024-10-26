@@ -48,7 +48,7 @@ func init_population():
     population = Population.new([], input_names, output_names,
         starting_gen, initial_population, true)
   if !is_loading_mode_enabled:
-    generate_agent_population(initial_population)
+    generate_agent_population()
   else:
     generate_from_save()
 
@@ -91,7 +91,7 @@ func restart_population():
   if is_loading_mode_enabled:
     generate_from_save()
   else:
-    generate_agent_population(initial_population)
+    generate_agent_population()
   restart_population_specific()
 
 
@@ -104,7 +104,7 @@ func get_active_agents():
   return active_agents
 
 
-func generate_agent_population(agent_pop = initial_population):
+func generate_agent_population():
   pass
 
 func decrement_agent_population(num: int = 1) -> void:
