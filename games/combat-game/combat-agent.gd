@@ -21,15 +21,15 @@ var nn: NeuralNetwork
 var battle_cage_width = 950
 var battle_cage_height = 590
 # var battle_cage
-# var side
 
 var population
 var game
-var lineage_times_finished: int
+var side
 var velocity = Vector2()
 var nn_rotation := 0.0
 var nn_speed := 0.0
 var is_dead: bool = false
+var current_fitness = 0
 
 
 func _ready():
@@ -192,6 +192,10 @@ func get_sensor_input():
     activated_input_dict[input] = inp_dict[input]
 
   return activated_input_dict
+
+
+func get_fitness():
+  return current_fitness
 
 
 func kill_agent():

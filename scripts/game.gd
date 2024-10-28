@@ -38,15 +38,10 @@ func _physics_process(_delta):
 
 
 func init_population():
-  var starting_gen = 0
-  if population != null:
-    starting_gen = population.generation
   if !is_loading_mode_enabled:
-    population = Population.new([], input_names, output_names,
-        starting_gen, initial_population)
+    population = Population.new([], input_names, output_names, initial_population)
   else:
-    population = Population.new([], input_names, output_names,
-        starting_gen, initial_population, true)
+    population = Population.new([], input_names, output_names, initial_population, true)
   if !is_loading_mode_enabled:
     generate_agent_population()
   else:
