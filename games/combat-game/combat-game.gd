@@ -9,6 +9,7 @@ var cage_height := 590
 var cage_width := 950
 var number_of_cages: int
 var cages_map := []
+var cage_side_size: int
 
 
 func _ready():
@@ -17,24 +18,39 @@ func _ready():
 
 
 func initialize_cages() -> void:
-  var cage_side_size = (ceil(sqrt(Main.AGENT_LIMIT)))
+  cage_side_size = int(ceil(sqrt(Main.AGENT_LIMIT)))
   number_of_cages = int(pow(cage_side_size, 2.0))
-  for column in cage_side_size:
+  for row in cage_side_size:
     cages_map.append([])
-    for row in cage_side_size:
-      cages_map[column].append({
+    for column in cage_side_size:
+      cages_map[row].append({
         "has_cage": true,
         "has_combat": false,
-        "pos": Vector2(row * cage_width, column * cage_height)
+        "pos": Vector2(column * cage_width, row * cage_height)
       })
       var battle_cage = BattleCage.instance()
-      battle_cage.global_position = cages_map[column][row]["pos"]
+      battle_cage.global_position = cages_map[row][column]["pos"]
+      cages_map[row][column]["cage"] = battle_cage
       battle_cages_node.add_child(battle_cage)
 
 
-func get_initial_pos() -> Vector2:
-  var starting_pos = battle_cages_node.get_node("BattleCage/StartingPos/LeftStartingPos")
+# func get_initial_pos() -> Vector2:
+#   var starting_pos = battle_cages_node.get_node("BattleCage/StartingPos/LeftStartingPos")
+#   return starting_pos.global_position
+
+func get_initial_pos(cage, side) -> Vector2:
+  var starting_pos
+  if side == Main.Side.LEFT:
+    starting_pos = cage.get_node("StartingPos/LeftStartingPos")
+  elif side == Main.Side.RIGHT:
+    starting_pos = cage.get_node("StartingPos/RightStartingPos")
   return starting_pos.global_position
+
+func get_initial_rot(side):
+  if side == Main.Side.LEFT:
+    return 0.0
+  elif side == Main.Side.RIGHT:
+    return PI
 
 
 func increment_agent_population(num: int = 1) -> void:
@@ -48,8 +64,19 @@ func generate_agent_population():
   var agent: Node2D
   for i in initial_population:
     agent = Agent.instance()
-    agent.position = get_initial_pos()
-    agent.rotation = 0.0
+
+    # Determine cage and side
+    if i % 2 == 0:
+      agent.side = Main.Side.LEFT
+    else:
+      agent.side = Main.Side.RIGHT
+    var cage_count = i / 2
+    var row = cage_count / cage_side_size
+    var column = cage_count % cage_side_size
+    var cage = cages_map[row][column]["cage"]
+
+    agent.position = get_initial_pos(cage, agent.side)
+    agent.rotation = get_initial_rot(agent.side)
 
     agent.population = population
     agent.nn_activated_inputs = input_names.duplicate()
