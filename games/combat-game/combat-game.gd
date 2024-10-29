@@ -3,6 +3,7 @@ extends "res://scripts/game.gd"
 export(PackedScene) var BattleCage
 
 onready var battle_cages_node = get_node("BattleCages")
+onready var camera = get_node("Camera2D")
 
 var agent_population : int = 0
 var cage_height := 590
@@ -10,11 +11,51 @@ var cage_width := 950
 var number_of_cages: int
 var cages_map := []
 var cage_side_size: int
+var original_mouse_pos
+
+var is_dragging: bool = false
 
 
 func _ready():
   initialize_cages()
   init_population()
+
+
+func _physics_process(_delta):
+  if Input.is_action_just_pressed("left_click"):
+    is_dragging = true
+
+func _input(event):
+  if event.is_action_pressed("left_click"):
+    # var vx = get_viewport_rect().size.x / 2.0
+    # var vy = get_viewport_rect().size.y / 2.0
+    # camera.global_position.x += event.global_position.x - vx
+    # camera.global_position.y += event.global_position.y - vy
+    original_mouse_pos = event.global_position
+    is_dragging = true
+
+  if event.is_action_released("left_click"):
+    is_dragging = false
+
+  if is_dragging && event is InputEventMouseMotion:
+    # var vx = get_viewport_rect().size.x / 2.0
+    # var vy = get_viewport_rect().size.y / 2.0
+    # camera.global_position.x += event.global_position.x - vx
+    # camera.global_position.y += event.global_position.y - vy
+
+    # camera.global_position -= (event.global_position - original_mouse_pos).normalized() * 10
+    camera.global_position -= (event.global_position - original_mouse_pos) * camera.zoom
+    original_mouse_pos = event.global_position
+
+  if event.is_action_pressed("zoom_in"):
+    camera.zoom.x -= 0.1
+    camera.zoom.y -= 0.1
+
+  if event.is_action_pressed("zoom_out"):
+    camera.zoom.x += 0.1
+    camera.zoom.y += 0.1
+
+
 
 
 func initialize_cages() -> void:

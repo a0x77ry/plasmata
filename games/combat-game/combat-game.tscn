@@ -6,8 +6,15 @@
 [ext_resource path="res://games/combat-game/battle-cage.tscn" type="PackedScene" id=4]
 
 [node name="CombatGame" instance=ExtResource( 1 )]
+position = Vector2( 0, 0 )
 script = ExtResource( 2 )
 Agent = ExtResource( 3 )
 BattleCage = ExtResource( 4 )
+
+[node name="Camera2D" type="Camera2D" parent="." index="0"]
+position = Vector2( 952, 532 )
+current = true
+
+[node name="BattleCages" type="Node2D" parent="." index="1"]
 
 [editable path="UI/SaveUI"]

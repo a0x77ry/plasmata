@@ -26,8 +26,8 @@ var population
 var game
 var side
 var velocity = Vector2()
-var nn_rotation := 0.0
-var nn_speed := 0.0
+# var nn_rotation := 0.0
+# var nn_speed := 0.0
 var is_dead: bool = false
 var current_fitness = 0
 
@@ -39,8 +39,10 @@ func _ready():
 
 func _physics_process(delta):
   if !is_dead:
-    get_nn_controls(nn, get_sensor_input())
-    rotation += nn_rotation * rotation_speed * delta
+    var nn_controls := get_nn_controls(nn, get_sensor_input())
+    rotation += nn_controls["nn_rotation"] * rotation_speed * delta
+    var real_speed = clamp(nn_controls["nn_speed"] * speed, 0.0, speed_limit)
+    velocity = Vector2(real_speed, 0).rotated(rotation)
     velocity = move_and_slide(velocity)
   else:
     if nn != null && nn.is_dissolved:
@@ -49,18 +51,17 @@ func _physics_process(delta):
     velocity = 0.0
 
 
-func get_nn_controls(_nn: NN, sensor_input: Dictionary):
+func get_nn_controls(_nn: NN, sensor_input: Dictionary) -> Dictionary:
   velocity = Vector2()
   _nn.set_input(sensor_input)
   var nn_output = _nn.get_output() # a dict
 
   # Apply a threshold in rotations
   var input_rotation = nn_output["go_right"]
-  nn_rotation = clamp(input_rotation, -rotation_speed_limit, rotation_speed_limit)
+  var nn_rotation = clamp(input_rotation, -rotation_speed_limit, rotation_speed_limit)
 
-  nn_speed = nn_output["go_forward"]
-  var real_speed = clamp(nn_speed * speed, 0.0, speed_limit)
-  velocity = Vector2(real_speed, 0).rotated(rotation)
+  var nn_speed = nn_output["go_forward"]
+  return {"nn_rotation": nn_rotation, "nn_speed": nn_speed}
 
 
 func get_sensor_input():
@@ -160,10 +161,12 @@ func get_sensor_input():
       ray_f_down_right_distance = (ray_length - distance) / ray_length
 
   if nn_activated_inputs.has("go_forward_input"):
-    go_forward_input = clamp(nn_speed, 0, speed_limit) / speed_limit
+    # go_forward_input = clamp(nn_speed, 0, speed_limit) / speed_limit
+    go_forward_input = clamp(velocity.length(), 0, speed_limit) / speed_limit
 
   if nn_activated_inputs.has("go_right_input"):
-    go_right_input = nn_rotation
+    # go_right_input = nn_rotation
+    go_right_input = rotation / PI
 
 
   var inp_dict = {
