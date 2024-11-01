@@ -30,7 +30,8 @@ func _enter_tree():
 
   output_names = [
     "go_right",
-    "go_forward"
+    "go_forward",
+    "shooting"
   ]
 
   level_name = "simple_combat_level"

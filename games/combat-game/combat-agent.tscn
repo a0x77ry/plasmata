@@ -13,6 +13,9 @@ __meta__ = {
 "_edit_group_": true
 }
 
+[node name="ProjectilePos" type="Position2D" parent="."]
+position = Vector2( 20, 0 )
+
 [node name="Sprite" type="Sprite" parent="."]
 rotation = 1.5708
 scale = Vector2( 0.5, 0.5 )
@@ -45,3 +48,9 @@ collision_mask = 2
 enabled = true
 cast_to = Vector2( 353.55, 353.55 )
 collision_mask = 2
+
+[node name="ShootingCooldownTimer" type="Timer" parent="."]
+wait_time = 2.0
+one_shot = true
+
+[connection signal="timeout" from="ShootingCooldownTimer" to="." method="_on_ShootingCooldownTimer_timeout"]

@@ -81,8 +81,7 @@ func restart_population():
     decrement_agent_population()
     agent.kill_agent()
   population.genomes = []
-  population = Population.new([], input_names, output_names,
-      0, initial_population)
+  population = Population.new([], input_names, output_names, initial_population)
   if is_loading_mode_enabled:
     generate_from_save()
   else:

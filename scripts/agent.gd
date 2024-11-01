@@ -344,10 +344,12 @@ func get_sensor_input():
         var col_normal = ray_forward.get_collision_normal()
         rf_col_normal_angle = col_normal.angle() / PI
 
-      if col.is_in_group("normal_walls"):
-        # ray_f_distance = distance / ray_forward.cast_to.x
-        ray_f_distance = (ray_forward.cast_to.x - distance) / ray_forward.cast_to.x
-      elif col.is_in_group("moving_walls"):
+      # if col.is_in_group("normal_walls"):
+      #   ray_f_distance = (ray_forward.cast_to.x - distance) / ray_forward.cast_to.x
+      # elif col.is_in_group("moving_walls"):
+      #   ray_f_distance_mw = (ray_forward.cast_to.x - distance) / ray_forward.cast_to.x
+      ray_f_distance = (ray_forward.cast_to.x - distance) / ray_forward.cast_to.x
+      if col.is_in_group("moving_walls"):
         ray_f_distance_mw = (ray_forward.cast_to.x - distance) / ray_forward.cast_to.x
 
   if nn_activated_inputs.has("ray_left_distance") || nn_activated_inputs.has("rl_col_normal_angle"):
