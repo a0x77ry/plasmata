@@ -1,11 +1,10 @@
-[gd_scene load_steps=18 format=2]
+[gd_scene load_steps=17 format=2]
 
 [ext_resource path="res://games/game.tscn" type="PackedScene" id=1]
 [ext_resource path="res://fonts/Jura-Light.ttf" type="DynamicFontData" id=2]
 [ext_resource path="res://wall.tscn" type="PackedScene" id=3]
 [ext_resource path="res://images/finish-line.png" type="Texture" id=4]
 [ext_resource path="res://games/navigation-game/level-4-obstacles/level-4-obstacles_lm.gd" type="Script" id=5]
-[ext_resource path="res://agent.tscn" type="PackedScene" id=6]
 
 [sub_resource type="RectangleShape2D" id=7]
 resource_local_to_scene = true
@@ -75,7 +74,6 @@ _data = {
 [node name="Game2" instance=ExtResource( 1 )]
 position = Vector2( 301, 232 )
 script = ExtResource( 5 )
-Agent = ExtResource( 6 )
 
 [node name="SpawnTimer" type="Timer" parent="." index="0"]
 process_mode = 0
@@ -146,13 +144,6 @@ __meta__ = {
 [node name="CollisionShape2D" type="CollisionShape2D" parent="FinishLine" index="0"]
 position = Vector2( 0, -37.5 )
 shape = SubResource( 8 )
-
-[node name="UI" parent="." index="6"]
-margin_left = -300.0
-margin_top = -132.0
-margin_right = -260.0
-margin_bottom = -92.0
-rect_pivot_offset = Vector2( -299, 20 )
 
 [node name="Countdown" type="HBoxContainer" parent="UI" index="1"]
 visible = false
@@ -237,9 +228,9 @@ margin_bottom = 40.0
 
 [node name="HBox" type="HBoxContainer" parent="UI/SolvedMessage" index="0"]
 margin_left = 16.0
-margin_top = -92.0
+margin_top = 5.0
 margin_right = 1915.0
-margin_bottom = 79.0
+margin_bottom = 176.0
 custom_constants/separation = 40
 alignment = 1
 
@@ -319,9 +310,9 @@ text = "0"
 
 [node name="TimeScale" type="VBoxContainer" parent="UI" index="4"]
 margin_left = 63.0
-margin_top = -82.0
+margin_top = 22.0
 margin_right = 281.0
-margin_bottom = 13.0
+margin_bottom = 117.0
 custom_constants/separation = 8
 alignment = 1
 
@@ -345,9 +336,9 @@ ticks_on_borders = true
 
 [node name="PauseWhenSolved" type="HBoxContainer" parent="UI" index="5"]
 margin_left = 38.0
-margin_top = 14.0
+margin_top = 118.0
 margin_right = 302.0
-margin_bottom = 54.0
+margin_bottom = 158.0
 alignment = 1
 
 [node name="CheckButton" type="CheckButton" parent="UI/PauseWhenSolved" index="0"]
@@ -360,9 +351,9 @@ text = "Pause when solved"
 
 [node name="CompletionTimesBox" type="HBoxContainer" parent="UI" index="8"]
 margin_left = 67.0
-margin_top = 95.0
+margin_top = 199.0
 margin_right = 271.0
-margin_bottom = 160.0
+margin_bottom = 264.0
 
 [node name="CompletionTimesLabel" type="Label" parent="UI/CompletionTimesBox" index="0"]
 margin_top = 6.0

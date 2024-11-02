@@ -27,10 +27,6 @@ func _physics_process(_delta):
 
 func _input(event):
   if event.is_action_pressed("left_click"):
-    # var vx = get_viewport_rect().size.x / 2.0
-    # var vy = get_viewport_rect().size.y / 2.0
-    # camera.global_position.x += event.global_position.x - vx
-    # camera.global_position.y += event.global_position.y - vy
     original_mouse_pos = event.global_position
     is_dragging = true
 
@@ -38,12 +34,6 @@ func _input(event):
     is_dragging = false
 
   if is_dragging && event is InputEventMouseMotion:
-    # var vx = get_viewport_rect().size.x / 2.0
-    # var vy = get_viewport_rect().size.y / 2.0
-    # camera.global_position.x += event.global_position.x - vx
-    # camera.global_position.y += event.global_position.y - vy
-
-    # camera.global_position -= (event.global_position - original_mouse_pos).normalized() * 10
     camera.global_position -= (event.global_position - original_mouse_pos) * camera.zoom
     original_mouse_pos = event.global_position
 
@@ -54,8 +44,6 @@ func _input(event):
   if event.is_action_pressed("zoom_out"):
     camera.zoom.x += 0.1
     camera.zoom.y += 0.1
-
-
 
 
 func initialize_cages() -> void:
@@ -74,10 +62,6 @@ func initialize_cages() -> void:
       cages_map[row][column]["cage"] = battle_cage
       battle_cages_node.add_child(battle_cage)
 
-
-# func get_initial_pos() -> Vector2:
-#   var starting_pos = battle_cages_node.get_node("BattleCage/StartingPos/LeftStartingPos")
-#   return starting_pos.global_position
 
 func get_initial_pos(cage, side) -> Vector2:
   var starting_pos
@@ -116,6 +100,11 @@ func generate_agent_population():
     var column = cage_count % cage_side_size
     var cage = cages_map[row][column]["cage"]
 
+    agent.battle_cage = cage
+    if agent.side == Main.Side.LEFT:
+      cage.agent_left = agent
+    else:
+      cage.agent_right = agent
     agent.position = get_initial_pos(cage, agent.side)
     agent.rotation = get_initial_rot(agent.side)
 

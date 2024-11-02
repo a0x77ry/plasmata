@@ -6,7 +6,6 @@
 [ext_resource path="res://games/combat-game/battle-cage.tscn" type="PackedScene" id=4]
 
 [node name="CombatGame" instance=ExtResource( 1 )]
-position = Vector2( 0, 0 )
 script = ExtResource( 2 )
 Agent = ExtResource( 3 )
 BattleCage = ExtResource( 4 )

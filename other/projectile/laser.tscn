@@ -6,7 +6,7 @@
 [sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 5, 2 )
 
-[node name="Laser" type="KinematicBody2D"]
+[node name="Laser" type="KinematicBody2D" groups=["untraced_lasers"]]
 script = ExtResource( 2 )
 
 [node name="Laser" type="Sprite" parent="."]

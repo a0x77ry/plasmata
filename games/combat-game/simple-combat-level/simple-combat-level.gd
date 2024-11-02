@@ -24,13 +24,21 @@ func _enter_tree():
     "rfu_col_normal_angle",
     "rfd_col_normal_angle",
 
-    "go_right_input",
-    "go_forward_input",
+    "turn_right_input",
+    "move_forward_input",
+    "move_right_input",
+    "shooting_input",
+
+    "opponent_angle",
+    "opponent_distance",
+    "traced_laser_1_angle",
+    "traced_laser_1_distance",
   ]
 
   output_names = [
-    "go_right",
-    "go_forward",
+    "turn_right",
+    "move_forward",
+    "move_right",
     "shooting"
   ]
 

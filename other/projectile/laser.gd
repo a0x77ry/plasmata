@@ -6,6 +6,7 @@ export(float) var speed = 300.0
 
 var velocity: Vector2 = Vector2.ZERO
 var col: KinematicCollision2D
+var side
 
 func _ready():
   velocity = Vector2(speed, 0).rotated(get_rotation())

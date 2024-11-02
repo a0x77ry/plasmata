@@ -303,8 +303,8 @@ func get_sensor_input():
   var finish_angle: float
 
   var fitness: float
-  var go_forward_input: float
-  var go_right_input: float
+  var move_forward_input: float
+  var turn_right_input: float
   var mwall_1_pos: float
   var mwall_2_pos: float
 
@@ -440,13 +440,13 @@ func get_sensor_input():
     # fitness = curve.get_closest_offset(position) / total_level_length
     fitness = simple_fitness / total_level_length
 
-  if nn_activated_inputs.has("go_forward_input"):
-    # go_forward_input = clamp(nn_speed, 0, speed_limit) / speed_limit
-    go_forward_input = clamp(velocity.length(), 0, speed_limit) / speed_limit
+  if nn_activated_inputs.has("move_forward_input"):
+    # move_forward_input = clamp(nn_speed, 0, speed_limit) / speed_limit
+    move_forward_input = clamp(velocity.length(), 0, speed_limit) / speed_limit
 
-  if nn_activated_inputs.has("go_right_input"):
-    # go_right_input = nn_rotation
-    go_right_input = rotation / PI
+  if nn_activated_inputs.has("turn_right_input"):
+    # turn_right_input = nn_rotation
+    turn_right_input = rotation / PI
 
   if nn_activated_inputs.has("mwall_1_pos"):
     # var mwall_1 = get_parent().get_parent().get_node("Walls/MovingWall")
@@ -490,8 +490,8 @@ func get_sensor_input():
         "finish_angle": finish_angle,
 
         "fitness": fitness,
-        "go_right_input": go_right_input,
-        "go_forward_input": go_forward_input,
+        "turn_right_input": turn_right_input,
+        "move_forward_input": move_forward_input,
         "mwall_1_pos": mwall_1_pos,
         "mwall_2_pos": mwall_2_pos 
       }
@@ -509,10 +509,10 @@ func get_nn_controls(_nn: NN, sensor_input: Dictionary) -> Dictionary:
   var nn_output = _nn.get_output() # a dict
 
   # Apply a threshold in rotations
-  var input_rotation = nn_output["go_right"]
+  var input_rotation = nn_output["turn_right"]
   var nn_rotation = clamp(input_rotation, -rotation_speed_limit, rotation_speed_limit)
 
-  var nn_speed = nn_output["go_forward"]
+  var nn_speed = nn_output["move_forward"]
   # var real_speed = clamp(nn_speed * speed, 0.0, speed_limit)
   # velocity = Vector2(real_speed, 0).rotated(rotation)
   return {"nn_rotation": nn_rotation, "nn_speed": nn_speed}

@@ -23,12 +23,12 @@ func _enter_tree():
     "finish_angle",
 
     "fitness",
-    # "go_right_input",
-    # "go_forward_input"
+    # "turn_right_input",
+    # "move_forward_input"
   ]
   output_names = [
-    "go_right",
-    "go_forward"
+    "turn_right",
+    "move_forward"
   ]
 
   level_name = "level_4_obstacles"

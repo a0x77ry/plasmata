@@ -33,14 +33,14 @@ func _enter_tree():
     "finish_angle",
 
     "fitness",
-    "go_right_input",
-    "go_forward_input",
+    "turn_right_input",
+    "move_forward_input",
     "mwall_1_pos",
     "mwall_2_pos"
   ]
   output_names = [
-    "go_right",
-    "go_forward"
+    "turn_right",
+    "move_forward"
   ]
 
   is_loading_mode_enabled = true

@@ -87,7 +87,6 @@ _data = {
 position = Vector2( 251, 264 )
 script = ExtResource( 5 )
 time = 20
-population_stream = 20
 
 [node name="SpawnTimer" type="Timer" parent="." index="0"]
 wait_time = 10.0
@@ -150,13 +149,6 @@ __meta__ = {
 [node name="CollisionShape2D" type="CollisionShape2D" parent="FinishLine" index="0"]
 position = Vector2( 0, -37.5 )
 shape = SubResource( 8 )
-
-[node name="UI" parent="." index="6"]
-margin_left = -252.0
-margin_top = -163.0
-margin_right = -212.0
-margin_bottom = -123.0
-rect_pivot_offset = Vector2( -299, 20 )
 
 [node name="Countdown" type="HBoxContainer" parent="UI" index="1"]
 visible = false
@@ -240,16 +232,16 @@ margin_right = 40.0
 margin_bottom = 40.0
 
 [node name="HBox" type="HBoxContainer" parent="UI/SolvedMessage" index="0"]
-margin_left = 16.0
-margin_top = -37.0
-margin_right = 1296.0
-margin_bottom = 79.0
+margin_left = 78.0
+margin_top = 13.0
+margin_right = 1358.0
+margin_bottom = 129.0
 custom_constants/separation = 40
 alignment = 1
 
 [node name="SolvedMessage" type="HBoxContainer" parent="UI/SolvedMessage/HBox" index="0"]
-margin_left = 477.0
-margin_right = 649.0
+margin_left = 417.0
+margin_right = 589.0
 margin_bottom = 116.0
 alignment = 2
 
@@ -262,8 +254,8 @@ custom_fonts/font = SubResource( 2 )
 text = "Solved!"
 
 [node name="BestTime" type="VBoxContainer" parent="UI/SolvedMessage/HBox" index="1"]
-margin_left = 689.0
-margin_right = 802.0
+margin_left = 629.0
+margin_right = 742.0
 margin_bottom = 116.0
 alignment = 1
 
@@ -296,23 +288,23 @@ size_flags_vertical = 3
 custom_styles/panel = SubResource( 5 )
 
 [node name="BAACT" type="VBoxContainer" parent="UI/SolvedMessage/HBox" index="2"]
-margin_left = 1092.0
-margin_right = 1172.0
-margin_bottom = 171.0
+margin_left = 782.0
+margin_right = 862.0
+margin_bottom = 116.0
 alignment = 1
 
 [node name="BAACTLabel" type="Label" parent="UI/SolvedMessage/HBox/BAACT" index="0"]
-margin_top = 47.0
+margin_top = 19.0
 margin_right = 80.0
-margin_bottom = 78.0
+margin_bottom = 50.0
 custom_colors/font_color = Color( 0.843137, 0.772549, 0.764706, 1 )
 custom_fonts/font = SubResource( 10 )
 text = "BAACT:"
 
 [node name="HBox" type="HBoxContainer" parent="UI/SolvedMessage/HBox/BAACT" index="1"]
-margin_top = 82.0
+margin_top = 54.0
 margin_right = 80.0
-margin_bottom = 124.0
+margin_bottom = 96.0
 
 [node name="CompletionTimes" type="Label" parent="UI/SolvedMessage/HBox/BAACT/HBox" index="0"]
 margin_right = 21.0
@@ -323,24 +315,24 @@ text = "0"
 
 [node name="TimeScale" type="VBoxContainer" parent="UI" index="4"]
 margin_left = 63.0
-margin_top = -82.0
+margin_top = -135.0
 margin_right = 281.0
-margin_bottom = 13.0
+margin_bottom = 255.0
 custom_constants/separation = 8
 alignment = 1
 
 [node name="TimeScaleLabel" type="Label" parent="UI/TimeScale" index="0"]
-margin_top = 20.0
+margin_top = 167.0
 margin_right = 218.0
-margin_bottom = 51.0
+margin_bottom = 198.0
 custom_fonts/font = SubResource( 6 )
 text = "Time Scale: 1x"
 valign = 1
 
 [node name="FFSlider" type="HSlider" parent="UI/TimeScale" index="1"]
-margin_top = 59.0
+margin_top = 206.0
 margin_right = 218.0
-margin_bottom = 75.0
+margin_bottom = 222.0
 min_value = 1.0
 max_value = 5.0
 value = 3.0
@@ -349,24 +341,24 @@ ticks_on_borders = true
 
 [node name="PauseWhenSolved" type="HBoxContainer" parent="UI" index="5"]
 margin_left = 38.0
-margin_top = 14.0
+margin_top = -39.0
 margin_right = 302.0
-margin_bottom = 54.0
+margin_bottom = 291.0
 alignment = 1
 
 [node name="CheckButton" type="CheckButton" parent="UI/PauseWhenSolved" index="0"]
 margin_left = 31.0
 margin_right = 233.0
-margin_bottom = 40.0
+margin_bottom = 330.0
 focus_mode = 0
 enabled_focus_mode = 0
 text = "Pause when solved"
 
 [node name="CompletionTimesBox" type="HBoxContainer" parent="UI" index="8"]
 margin_left = 40.0
-margin_top = 110.0
+margin_top = 220.0
 margin_right = 244.0
-margin_bottom = 175.0
+margin_bottom = 285.0
 
 [node name="CompletionTimesLabel" type="Label" parent="UI/CompletionTimesBox" index="0"]
 margin_top = 6.0
