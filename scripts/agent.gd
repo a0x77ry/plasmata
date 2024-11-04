@@ -205,8 +205,8 @@ func spawn_new_agent(pos: Vector2, inputs: Array, geno: Genome, t_finished: int)
 
   var new_agent = Agent.instance()
   new_agent.position = pos
-  # new_agent.rotation = rot
-  new_agent.rotation = 0.0
+  # new_agent.rotation = 0.0
+  new_agent.rotation = rotation
 
   new_agent.nn_activated_inputs = inputs.duplicate()
   new_agent.genome = geno

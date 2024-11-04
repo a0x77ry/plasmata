@@ -121,3 +121,4 @@ func generate_agent_population():
 
     agent.connect("agent_removed", self, "decrement_agent_population")
     agents_node.call_deferred("add_child", agent)
+

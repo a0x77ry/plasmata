@@ -12,6 +12,7 @@ size = 25
 font_data = ExtResource( 1 )
 
 [node name="SaveUI" type="CanvasLayer"]
+layer = 2
 
 [node name="ColorRect" type="ColorRect" parent="."]
 anchor_left = 0.5

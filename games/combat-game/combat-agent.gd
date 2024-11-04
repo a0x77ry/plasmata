@@ -231,8 +231,8 @@ func get_sensor_input():
       var opponent_pos = opponent.global_position
       # var opponent_pos = get_opponent_pos()
       opponent_angle = global_position.angle_to(opponent_pos) / PI
-      opponent_distance = global_position.distance_to(opponent_pos) \
-          / sqrt(pow(battle_cage_width, 2.0) * pow(battle_cage_height, 2.0))
+      opponent_distance = 1.0 - (global_position.distance_to(opponent_pos) \
+          / sqrt(pow(battle_cage_width, 2.0) * pow(battle_cage_height, 2.0)))
 
   if nn_activated_inputs.has("traced_laser_1_angle") || \
       nn_activated_inputs.has("trase_laser_1_distance"):
@@ -249,8 +249,8 @@ func get_sensor_input():
     else:
       var traced_laser_pos = traced_laser_1.global_position
       traced_laser_1_angle = global_position.angle_to(traced_laser_pos) / PI
-      traced_laser_1_distance = global_position.distance_to(traced_laser_pos) \
-          / sqrt(pow(battle_cage_width, 2.0) * pow(battle_cage_height, 2.0))
+      traced_laser_1_distance = 1.0 - (global_position.distance_to(traced_laser_pos) \
+          / sqrt(pow(battle_cage_width, 2.0) * pow(battle_cage_height, 2.0)))
 
   var inp_dict = {
         "rotation": newrot,
