@@ -76,17 +76,18 @@ func load_agent(name) -> Dictionary:
 
 
 func restart_population():
-  agents_alive = get_tree().get_nodes_in_group("agents")
-  for agent in agents_alive:
-    decrement_agent_population()
-    agent.kill_agent()
-  population.genomes = []
-  population = Population.new([], input_names, output_names, initial_population)
-  if is_loading_mode_enabled:
-    generate_from_save()
-  else:
-    generate_agent_population()
-  restart_population_specific()
+  get_tree().reload_current_scene()
+  # agents_alive = get_tree().get_nodes_in_group("agents")
+  # for agent in agents_alive:
+  #   decrement_agent_population()
+  #   agent.kill_agent()
+  # population.genomes = []
+  # population = Population.new([], input_names, output_names, initial_population)
+  # if is_loading_mode_enabled:
+  #   generate_from_save()
+  # else:
+  #   generate_agent_population()
+  # restart_population_specific()
 
 
 func get_active_agents():

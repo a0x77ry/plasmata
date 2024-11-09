@@ -4,7 +4,7 @@ const INPUT_INCREMENT := 0.01
 const NO_IN := -1
 const THRESHOLD := 1.0
 const E = 2.7182
-const USE_BIAS = false
+const USE_BIAS = true
 
 var random = RandomNumberGenerator.new()
 var input_layer = [] 

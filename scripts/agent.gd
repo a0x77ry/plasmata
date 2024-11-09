@@ -460,6 +460,8 @@ func get_sensor_input():
     # var w_starting_y = 320
     # var w_ending_y = 216
     # var w_distance = abs(w_starting_y - w_ending_y)
+
+    # mwall_2_pos = abs(mw1_starting_y - mwall_2.position.y) / mw_distance
     mwall_2_pos = abs(mw1_starting_y - mwall_2.position.y) / mw_distance
 
   var inp_dict = {

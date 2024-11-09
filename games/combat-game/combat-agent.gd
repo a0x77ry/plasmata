@@ -1,6 +1,7 @@
 extends KinematicBody2D
 
 signal agent_removed(value)
+signal agent_killed(side)
 
 export (float) var speed = 20.0 # waa 50.0
 export (float) var lateral_speed = 20.0
@@ -8,6 +9,7 @@ export (float) var rotation_speed = 1.0 # was 0.5
 export (float) var speed_limit = 110.0
 export (float) var lateral_speed_limit = 80.0
 export (float) var rotation_speed_limit = 2.0
+# export(PackedScene) var Agent
 
 const NN = preload("res://scripts/neural_network.gd")
 const Laser = preload("res://other/projectile/laser.tscn")
@@ -32,13 +34,15 @@ var game
 var side
 var velocity = Vector2()
 var is_dead: bool = false
-var current_fitness = 0
+var current_fitness: float
 var can_shoot := true
+var Agent
 
 
 func _ready():
   assert(genome != null, "genome is not initialized in combat agent")
   nn = NN.new(genome)
+  Agent = game.Agent
 
 
 func _physics_process(delta):
@@ -302,22 +306,47 @@ func get_fitness():
   return current_fitness
 
 
+func kill_agent():
+  disolve_agent()
+  emit_signal("agent_removed", 1)
+  emit_signal("agent_killed", side)
+  queue_free()
+
+
+func disolve_agent():
+  if is_dead:
+    return
+  is_dead = true
+  # yield(get_tree(), "idle_frame")
+  if nn != null: # Needed in the case of a copy
+    nn.disolve_nn()
+    nn = null
+  genome.disolve_genome()
+  genome = null
+
+
+
+func copy():
+  var agent: Node2D
+  agent = Agent.instance()
+  agent.population = population
+  agent.current_fitness = current_fitness
+  agent.nn_activated_inputs = game.input_names.duplicate()
+  agent.game = game
+  agent.current_fitness = current_fitness
+
+  var new_genome = Genome.new(population)
+  new_genome.copy(genome)
+  agent.genome = new_genome
+
+  return agent
+
+
 func _on_agent_hit(agent_id):
   if agent_id == get_instance_id():
     kill_agent()
 
 
-func kill_agent():
-  if is_dead:
-    return
-  is_dead = true
-  yield(get_tree(), "idle_frame")
-  nn.disolve_nn()
-  genome.disolve_genome()
-
-  emit_signal("agent_removed", 1)
-  queue_free()
-
-
 func _on_ShootingCooldownTimer_timeout():
   can_shoot = true
+

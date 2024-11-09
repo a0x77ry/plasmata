@@ -1,11 +1,22 @@
 extends Node2D
 
+signal battle_won(winner_agent)
+signal battle_draw()
+signal cage_cleared(cage)
+signal agent_queued(agent)
+
+onready var left_pos = get_node("StartingPos/LeftStartingPos")
+onready var right_pos = get_node("StartingPos/RightStartingPos")
+onready var death_timer = get_node("DeathTimer")
+
 var agent_left
 var agent_right
 var left_traced_lasers = []
 var right_traced_lasers = []
-#
-#
+var left_rot = 0.0
+var right_rot = PI
+var has_active_battle := false
+
 func _physics_process(_delta):
   trace_lasers(1)
 
@@ -51,4 +62,55 @@ func trace_lasers(traced_number):
         if !slot_found && left_traced_lasers.size() < traced_number:
           right_traced_lasers.append(u_laser)
           u_laser.remove_from_group("untraced_lasers")
+
+
+func add_agent(agent):
+  assert(agent.side != null)
+  if agent.side == Main.Side.LEFT:
+    agent_left = agent
+    if agent_right != null:
+      has_active_battle = true
+  elif agent.side == Main.Side.RIGHT:
+    agent_right = agent
+    if agent_left != null:
+      has_active_battle = true
+
+
+func clean_cage():
+  if is_instance_valid(agent_left):
+    agent_left.disolve_agent()
+    agent_left.queue_free()
+  if is_instance_valid(agent_right):
+    agent_right.disolve_agent()
+    agent_right.queue_free()
+  agent_left = null
+  agent_right = null
+  death_timer.stop()
+  emit_signal("cage_cleared", self)
+  has_active_battle = false
+
+
+func _on_agent_death(side):
+  var winner_agent
+  assert(side != null)
+  if !is_instance_valid(agent_left) && !is_instance_valid(agent_right):
+    emit_signal("battle_draw")
+    clean_cage()
+    return
+
+  if side == Main.Side.LEFT:
+    winner_agent = agent_right.copy()
+  else:
+    winner_agent = agent_left.copy()
+  emit_signal("battle_won", winner_agent)
+  clean_cage()
+
+
+func _on_DeathTimer_timeout():
+  if is_instance_valid(agent_left):
+    emit_signal("agent_queued", agent_left.copy())
+  if is_instance_valid(agent_right):
+    emit_signal("agent_queued", agent_right.copy())
+  emit_signal("battle_draw")
+  clean_cage()
 

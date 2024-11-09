@@ -33,7 +33,7 @@ func _enter_tree():
     "finish_angle",
 
     "fitness",
-    "turn_right_input",
+    # "turn_right_input",
     "move_forward_input",
     "mwall_1_pos",
     "mwall_2_pos"

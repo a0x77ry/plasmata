@@ -1,5 +1,8 @@
 extends "res://scripts/game.gd"
 
+const WINNING_FITNESS_POINTS := 3.0
+const AGENT_QUEUE_LIMIT = 50
+
 export(PackedScene) var BattleCage
 
 onready var battle_cages_node = get_node("BattleCages")
@@ -12,6 +15,8 @@ var number_of_cages: int
 var cages_map := []
 var cage_side_size: int
 var original_mouse_pos
+var available_cages := []
+var agent_queue := []
 
 var is_dragging: bool = false
 
@@ -24,6 +29,7 @@ func _ready():
 func _physics_process(_delta):
   if Input.is_action_just_pressed("left_click"):
     is_dragging = true
+  # agent_queue.sort_custom(AgentSorter, "sort_by_fitness_ascenting")
 
 func _input(event):
   if event.is_action_pressed("left_click"):
@@ -58,7 +64,12 @@ func initialize_cages() -> void:
         "pos": Vector2(column * cage_width, row * cage_height)
       })
       var battle_cage = BattleCage.instance()
+      available_cages.append(battle_cage)
       battle_cage.global_position = cages_map[row][column]["pos"]
+      battle_cage.connect("battle_won", self, "_on_battle_won")
+      battle_cage.connect("battle_draw", self, "_on_battle_draw")
+      battle_cage.connect("cage_cleared", self, "_on_cage_cleared")
+      battle_cage.connect("agent_queued", self, "_on_agent_queued")
       cages_map[row][column]["cage"] = battle_cage
       battle_cages_node.add_child(battle_cage)
 
@@ -101,17 +112,21 @@ func generate_agent_population():
     var cage = cages_map[row][column]["cage"]
 
     agent.battle_cage = cage
-    if agent.side == Main.Side.LEFT:
-      cage.agent_left = agent
-    else:
-      cage.agent_right = agent
+    cage.add_agent(agent)
+    if is_instance_valid(cage.agent_left) && is_instance_valid(cage.agent_right):
+      var cage_to_remove
+      for av_cage in available_cages:
+        if cage.get_instance_id() == av_cage.get_instance_id():
+         cage_to_remove = av_cage
+      available_cages.erase(cage_to_remove)
     agent.position = get_initial_pos(cage, agent.side)
     agent.rotation = get_initial_rot(agent.side)
+    agent.current_fitness = 0.0
 
     agent.population = population
     agent.nn_activated_inputs = input_names.duplicate()
-    assert(population.genomes[i] != null)
 
+    assert(population.genomes[i] != null)
     agent.genome = population.genomes[i]
 
     agent.game = self
@@ -120,5 +135,135 @@ func generate_agent_population():
     increment_agent_population()
 
     agent.connect("agent_removed", self, "decrement_agent_population")
+    agent.connect("agent_killed", cage, "_on_agent_death")
     agents_node.call_deferred("add_child", agent)
 
+
+func spawn_new_agent(b_cage, side, geno: Genome):
+  var new_agent = Agent.instance()
+  new_agent.position = get_initial_pos(b_cage, side)
+  new_agent.rotation = get_initial_rot(side)
+
+  if side == Main.Side.LEFT:
+    b_cage.agent_left = new_agent
+  elif side == Main.Side.RIGHT:
+    b_cage.agent_right = new_agent
+  b_cage.has_active_battle = true
+
+  new_agent.battle_cage = b_cage
+  new_agent.side = side
+  new_agent.population = population
+  new_agent.nn_activated_inputs = input_names.duplicate()
+  new_agent.genome = geno
+  new_agent.game = self
+  new_agent.add_to_group("agents")
+  increment_agent_population()
+  new_agent.connect("agent_removed", self, "decrement_agent_population")
+  new_agent.connect("agent_killed", b_cage, "_on_agent_death")
+  agents_node.call_deferred("add_child", new_agent)
+
+
+func spawn_children_when_won(agent):
+  var new_genome = Genome.new(population)
+  new_genome.copy(agent.genome)
+  if get_active_agents().size() > Main.AGENT_LIMIT ||\
+      agent.is_queued_for_deletion():
+    return
+
+  var main_genome = Genome.new(population)
+  main_genome.copy(agent.genome)
+  var mate_agent = agent_queue.pop_back()
+  var mate_genome = Genome.new(population)
+  mate_genome.copy(mate_agent.genome)
+  agent.disolve_agent()
+  mate_agent.disolve_agent()
+
+  mate_agent.disolve_agent()
+  var cage = available_cages.pop_front()
+  while cage.has_active_battle:
+    cage = available_cages.pop_front()
+  spawn_new_agent(cage, Main.Side.LEFT, new_genome)
+  spawn_new_agent(cage, Main.Side.RIGHT, get_alter_genome(main_genome, mate_genome))
+  cage.death_timer.start()
+  cage.has_active_battle = true
+
+  var extra_spawns = 8
+  while extra_spawns > 0 && available_cages.size() >= 1:
+    var new_cage = available_cages.pop_front()
+    while new_cage.has_active_battle:
+      new_cage = available_cages.pop_front()
+    spawn_new_agent(new_cage, Main.Side.LEFT, get_alter_genome(main_genome, mate_genome))
+    spawn_new_agent(new_cage, Main.Side.RIGHT, get_alter_genome(main_genome, mate_genome))
+    new_cage.death_timer.start()
+    new_cage.has_active_battle = true
+    extra_spawns -= 2
+
+
+func spawn_children_when_draw():
+  if get_active_agents().size() > Main.AGENT_LIMIT:
+    return
+  if agent_queue.size() < 2 || available_cages.size() < 1:
+    return
+
+  var main_agent = agent_queue.pop_back()
+  var mate_agent = agent_queue.pop_back()
+  var main_genome = Genome.new(population)
+  main_genome.copy(main_agent.genome)
+  var mate_genome = Genome.new(population)
+  mate_genome.copy(mate_agent.genome)
+  main_agent.disolve_agent()
+  mate_agent.disolve_agent()
+
+
+  var extra_spawns = 4
+  while available_cages.size() >= 1 && extra_spawns > 0:
+    var cage = available_cages.pop_front()
+    while cage.has_active_battle:
+      cage = available_cages.pop_front()
+    if cage.has_active_battle:
+      breakpoint
+    spawn_new_agent(cage, Main.Side.LEFT, get_alter_genome(main_genome, mate_genome))
+    spawn_new_agent(cage, Main.Side.RIGHT, get_alter_genome(main_genome, mate_genome))
+    cage.death_timer.start()
+    cage.has_active_battle = true
+    extra_spawns -= 2
+
+
+func get_alter_genome(winner_genome, mate_genome):
+  var winner_genome_copy = Genome.new(population)
+  winner_genome_copy.copy(winner_genome)
+  var crossed_genomes = population\
+    .couple_crossover([winner_genome_copy, mate_genome], 1)
+  crossed_genomes[0].mutate()
+  return crossed_genomes[0]
+
+
+
+func _on_battle_won(winner_agent):
+  if available_cages.size() >= 1 && agent_queue.size() >= 1:
+    winner_agent.current_fitness += WINNING_FITNESS_POINTS
+    spawn_children_when_won(winner_agent)
+  else:
+    if agent_queue.size() < AGENT_QUEUE_LIMIT:
+      agent_queue.append(winner_agent)
+    else:
+      winner_agent.disolve_agent()
+
+
+func _on_battle_draw():
+  # if available_cages.size() == 0:
+  #   if agent_queue < AGENT_QUEUE_LIMIT:
+  #     agent_queue.append(
+  spawn_children_when_draw()
+
+
+func _on_cage_cleared(cage):
+  available_cages.append(cage)
+
+
+func _on_agent_queued(agent):
+  agent_queue.append(agent)
+
+
+func _on_UpdateTimer_timeout():
+  agent_queue.sort_custom(AgentSorter, "sort_by_fitness_ascenting")
