@@ -176,9 +176,11 @@ func spawn_children_when_won(agent):
   var mate_genome = Genome.new(population)
   mate_genome.copy(mate_agent.genome)
   agent.disolve_agent()
+  agent.queue_free()
   mate_agent.disolve_agent()
+  mate_agent.queue_free()
 
-  mate_agent.disolve_agent()
+  # mate_agent.disolve_agent()
   var cage = available_cages.pop_front()
   while cage.has_active_battle:
     cage = available_cages.pop_front()
@@ -212,7 +214,9 @@ func spawn_children_when_draw():
   var mate_genome = Genome.new(population)
   mate_genome.copy(mate_agent.genome)
   main_agent.disolve_agent()
+  main_agent.queue_free()
   mate_agent.disolve_agent()
+  mate_agent.queue_free()
 
 
   var extra_spawns = 4
@@ -248,6 +252,7 @@ func _on_battle_won(winner_agent):
       agent_queue.append(winner_agent)
     else:
       winner_agent.disolve_agent()
+      winner_agent.queue_free()
 
 
 func _on_battle_draw():

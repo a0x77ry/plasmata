@@ -156,7 +156,9 @@ func remove_disconnected_hidden_nodes():
 # Mutate this specific genome
 func mutate():
   # remove_disconnected_hidden_nodes()
+
   random.randomize()
+
   # var fraction := genome_fraction()
   # var mut_multiplier: float
   # if fraction > 0.0:

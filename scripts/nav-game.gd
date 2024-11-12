@@ -1,6 +1,7 @@
 extends "res://scripts/game.gd"
 
 onready var spawning_area = get_node("SpawningArea")
+onready var initial_pos = get_node("InitialPos")
 onready var countdown = get_node("UI/Countdown/Time")
 onready var gen_counter = get_node("UI/Statistics/GenCounter/GenNumber")
 onready var genome_counter = get_node("UI/Statistics/Genomes/GenomesNumber")
@@ -51,9 +52,10 @@ func get_initial_pos() -> Vector2:
   var pos_y = rand_range(spawning_area.get_position().y - area_extents.y,
       spawning_area.get_position().y + area_extents.y)
   return Vector2(pos_x, pos_y)
+  # return initial_pos.position
 
 
-func generate_agent_population():
+func generate_agent_population(to_mutate := false):
   # var agents = []
   var agent: Node2D
   for i in initial_population:
@@ -66,11 +68,19 @@ func generate_agent_population():
     agent.nn_activated_inputs = input_names.duplicate()
     assert(population.genomes[i] != null)
 
-    agent.genome = population.genomes[i]
+    # agent.genome = population.genomes[i]
+    var new_genome = Genome.new(population)
+    new_genome.init_io_nodes(input_names.duplicate(), output_names.duplicate())
+    new_genome.mutate()
+    agent.genome = new_genome
 
     # agent.modulate = agent.genome.tint
     agent.game = self
     agent.lineage_times_finished = 0
+
+    # mutate
+    if to_mutate:
+      agent.genome.mutate()
 
     # agents.append(agent)
     agent.add_to_group("agents")
@@ -161,5 +171,5 @@ func _on_SpawnTimer_timeout():
     return
   var agents = get_active_agents()
   if agents.size() < ceil(Main.AGENT_LIMIT / 5.0):
-    generate_agent_population()
+    generate_agent_population(true)
 

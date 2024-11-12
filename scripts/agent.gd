@@ -32,13 +32,14 @@ onready var path = get_parent().get_parent().get_node("Path2D")
 onready var curve = path.curve
 onready var spawn_timer = get_node("SpawnTimer")
 onready var death_timer = get_node("DeathTimer")
+# onready var teleport_timer = get_node("TeleportTimer")
 # onready var spawning_area = get_node("SpawningArea")
 # onready var solved_text = get_node("UI/Soved/SolvedText")
 
 
 var random = RandomNumberGenerator.new()
-# var nn_rotation := 0.0
-# var nn_speed := 0.0
+var nn_rotation := 0.0
+var nn_speed := 0.0
 var velocity = Vector2()
 # var rotation_dir = 0
 var nn: NN
@@ -75,6 +76,7 @@ var mw_distance: float = 104.0
 var mwall_1
 var mwall_2
 var start_time: int
+var is_holding := false
 
 
 func _ready():
@@ -254,6 +256,7 @@ func get_fitness() -> float:
 
 func update_current_fitness():
   var curve_local_pos = path.to_local(global_position)
+  # var curve_local_pos = path.to_local(position)
   var current_offset = curve.get_closest_offset(curve_local_pos)
 
   var int_baked = curve.interpolate_baked(current_offset)
@@ -309,7 +312,7 @@ func get_sensor_input():
   var mwall_2_pos: float
 
   if nn_activated_inputs.has("rotation"):
-    var current_rot = get_rotation()
+    var current_rot = rotation
     # Normalized rotation in positive radians
     # newrot = (current_rot if current_rot > 0 else current_rot + TAU) / TAU
     newrot = current_rot / PI
@@ -321,9 +324,9 @@ func get_sensor_input():
     time_since_birth = (timer.wait_time - timer.time_left) / timer.wait_time
 
   if nn_activated_inputs.has("pos_x"):
-    norm_pos_x = global_position.x / level_width
+    norm_pos_x = position.x / level_width
   if nn_activated_inputs.has("pos_y"):
-    norm_pos_y = global_position.y / level_height
+    norm_pos_y = position.y / level_height
 
   if nn_activated_inputs.has("finish_distance") || nn_activated_inputs.has("finish_angle"):
     var fa_pos = game.fa_col_result["collider"].global_position
@@ -348,6 +351,7 @@ func get_sensor_input():
       #   ray_f_distance = (ray_forward.cast_to.x - distance) / ray_forward.cast_to.x
       # elif col.is_in_group("moving_walls"):
       #   ray_f_distance_mw = (ray_forward.cast_to.x - distance) / ray_forward.cast_to.x
+
       ray_f_distance = (ray_forward.cast_to.x - distance) / ray_forward.cast_to.x
       if col.is_in_group("moving_walls"):
         ray_f_distance_mw = (ray_forward.cast_to.x - distance) / ray_forward.cast_to.x
@@ -368,6 +372,7 @@ func get_sensor_input():
       #   ray_left_distance = (abs(ray_left.cast_to.y) - distance) / abs(ray_left.cast_to.y)
       # elif col.is_in_group("moving_walls"):
       #   ray_left_distance_mw = (abs(ray_left.cast_to.y) - distance) / abs(ray_left.cast_to.y)
+
       ray_left_distance = (abs(ray_left.cast_to.y) - distance) / abs(ray_left.cast_to.y)
       if col.is_in_group("moving_walls"):
         ray_left_distance_mw = (abs(ray_left.cast_to.y) - distance) / abs(ray_left.cast_to.y)
@@ -388,6 +393,7 @@ func get_sensor_input():
       #   ray_right_distance = (ray_right.cast_to.y - distance) / ray_right.cast_to.y
       # elif col.is_in_group("moving_walls"):
       #   ray_right_distance_mw = (ray_right.cast_to.y - distance) / ray_right.cast_to.y
+
       ray_right_distance = (ray_right.cast_to.y - distance) / ray_right.cast_to.y
       if col.is_in_group("moving_walls"):
         ray_right_distance_mw = (ray_right.cast_to.y - distance) / ray_right.cast_to.y
@@ -410,6 +416,7 @@ func get_sensor_input():
       #   ray_f_up_right_distance = (ray_length - distance) / ray_length
       # elif col.is_in_group("moving_walls"):
       #   ray_f_up_right_distance_mw = (ray_length - distance) / ray_length
+
       ray_f_up_right_distance = (ray_length - distance) / ray_length
       if col.is_in_group("moving_walls"):
         ray_f_up_right_distance_mw = (ray_length - distance) / ray_length
@@ -432,6 +439,7 @@ func get_sensor_input():
       #   ray_f_down_right_distance = (ray_length - distance) / ray_length
       # elif col.is_in_group("moving_walls"):
       #   ray_f_down_right_distance_mw = (ray_length - distance) / ray_length
+
       ray_f_down_right_distance = (ray_length - distance) / ray_length
       if col.is_in_group("moving_walls"):
         ray_f_down_right_distance_mw = (ray_length - distance) / ray_length
@@ -441,12 +449,11 @@ func get_sensor_input():
     fitness = simple_fitness / total_level_length
 
   if nn_activated_inputs.has("move_forward_input"):
-    # move_forward_input = clamp(nn_speed, 0, speed_limit) / speed_limit
-    move_forward_input = clamp(velocity.length(), 0, speed_limit) / speed_limit
+    move_forward_input = clamp(nn_speed, 0, speed_limit) / speed_limit
+    # move_forward_input = clamp(velocity.length(), 0, speed_limit) / speed_limit
 
   if nn_activated_inputs.has("turn_right_input"):
-    # turn_right_input = nn_rotation
-    turn_right_input = rotation / PI
+    turn_right_input = nn_rotation / rotation_speed_limit
 
   if nn_activated_inputs.has("mwall_1_pos"):
     # var mwall_1 = get_parent().get_parent().get_node("Walls/MovingWall")
@@ -461,8 +468,7 @@ func get_sensor_input():
     # var w_ending_y = 216
     # var w_distance = abs(w_starting_y - w_ending_y)
 
-    # mwall_2_pos = abs(mw1_starting_y - mwall_2.position.y) / mw_distance
-    mwall_2_pos = abs(mw1_starting_y - mwall_2.position.y) / mw_distance
+    mwall_2_pos = abs(mw2_starting_y - mwall_2.position.y) / mw_distance
 
   var inp_dict = {
         "rotation": newrot,
@@ -512,9 +518,9 @@ func get_nn_controls(_nn: NN, sensor_input: Dictionary) -> Dictionary:
 
   # Apply a threshold in rotations
   var input_rotation = nn_output["turn_right"]
-  var nn_rotation = clamp(input_rotation, -rotation_speed_limit, rotation_speed_limit)
+  nn_rotation = clamp(input_rotation, -rotation_speed_limit, rotation_speed_limit)
 
-  var nn_speed = nn_output["move_forward"]
+  nn_speed = nn_output["move_forward"]
   # var real_speed = clamp(nn_speed * speed, 0.0, speed_limit)
   # velocity = Vector2(real_speed, 0).rotated(rotation)
   return {"nn_rotation": nn_rotation, "nn_speed": nn_speed}
@@ -561,6 +567,11 @@ func finish():
   #   print("counter: %s" % agent_completion_counter)
   position = game.get_initial_pos()
   rotation = 0.0
+
+  # is_holding = true
+  # teleport_timer.wait_time = random.randf_range(0.0, 7.0)
+  # teleport_timer.start()
+  
   death_timer.start()
   lineage_times_finished += 1
   # is_original = true
@@ -633,4 +644,8 @@ func _on_DeathTimer_timeout():
 #     if a.get_fitness() < b.get_fitness():
 #       return true
 #     return false
+
+
+# func _on_TeleportTimer_timeout():
+#   is_holding = false
 

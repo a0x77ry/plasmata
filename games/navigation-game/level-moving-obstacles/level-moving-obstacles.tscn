@@ -416,6 +416,9 @@ position = Vector2( -74.7798, -191.561 )
 scale = Vector2( 1.0581, 1.47534 )
 curve = SubResource( 9 )
 
+[node name="InitialPos" type="Position2D" parent="." index="9"]
+position = Vector2( 56, 253 )
+
 [connection signal="timeout" from="SpawnTimer" to="." method="_on_SpawnTimer_timeout"]
 [connection signal="body_entered" from="FinishLine" to="." method="_on_FinishLine_body_entered"]
 [connection signal="value_changed" from="UI/TimeScale/FFSlider" to="." method="_on_FFSlider_value_changed"]

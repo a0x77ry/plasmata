@@ -37,7 +37,9 @@ var is_dead: bool = false
 var current_fitness: float
 var can_shoot := true
 var Agent
-
+var nn_rotation := 0.0
+var real_speed := 0.0
+var real_lateral_speed := 0.0
 
 func _ready():
   assert(genome != null, "genome is not initialized in combat agent")
@@ -50,9 +52,8 @@ func _physics_process(delta):
     var nn_controls := get_nn_controls(nn, get_sensor_input())
     rotation += nn_controls["nn_rotation"] * rotation_speed * delta
 
-    # var real_speed = clamp(nn_controls["nn_move_forward"] * speed, 0.0, speed_limit)
-    var real_speed = clamp(nn_controls["nn_move_forward"] * speed, -speed_limit, speed_limit)
-    var real_lateral_speed = clamp(nn_controls["nn_move_right"] * lateral_speed ,
+    real_speed = clamp(nn_controls["nn_move_forward"] * speed, -speed_limit, speed_limit)
+    real_lateral_speed = clamp(nn_controls["nn_move_right"] * lateral_speed ,
         -lateral_speed_limit, lateral_speed_limit)
     velocity = Vector2(real_speed, real_lateral_speed).rotated(rotation)
     velocity = move_and_slide(velocity)
@@ -73,7 +74,7 @@ func get_nn_controls(_nn: NN, sensor_input: Dictionary) -> Dictionary:
 
   # Apply a threshold in rotations
   var input_rotation = nn_output["turn_right"]
-  var nn_rotation = clamp(input_rotation, -rotation_speed_limit, rotation_speed_limit)
+  nn_rotation = clamp(input_rotation, -rotation_speed_limit, rotation_speed_limit)
 
   var nn_move_forward = nn_output["move_forward"]
   var nn_move_right = nn_output["move_right"]
@@ -210,16 +211,16 @@ func get_sensor_input():
       ray_f_down_right_distance = (ray_length - distance) / ray_length
 
   if nn_activated_inputs.has("move_forward_input"):
-    # move_forward_input = clamp(nn_move_forward, 0, speed_limit) / speed_limit
-    move_forward_input = clamp(velocity.x, 0, speed_limit) / speed_limit
+    # move_forward_input = clamp(velocity.x, 0, speed_limit) / speed_limit
+    move_forward_input = clamp(real_speed, 0, speed_limit) / speed_limit
 
   if nn_activated_inputs.has("move_right_input"):
-    # move_right_input = clamp(nn_move_right, 0, speed_limit) / speed_limit
-    move_right_input = clamp(velocity.y, -lateral_speed_limit, lateral_speed_limit) / lateral_speed_limit
+    # move_right_input = clamp(velocity.y, -lateral_speed_limit, lateral_speed_limit) / lateral_speed_limit
+    move_right_input = clamp(real_lateral_speed, -lateral_speed_limit, lateral_speed_limit) / lateral_speed_limit
 
   if nn_activated_inputs.has("turn_right_input"):
-    # turn_right_input = nn_rotation
-    turn_right_input = rotation / PI
+    turn_right_input = nn_rotation
+    # turn_right_input = rotation / PI
 
   if nn_activated_inputs.has("shooting_input"):
     shooting_input = cooldown_timer.time_left / cooldown_timer.wait_time
