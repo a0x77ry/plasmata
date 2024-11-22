@@ -460,6 +460,7 @@ func get_sensor_input():
     # var w_starting_y = 216
     # var w_ending_y = 316
     # var w_distance = abs(w_starting_y - w_ending_y)
+
     mwall_1_pos = 1.0 - (abs(mw1_starting_y - mwall_1.position.y) / mw_distance)
 
   if nn_activated_inputs.has("mwall_2_pos"):

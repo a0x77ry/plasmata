@@ -1,7 +1,6 @@
 extends "res://scripts/game.gd"
 
 onready var spawning_area = get_node("SpawningArea")
-onready var initial_pos = get_node("InitialPos")
 onready var countdown = get_node("UI/Countdown/Time")
 onready var gen_counter = get_node("UI/Statistics/GenCounter/GenNumber")
 onready var genome_counter = get_node("UI/Statistics/Genomes/GenomesNumber")
@@ -26,7 +25,7 @@ var start_finish_distance: float
 var fa_collision_mask
 var fa_col_result
 # var filename_to_load: String
-
+var sorted_agents = []
 
 func _ready():
   random.randomize()
@@ -40,6 +39,9 @@ func _ready():
 
 
 func _physics_process(_delta):
+  sorted_agents = get_active_agents()
+  sorted_agents.sort_custom(AgentSorter, "sort_by_fitness_ascenting")
+
   var space_state = get_world_2d().direct_space_state
   fa_col_result = space_state.intersect_ray(global_position, finish_area.global_position,
       [self], fa_collision_mask, true, true)

@@ -1,7 +1,7 @@
 extends "res://scripts/game.gd"
 
 const WINNING_FITNESS_POINTS := 3.0
-const AGENT_QUEUE_LIMIT = 50
+const AGENT_QUEUE_LIMIT = 150
 
 export(PackedScene) var BattleCage
 
@@ -155,11 +155,13 @@ func spawn_new_agent(b_cage, side, geno: Genome):
   new_agent.population = population
   new_agent.nn_activated_inputs = input_names.duplicate()
   new_agent.genome = geno
+  new_agent.current_fitness = geno.fitness
   new_agent.game = self
   new_agent.add_to_group("agents")
   increment_agent_population()
   new_agent.connect("agent_removed", self, "decrement_agent_population")
   new_agent.connect("agent_killed", b_cage, "_on_agent_death")
+  # print("New agent fitness: %s" % new_agent.current_fitness)
   agents_node.call_deferred("add_child", new_agent)
 
 
@@ -242,10 +244,10 @@ func get_alter_genome(winner_genome, mate_genome):
   return crossed_genomes[0]
 
 
-
 func _on_battle_won(winner_agent):
+  winner_agent.current_fitness += WINNING_FITNESS_POINTS
+  winner_agent.genome.fitness += WINNING_FITNESS_POINTS
   if available_cages.size() >= 1 && agent_queue.size() >= 1:
-    winner_agent.current_fitness += WINNING_FITNESS_POINTS
     spawn_children_when_won(winner_agent)
   else:
     if agent_queue.size() < AGENT_QUEUE_LIMIT:

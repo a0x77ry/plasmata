@@ -34,7 +34,7 @@ var game
 var side
 var velocity = Vector2()
 var is_dead: bool = false
-var current_fitness: float
+var current_fitness := 0.0
 var can_shoot := true
 var Agent
 var nn_rotation := 0.0
@@ -135,7 +135,7 @@ func get_sensor_input():
   var traced_laser_1_distance: float
 
   if nn_activated_inputs.has("rotation"):
-    var current_rot = get_rotation()
+    var current_rot = rotation
     newrot = current_rot / PI
 
   if nn_activated_inputs.has("pos_x"):
@@ -219,7 +219,7 @@ func get_sensor_input():
     move_right_input = clamp(real_lateral_speed, -lateral_speed_limit, lateral_speed_limit) / lateral_speed_limit
 
   if nn_activated_inputs.has("turn_right_input"):
-    turn_right_input = nn_rotation
+    turn_right_input = nn_rotation / rotation_speed_limit
     # turn_right_input = rotation / PI
 
   if nn_activated_inputs.has("shooting_input"):
@@ -334,7 +334,6 @@ func copy():
   agent.current_fitness = current_fitness
   agent.nn_activated_inputs = game.input_names.duplicate()
   agent.game = game
-  agent.current_fitness = current_fitness
 
   var new_genome = Genome.new(population)
   new_genome.copy(genome)

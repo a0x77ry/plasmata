@@ -19,7 +19,7 @@ var agents_alive = []
 var is_game_paused := false
 var input_names = []
 var output_names = []
-var sorted_agents = []
+# var sorted_agents = []
 var is_loading_mode_enabled := false
 var finished_agent
 var game_name
@@ -33,8 +33,9 @@ func _process(_delta):
 
 
 func _physics_process(_delta):
-  sorted_agents = get_active_agents()
-  sorted_agents.sort_custom(AgentSorter, "sort_by_fitness_ascenting")
+  pass
+  # sorted_agents = get_active_agents()
+  # sorted_agents.sort_custom(AgentSorter, "sort_by_fitness_ascenting")
 
 
 func init_population():
