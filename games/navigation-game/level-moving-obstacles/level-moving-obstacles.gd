@@ -35,8 +35,10 @@ func _enter_tree():
     "fitness",
     "turn_right_input",
     "move_forward_input",
-    "mwall_1_pos",
-    "mwall_2_pos"
+    "mwall_1_descent_completion",
+    "mwall_1_ascent_completion",
+    "mwall_2_descent_completion",
+    "mwall_2_ascent_completion",
   ]
   output_names = [
     "turn_right",

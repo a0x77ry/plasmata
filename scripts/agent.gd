@@ -70,9 +70,9 @@ var simple_fitness: float = 0.1
 var is_dead := false
 # var area_extents
 # var spawning_area_position
-var mw1_starting_y: float
-var mw2_starting_y: float
-var mw_distance: float = 104.0
+var mw1_starting_up_y: float
+var mw1_starting_down_y: float
+var mw_distance: float = 95.0
 var mwall_1
 var mwall_2
 var start_time: int
@@ -87,12 +87,12 @@ func _ready():
   # spawning_area = game.get_node("SpawningArea")
   # spawning_area_position = spawning_area.position
   # area_extents = spawning_area.get_node("CollisionShape2D").shape.extents
-  if nn_activated_inputs.has("mwall_1_pos"):
+  if nn_activated_inputs.has("mwall_1_descent_completion"):
     mwall_1 = get_parent().get_parent().get_node("Walls/MovingWall")
-    mw1_starting_y = mwall_1.position.y
-  if nn_activated_inputs.has("mwall_2_pos"):
+    mw1_starting_up_y = mwall_1.position.y
+  if nn_activated_inputs.has("mwall_2_ascent_completion"):
     mwall_2 = get_parent().get_parent().get_node("Walls/MovingWall2")
-    mw2_starting_y = mwall_2.position.y
+    mw1_starting_down_y = mwall_2.position.y
 
   if spawn_timer_to_set != 0.0:
     spawn_timer.wait_time = spawn_timer_to_set
@@ -113,14 +113,30 @@ func _physics_process(delta):
     var nn_controls := get_nn_controls(nn, get_sensor_input())
     rotation += nn_controls["nn_rotation"] * rotation_speed * delta
     var real_speed = clamp(nn_controls["nn_speed"] * speed, 0.0, speed_limit)
-    velocity = Vector2(real_speed, 0).rotated(rotation)
-    velocity = move_and_slide(velocity)
+    # velocity = Vector2(real_speed, 0).rotated(rotation)
+    var temp_velocity = Vector2(real_speed, 0).rotated(rotation)
+    velocity = move_and_slide(temp_velocity)
   else:
     if nn != null && nn.is_dissolved:
       nn = null
       # genome = null
     rotation = 0.0
     velocity = 0.0
+
+
+func get_nn_controls(_nn: NN, sensor_input: Dictionary) -> Dictionary:
+  velocity = Vector2()
+  _nn.set_input(sensor_input)
+  var nn_output = _nn.get_output() # a dict
+
+  # Apply a threshold in rotations
+  var input_rotation = nn_output["turn_right"]
+  nn_rotation = clamp(input_rotation, -rotation_speed_limit, rotation_speed_limit)
+
+  nn_speed = nn_output["move_forward"]
+  # var real_speed = clamp(nn_speed * speed, 0.0, speed_limit)
+  # velocity = Vector2(real_speed, 0).rotated(rotation)
+  return {"nn_rotation": nn_rotation, "nn_speed": nn_speed}
 
 
 func get_relative_fitness(agent, agents):
@@ -308,8 +324,10 @@ func get_sensor_input():
   var fitness: float
   var move_forward_input: float
   var turn_right_input: float
-  var mwall_1_pos: float
-  var mwall_2_pos: float
+  var mwall_1_descent_completion: float
+  var mwall_2_ascent_completion: float
+  var mwall_2_descent_completion: float
+  var mwall_1_ascent_completion: float
 
   if nn_activated_inputs.has("rotation"):
     var current_rot = rotation
@@ -450,26 +468,20 @@ func get_sensor_input():
 
   if nn_activated_inputs.has("move_forward_input"):
     move_forward_input = clamp(nn_speed, 0, speed_limit) / speed_limit
-    # move_forward_input = clamp(velocity.length(), 0, speed_limit) / speed_limit
 
   if nn_activated_inputs.has("turn_right_input"):
-    turn_right_input = nn_rotation / rotation_speed_limit
+    turn_right_input = (nn_rotation / rotation_speed_limit) * (get_physics_process_delta_time() * rotation_speed)
+    # turn_right_input = clamp(nn_rotation, -rotation_speed_limit, rotation_speed_limit) / rotation_speed_limit
 
-  if nn_activated_inputs.has("mwall_1_pos"):
-    # var mwall_1 = get_parent().get_parent().get_node("Walls/MovingWall")
-    # var w_starting_y = 216
-    # var w_ending_y = 316
-    # var w_distance = abs(w_starting_y - w_ending_y)
+  if nn_activated_inputs.has("mwall_1_descent_completion") || \
+      nn_activated_inputs.has("mwall_1_ascent_completion"):
+    mwall_1_descent_completion = 1.0 - (abs(mw1_starting_up_y - mwall_1.position.y) / mw_distance)
+    mwall_1_ascent_completion = abs(mw1_starting_up_y - mwall_1.position.y) / mw_distance
 
-    mwall_1_pos = 1.0 - (abs(mw1_starting_y - mwall_1.position.y) / mw_distance)
-
-  if nn_activated_inputs.has("mwall_2_pos"):
-    # var mwall_2 = get_parent().get_parent().get_node("Walls/MovingWall2")
-    # var w_starting_y = 320
-    # var w_ending_y = 216
-    # var w_distance = abs(w_starting_y - w_ending_y)
-
-    mwall_2_pos = abs(mw2_starting_y - mwall_2.position.y) / mw_distance
+  if nn_activated_inputs.has("mwall_2_ascent_completion") || \
+      nn_activated_inputs.has("mwall_2_descent_completion"):
+    mwall_2_ascent_completion = abs(mw1_starting_down_y - mwall_2.position.y) / mw_distance
+    mwall_2_descent_completion = 1.0 - abs(mw1_starting_down_y - mwall_2.position.y) / mw_distance
 
   var inp_dict = {
         "rotation": newrot,
@@ -501,8 +513,10 @@ func get_sensor_input():
         "fitness": fitness,
         "turn_right_input": turn_right_input,
         "move_forward_input": move_forward_input,
-        "mwall_1_pos": mwall_1_pos,
-        "mwall_2_pos": mwall_2_pos 
+        "mwall_1_descent_completion": mwall_1_descent_completion,
+        "mwall_1_ascent_completion": mwall_1_ascent_completion,
+        "mwall_2_ascent_completion": mwall_2_ascent_completion,
+        "mwall_2_descent_completion": mwall_2_descent_completion,
       }
 
   var activated_input_dict := {}
@@ -510,21 +524,6 @@ func get_sensor_input():
     activated_input_dict[input] = inp_dict[input]
 
   return activated_input_dict
-
-
-func get_nn_controls(_nn: NN, sensor_input: Dictionary) -> Dictionary:
-  velocity = Vector2()
-  _nn.set_input(sensor_input)
-  var nn_output = _nn.get_output() # a dict
-
-  # Apply a threshold in rotations
-  var input_rotation = nn_output["turn_right"]
-  nn_rotation = clamp(input_rotation, -rotation_speed_limit, rotation_speed_limit)
-
-  nn_speed = nn_output["move_forward"]
-  # var real_speed = clamp(nn_speed * speed, 0.0, speed_limit)
-  # velocity = Vector2(real_speed, 0).rotated(rotation)
-  return {"nn_rotation": nn_rotation, "nn_speed": nn_speed}
 
 
 func set_finished_agent():
