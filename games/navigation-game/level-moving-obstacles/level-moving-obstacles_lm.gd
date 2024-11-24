@@ -11,6 +11,7 @@ func _enter_tree():
 
     # "pos_x",
     # "pos_y",
+
     "ray_f_distance",
     "ray_f_up_right_distance",
     "ray_f_down_right_distance",
@@ -22,6 +23,19 @@ func _enter_tree():
     "ray_f_down_right_distance_mw",
     "ray_left_distance_mw",
     "ray_right_distance_mw",
+
+    "ray_f_distance_complement",
+    "ray_f_up_right_distance_complement",
+    "ray_f_down_right_distance_complement",
+    "ray_left_distance_complement",
+    "ray_right_distance_complement",
+
+    "ray_f_distance_mw_complement",
+    "ray_f_up_right_distance_mw_complement",
+    "ray_f_down_right_distance_mw_complement",
+    "ray_left_distance_mw_complement",
+    "ray_right_distance_mw_complement",
+
 
     "rf_col_normal_angle",
     "rl_col_normal_angle",

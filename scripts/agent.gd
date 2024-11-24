@@ -294,6 +294,10 @@ func assign_fitness():
   # genome.fitness = pow(genome.fitness, 2.0) / 3.0
 
 
+func complement(x: float) -> float:
+  return 1.0 - x
+
+
 func get_sensor_input():
   var newrot: float
   var invrot: float
@@ -311,6 +315,18 @@ func get_sensor_input():
   var ray_right_distance_mw: float
   var ray_f_up_right_distance_mw: float
   var ray_f_down_right_distance_mw: float
+
+  var ray_f_distance_complement: float
+  var ray_left_distance_complement: float
+  var ray_right_distance_complement: float
+  var ray_f_up_right_distance_complement: float
+  var ray_f_down_right_distance_complement: float
+
+  var ray_f_distance_mw_complement: float
+  var ray_left_distance_mw_complement: float
+  var ray_right_distance_mw_complement: float
+  var ray_f_up_right_distance_mw_complement: float
+  var ray_f_down_right_distance_mw_complement: float
 
   var rf_col_normal_angle: float
   var rl_col_normal_angle: float
@@ -336,7 +352,11 @@ func get_sensor_input():
     newrot = current_rot / PI
 
   if nn_activated_inputs.has("inverse_rotation"):
-    invrot = 1 - newrot
+    # invrot = 1 - newrot
+    if newrot >= 0:
+      invrot = 1.0 - newrot
+    else:
+      invrot = -1.0 - newrot
 
   if nn_activated_inputs.has("time_since_birth"):
     time_since_birth = (timer.wait_time - timer.time_left) / timer.wait_time
@@ -370,9 +390,13 @@ func get_sensor_input():
       # elif col.is_in_group("moving_walls"):
       #   ray_f_distance_mw = (ray_forward.cast_to.x - distance) / ray_forward.cast_to.x
 
-      ray_f_distance = (ray_forward.cast_to.x - distance) / ray_forward.cast_to.x
+
+      if col.is_in_group("normal_walls") || col.is_in_group("moving_walls"): # in order to avoid third parties
+        ray_f_distance = (ray_forward.cast_to.x - distance) / ray_forward.cast_to.x
+        ray_f_distance_complement = complement(ray_f_distance)
       if col.is_in_group("moving_walls"):
         ray_f_distance_mw = (ray_forward.cast_to.x - distance) / ray_forward.cast_to.x
+        ray_f_distance_mw_complement = complement(ray_f_distance_mw)
 
   if nn_activated_inputs.has("ray_left_distance") || nn_activated_inputs.has("rl_col_normal_angle"):
     ray_left_distance = 0.0 # is was 1.0
@@ -391,9 +415,12 @@ func get_sensor_input():
       # elif col.is_in_group("moving_walls"):
       #   ray_left_distance_mw = (abs(ray_left.cast_to.y) - distance) / abs(ray_left.cast_to.y)
 
-      ray_left_distance = (abs(ray_left.cast_to.y) - distance) / abs(ray_left.cast_to.y)
+      if col.is_in_group("normal_walls") || col.is_in_group("moving_walls"):
+        ray_left_distance = (abs(ray_left.cast_to.y) - distance) / abs(ray_left.cast_to.y)
+        ray_left_distance_complement = complement(ray_left_distance)
       if col.is_in_group("moving_walls"):
         ray_left_distance_mw = (abs(ray_left.cast_to.y) - distance) / abs(ray_left.cast_to.y)
+        ray_left_distance_mw_complement = complement(ray_left_distance_mw)
 
   if nn_activated_inputs.has("ray_right_distance") || nn_activated_inputs.has("rr_col_normal_angle"):
     ray_right_distance = 0.0 # is was 1.0
@@ -412,9 +439,12 @@ func get_sensor_input():
       # elif col.is_in_group("moving_walls"):
       #   ray_right_distance_mw = (ray_right.cast_to.y - distance) / ray_right.cast_to.y
 
-      ray_right_distance = (ray_right.cast_to.y - distance) / ray_right.cast_to.y
+      if col.is_in_group("normal_walls") || col.is_in_group("moving_walls"):
+        ray_right_distance = (ray_right.cast_to.y - distance) / ray_right.cast_to.y
+        ray_right_distance_complement = complement(ray_right_distance)
       if col.is_in_group("moving_walls"):
         ray_right_distance_mw = (ray_right.cast_to.y - distance) / ray_right.cast_to.y
+        ray_right_distance_mw_complement = complement(ray_right_distance_mw)
 
   if nn_activated_inputs.has("ray_f_up_right_distance") || nn_activated_inputs.has("rfu_col_normal_angle"):
     ray_f_up_right_distance = 0.0
@@ -435,9 +465,12 @@ func get_sensor_input():
       # elif col.is_in_group("moving_walls"):
       #   ray_f_up_right_distance_mw = (ray_length - distance) / ray_length
 
-      ray_f_up_right_distance = (ray_length - distance) / ray_length
+      if col.is_in_group("normal_walls") || col.is_in_group("moving_walls"):
+        ray_f_up_right_distance = (ray_length - distance) / ray_length
+        ray_f_up_right_distance_complement = complement(ray_f_up_right_distance)
       if col.is_in_group("moving_walls"):
         ray_f_up_right_distance_mw = (ray_length - distance) / ray_length
+        ray_f_up_right_distance_mw_complement = complement(ray_f_up_right_distance_mw)
 
   if nn_activated_inputs.has("ray_f_down_right_distance") || nn_activated_inputs.has("rfd_col_normal_angle"):
     ray_f_down_right_distance = 0.0
@@ -458,9 +491,12 @@ func get_sensor_input():
       # elif col.is_in_group("moving_walls"):
       #   ray_f_down_right_distance_mw = (ray_length - distance) / ray_length
 
-      ray_f_down_right_distance = (ray_length - distance) / ray_length
+      if col.is_in_group("normal_walls") || col.is_in_group("moving_walls"):
+        ray_f_down_right_distance = (ray_length - distance) / ray_length
+        ray_f_down_right_distance_complement = complement(ray_f_down_right_distance)
       if col.is_in_group("moving_walls"):
         ray_f_down_right_distance_mw = (ray_length - distance) / ray_length
+        ray_f_down_right_distance_mw_complement = complement(ray_f_down_right_distance_mw)
 
   if nn_activated_inputs.has("fitness"):
     # fitness = curve.get_closest_offset(position) / total_level_length
@@ -500,6 +536,18 @@ func get_sensor_input():
         "ray_f_down_right_distance_mw": ray_f_down_right_distance_mw,
         "ray_left_distance_mw": ray_left_distance_mw,
         "ray_right_distance_mw": ray_right_distance_mw,
+
+        "ray_f_distance_complement": ray_f_distance_complement,
+        "ray_f_up_right_distance_complement": ray_f_up_right_distance_complement,
+        "ray_f_down_right_distance_complement": ray_f_down_right_distance_complement,
+        "ray_left_distance_complement": ray_left_distance_complement,
+        "ray_right_distance_complement": ray_right_distance_complement,
+
+        "ray_f_distance_mw_complement": ray_f_distance_mw_complement,
+        "ray_f_up_right_distance_mw_complement": ray_f_up_right_distance_mw_complement,
+        "ray_f_down_right_distance_mw_complement": ray_f_down_right_distance_mw_complement,
+        "ray_left_distance_mw_complement": ray_left_distance_mw_complement,
+        "ray_right_distance_mw_complement": ray_right_distance_mw_complement,
 
         "rf_col_normal_angle": rf_col_normal_angle,
         "rl_col_normal_angle": rl_col_normal_angle,
