@@ -71,7 +71,7 @@ var is_dead := false
 # var area_extents
 # var spawning_area_position
 var mw1_starting_up_y: float
-var mw1_starting_down_y: float
+var mw2_starting_down_y: float
 var mw_distance: float = 95.0
 var mwall_1
 var mwall_2
@@ -92,7 +92,7 @@ func _ready():
     mw1_starting_up_y = mwall_1.position.y
   if nn_activated_inputs.has("mwall_2_ascent_completion"):
     mwall_2 = get_parent().get_parent().get_node("Walls/MovingWall2")
-    mw1_starting_down_y = mwall_2.position.y
+    mw2_starting_down_y = mwall_2.position.y
 
   if spawn_timer_to_set != 0.0:
     spawn_timer.wait_time = spawn_timer_to_set
@@ -484,7 +484,7 @@ func get_sensor_input():
 
       if nn_activated_inputs.has("rfd_col_normal_angle"):
         var col_normal = ray_f_down_right.get_collision_normal()
-        rfu_col_normal_angle = col_normal.angle() / PI
+        rfd_col_normal_angle = col_normal.angle() / PI
 
       # if col.is_in_group("normal_walls"):
       #   ray_f_down_right_distance = (ray_length - distance) / ray_length
@@ -511,13 +511,14 @@ func get_sensor_input():
 
   if nn_activated_inputs.has("mwall_1_descent_completion") || \
       nn_activated_inputs.has("mwall_1_ascent_completion"):
-    mwall_1_descent_completion = 1.0 - (abs(mw1_starting_up_y - mwall_1.position.y) / mw_distance)
     mwall_1_ascent_completion = abs(mw1_starting_up_y - mwall_1.position.y) / mw_distance
+    mwall_1_descent_completion = 1.0 - mwall_1_ascent_completion
 
   if nn_activated_inputs.has("mwall_2_ascent_completion") || \
       nn_activated_inputs.has("mwall_2_descent_completion"):
-    mwall_2_ascent_completion = abs(mw1_starting_down_y - mwall_2.position.y) / mw_distance
-    mwall_2_descent_completion = 1.0 - abs(mw1_starting_down_y - mwall_2.position.y) / mw_distance
+    mwall_2_ascent_completion = abs(mw2_starting_down_y - mwall_2.position.y) / mw_distance
+    # mwall_2_descent_completion = 1.0 - (abs(mw2_starting_down_y - mwall_2.position.y) / mw_distance)
+    mwall_2_descent_completion = 1.0 - mwall_2_ascent_completion
 
   var inp_dict = {
         "rotation": newrot,

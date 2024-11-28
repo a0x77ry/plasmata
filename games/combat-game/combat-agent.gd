@@ -41,6 +41,7 @@ var nn_rotation := 0.0
 var real_speed := 0.0
 var real_lateral_speed := 0.0
 
+
 func _ready():
   assert(genome != null, "genome is not initialized in combat agent")
   nn = NN.new(genome)
@@ -163,24 +164,28 @@ func get_sensor_input():
     rl_col_normal_angle = 0.0
     if ray_left.is_colliding():
       var distance = global_position.distance_to(ray_left.get_collision_point())
+      var col = ray_left.get_collider()
 
       if nn_activated_inputs.has("rl_col_normal_angle"):
         var col_normal = ray_left.get_collision_normal()
         rl_col_normal_angle = col_normal.angle() / PI
 
-      ray_left_distance = (abs(ray_left.cast_to.y) - distance) / abs(ray_left.cast_to.y)
+      if col.is_in_group("normal_walls"):
+        ray_left_distance = (abs(ray_left.cast_to.y) - distance) / abs(ray_left.cast_to.y)
 
   if nn_activated_inputs.has("ray_right_distance") || nn_activated_inputs.has("rr_col_normal_angle"):
     ray_right_distance = 0.0 # is was 1.0
     rr_col_normal_angle = 0.0
     if ray_right.is_colliding():
       var distance = global_position.distance_to(ray_right.get_collision_point())
+      var col = ray_right.get_collider()
 
       if nn_activated_inputs.has("rr_col_normal_angle"):
         var col_normal = ray_right.get_collision_normal()
         rr_col_normal_angle = col_normal.angle() / PI
 
-      ray_right_distance = (ray_right.cast_to.y - distance) / ray_right.cast_to.y
+      if col.is_in_group("normal_walls"):
+        ray_right_distance = (ray_right.cast_to.y - distance) / ray_right.cast_to.y
 
   if nn_activated_inputs.has("ray_f_up_right_distance") || nn_activated_inputs.has("rfu_col_normal_angle"):
     ray_f_up_right_distance = 0.0
@@ -189,12 +194,14 @@ func get_sensor_input():
       var distance = global_position.distance_to(ray_f_up_right.get_collision_point())
       var ray_length = Vector2.ZERO.distance_to(Vector2(ray_f_up_right.cast_to.x,
           ray_f_up_right.cast_to.y))
+      var col = ray_f_up_right.get_collider()
 
       if nn_activated_inputs.has("rfu_col_normal_angle"):
         var col_normal = ray_f_up_right.get_collision_normal()
         rfu_col_normal_angle = col_normal.angle() / PI
 
-      ray_f_up_right_distance = (ray_length - distance) / ray_length
+      if col.is_in_group("normal_walls"):
+        ray_f_up_right_distance = (ray_length - distance) / ray_length
 
   if nn_activated_inputs.has("ray_f_down_right_distance") || nn_activated_inputs.has("rfd_col_normal_angle"):
     ray_f_down_right_distance = 0.0
@@ -203,12 +210,14 @@ func get_sensor_input():
       var distance = global_position.distance_to(ray_f_down_right.get_collision_point())
       var ray_length = Vector2.ZERO.distance_to(Vector2(ray_f_down_right.cast_to.x,
           ray_f_down_right.cast_to.y))
+      var col = ray_f_down_right.get_collider()
 
       if nn_activated_inputs.has("rfd_col_normal_angle"):
         var col_normal = ray_f_down_right.get_collision_normal()
         rfu_col_normal_angle = col_normal.angle() / PI
 
-      ray_f_down_right_distance = (ray_length - distance) / ray_length
+      if col.is_in_group("normal_walls"):
+        ray_f_down_right_distance = (ray_length - distance) / ray_length
 
   if nn_activated_inputs.has("move_forward_input"):
     # move_forward_input = clamp(velocity.x, 0, speed_limit) / speed_limit
@@ -219,7 +228,7 @@ func get_sensor_input():
     move_right_input = clamp(real_lateral_speed, -lateral_speed_limit, lateral_speed_limit) / lateral_speed_limit
 
   if nn_activated_inputs.has("turn_right_input"):
-    turn_right_input = nn_rotation / rotation_speed_limit
+    turn_right_input = (nn_rotation / rotation_speed_limit) * (get_physics_process_delta_time() * rotation_speed)
     # turn_right_input = rotation / PI
 
   if nn_activated_inputs.has("shooting_input"):
