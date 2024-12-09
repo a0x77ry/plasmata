@@ -16,9 +16,9 @@ current = true
 
 [node name="BattleCages" type="Node2D" parent="." index="1"]
 
-[node name="UpdateTimer" type="Timer" parent="." index="4"]
+[node name="CageFillTimer" type="Timer" parent="." index="4"]
 autostart = true
 
-[connection signal="timeout" from="UpdateTimer" to="." method="_on_UpdateTimer_timeout"]
+[connection signal="timeout" from="CageFillTimer" to="." method="_on_CageFillTimer_timeout"]
 
 [editable path="UI/SaveUI"]

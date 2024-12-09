@@ -115,7 +115,7 @@ func get_out(_userdata) -> Dictionary:
   return output_dict
 
 
-func disolve_nn():
+func dissolve_nn():
   is_moribund = true
   for node in input_layer:
     node.outgoing_links = []

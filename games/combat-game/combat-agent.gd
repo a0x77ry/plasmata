@@ -34,7 +34,7 @@ var game
 var side
 var velocity = Vector2()
 var is_dead: bool = false
-var current_fitness := 0.0
+# var current_fitness := 0.0
 var can_shoot := true
 var Agent
 var nn_rotation := 0.0
@@ -313,34 +313,34 @@ func shoot():
 
 
 func get_fitness():
-  return current_fitness
+  # return current_fitness
+  return genome.fitness
 
 
 func kill_agent():
-  disolve_agent()
+  dissolve_agent()
   emit_signal("agent_removed", 1)
   emit_signal("agent_killed", side)
   queue_free()
 
 
-func disolve_agent():
+func dissolve_agent():
   if is_dead:
     return
   is_dead = true
   # yield(get_tree(), "idle_frame")
   if nn != null: # Needed in the case of a copy
-    nn.disolve_nn()
+    nn.dissolve_nn()
     nn = null
-  genome.disolve_genome()
+  genome.dissolve_genome()
   genome = null
-
 
 
 func copy():
   var agent: Node2D
   agent = Agent.instance()
   agent.population = population
-  agent.current_fitness = current_fitness
+  # agent.current_fitness = current_fitness
   agent.nn_activated_inputs = game.input_names.duplicate()
   agent.game = game
 

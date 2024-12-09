@@ -650,8 +650,8 @@ func kill_agent():
   #   game.generate_from_save()
   is_dead = true
   yield(get_tree(), "idle_frame")
-  nn.disolve_nn()
-  genome.disolve_genome()
+  nn.dissolve_nn()
+  genome.dissolve_genome()
 
   # game.decrement_agent_population()
   emit_signal("agent_removed", 1)

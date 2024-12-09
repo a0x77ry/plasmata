@@ -1,9 +1,10 @@
 extends Node2D
 
-signal battle_won(winner_agent)
-signal battle_draw()
+signal battle_won(winner_genome)
+signal battle_draw(genome_left, genome_right)
 signal cage_cleared(cage)
-signal agent_queued(agent)
+# signal agent_queued(agent)
+# signal genome_queued(genome)
 
 onready var left_pos = get_node("StartingPos/LeftStartingPos")
 onready var right_pos = get_node("StartingPos/RightStartingPos")
@@ -11,11 +12,15 @@ onready var death_timer = get_node("DeathTimer")
 
 var agent_left
 var agent_right
+var genome_left_copy
+var genome_right_copy
 var left_traced_lasers = []
 var right_traced_lasers = []
 var left_rot = 0.0
 var right_rot = PI
 var has_active_battle := false
+var game
+
 
 func _physics_process(_delta):
   trace_lasers(1)
@@ -68,21 +73,31 @@ func add_agent(agent):
   assert(agent.side != null)
   if agent.side == Main.Side.LEFT:
     agent_left = agent
+    # genome_left_copy = Genome.new(agent.genome.population)
+    # genome_left_copy.copy(agent.genome)
+    genome_left_copy = game.genome_duplicate(agent.genome)
     if agent_right != null:
       has_active_battle = true
   elif agent.side == Main.Side.RIGHT:
     agent_right = agent
+    # genome_right_copy = Genome.new(agent.genome.population)
+    # genome_right_copy.copy(agent.genome)
+    genome_right_copy = game.genome_duplicate(agent.genome)
     if agent_left != null:
       has_active_battle = true
 
 
 func clean_cage():
   if is_instance_valid(agent_left):
-    agent_left.disolve_agent()
+    agent_left.dissolve_agent()
     agent_left.queue_free()
+  if is_instance_valid(genome_left_copy):
+    genome_left_copy.dissolve_genome()
   if is_instance_valid(agent_right):
-    agent_right.disolve_agent()
+    agent_right.dissolve_agent()
     agent_right.queue_free()
+  if is_instance_valid(genome_right_copy):
+    genome_right_copy.dissolve_genome()
   agent_left = null
   agent_right = null
   death_timer.stop()
@@ -91,26 +106,35 @@ func clean_cage():
 
 
 func _on_agent_death(side):
-  var winner_agent
+  var winner_genome
   assert(side != null)
   if !is_instance_valid(agent_left) && !is_instance_valid(agent_right):
-    emit_signal("battle_draw")
+    emit_signal("battle_draw", game.genome_duplicate(genome_left_copy), game.genome_duplicate(genome_right_copy))
     clean_cage()
     return
 
   if side == Main.Side.LEFT:
-    winner_agent = agent_right.copy()
+    winner_genome = game.genome_duplicate(genome_right_copy)
   else:
-    winner_agent = agent_left.copy()
-  emit_signal("battle_won", winner_agent)
+    winner_genome = game.genome_duplicate(genome_left_copy)
+  emit_signal("battle_won", winner_genome)
   clean_cage()
 
 
 func _on_DeathTimer_timeout():
-  if is_instance_valid(agent_left):
-    emit_signal("agent_queued", agent_left.copy())
-  if is_instance_valid(agent_right):
-    emit_signal("agent_queued", agent_right.copy())
-  emit_signal("battle_draw")
+  var left_alive = is_instance_valid(agent_left)
+  var right_alive = is_instance_valid(agent_right)
+  if left_alive && right_alive:
+    emit_signal("battle_draw", game.genome_duplicate(genome_left_copy), game.genome_duplicate(genome_right_copy))
+  elif left_alive:
+    emit_signal("battle_won", game.genome_duplicate(genome_left_copy))
+  elif right_alive:
+    emit_signal("battle_won", game.genome_duplicate(genome_right_copy))
+
+  # if is_instance_valid(agent_left):
+  #   emit_signal("agent_queued", agent_left.copy())
+  # if is_instance_valid(agent_right):
+  #   emit_signal("agent_queued", agent_right.copy())
+  # emit_signal("battle_draw")
   clean_cage()
 

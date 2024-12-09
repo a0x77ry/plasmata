@@ -107,7 +107,7 @@ func from_dict(agent_dict):
   links = new_links
 
 
-func disolve_genome():
+func dissolve_genome():
   # input_nodes = []
   # hidden_nodes = []
   # output_nodes = []
@@ -117,24 +117,36 @@ func disolve_genome():
 
 
 func copy(geno: Genome):
-  # input_nodes = geno.input_nodes.duplicate()
   input_nodes = []
   for node in geno.input_nodes:
     input_nodes.append(node.dupl())
-  # hidden_nodes = geno.hidden_nodes.duplicate()
   hidden_nodes = []
   for node in geno.hidden_nodes:
     hidden_nodes.append(node.dupl())
-  # output_nodes = geno.output_nodes.duplicate()
   output_nodes = []
   for node in geno.output_nodes:
     output_nodes.append(node.dupl())
-  # links = geno.links.duplicate()
   links = []
   for link in geno.links:
     links.append(link.dupl())
 
   fitness = geno.fitness
+
+
+# Cannot use Genome. Outputs an error for cyclic reference
+# func duplicate() -> Genome:
+#   var genome: Genome
+#   genome = Genome.new(population)
+#   for node in input_nodes:
+#     genome.input_nodes.append(node.dupl())
+#   for node in hidden_nodes:
+#     genome.hidden_nodes.append(node.dupl())
+#   for node in output_nodes:
+#     genome.output_nodes.append(node.dupl())
+#   for link in links:
+#     genome.links.append(link.dupl())
+#   genome.fitness = fitness
+#   return genome
 
 
 func init_io_nodes(input_names: Array, output_names: Array):
