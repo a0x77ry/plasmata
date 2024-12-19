@@ -4,12 +4,14 @@ const WINNING_FITNESS_POINTS := 3.0
 const DRAW_FITNESS_POINTS := 1.0
 # const AGENT_QUEUE_LIMIT = 150
 const GENOME_QUEUE_LIMIT = 150
+const TOTAL_QUEUE_CHILDREN = GENOME_QUEUE_LIMIT * 2
 
 export(PackedScene) var BattleCage
 
 onready var battle_cages_node = get_node("BattleCages")
 onready var camera = get_node("Camera2D")
 
+var random = RandomNumberGenerator.new()
 var agent_population : int = 0
 var cage_height := 590
 var cage_width := 950
@@ -19,12 +21,13 @@ var cage_side_size: int
 var original_mouse_pos
 var available_cages := []
 # var agent_queue := []
-var genome_queue := []
+var genome_queue := [] # example: [{"genome": gen01, "children_spawned": 5}]
 
 var is_dragging: bool = false
 
 
 func _ready():
+  random.randomize()
   initialize_cages()
   init_population()
 
@@ -255,9 +258,20 @@ func genome_duplicate(original_genome: Genome) -> Genome:
 
 func queue_or_dissolve(genome):
   if genome_queue.size() < GENOME_QUEUE_LIMIT:
-    genome_queue.append(genome)
+    genome_queue.append({"genome": genome, "children_spawned": 0})
   else:
     genome.dissolve_genome()
+
+
+# Determines the maximum number of children a genome in the queue can have
+func calc_children_number_and_relative_fitness(genome_index: int) -> Dictionary:
+  var total_fitness := 0
+  for gen_dict in genome_queue:
+    total_fitness += gen_dict["genome"].fitness
+  var relative_fitness = genome_queue[genome_index]["genome"].fitness / total_fitness
+  var children_number = int(round(relative_fitness * TOTAL_QUEUE_CHILDREN))
+  var dict = {"children_number": children_number, "relavive_fitness": relative_fitness}
+  return dict
 
 
 func _on_battle_won(winner_genome):
@@ -282,9 +296,24 @@ func _on_cage_cleared(cage):
 
 
 func _on_CageFillTimer_timeout():
-  if available_cages.size() > 0:
+  if available_cages.size() > 0 && genome_queue.size() > 0:
     var cage = available_cages.pop_front()
-  # use this if more that two agents appear in a cage
-  # while cage.has_active_battle:
-  #   cage = available_cages.pop_front()
+
+    # use this if more that two agents appear in a cage
+    while cage.has_active_battle:
+      cage = available_cages.pop_front()
+
+    # determine main and mate genomes
+    var main_genome: Genome
+    var mate_genome: Genome
+    for i in genome_queue.size() - 1:
+      var gendict = calc_children_number_and_relative_fitness(i)
+      if genome_queue[i]["children_spawned"] >= gendict["children_number"]:
+        genome_queue.remove(i)
+      else:
+        if random.randf() < (1.0 / genome_queue.size()):
+          if main_genome == null:
+            main_genome = gendict["genome"]
+          elif mate_genome == null:
+            mate_genome = gendict["genome"]
 
