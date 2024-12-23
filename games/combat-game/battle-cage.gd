@@ -108,7 +108,7 @@ func clean_cage():
 func _on_agent_death(side):
   var winner_genome
   assert(side != null)
-  if !is_instance_valid(agent_left) && !is_instance_valid(agent_right):
+  if (!is_instance_valid(agent_left) && !is_instance_valid(agent_right)):
     emit_signal("battle_draw", game.genome_duplicate(genome_left_copy), game.genome_duplicate(genome_right_copy))
     clean_cage()
     return
@@ -124,7 +124,7 @@ func _on_agent_death(side):
 func _on_DeathTimer_timeout():
   var left_alive = is_instance_valid(agent_left)
   var right_alive = is_instance_valid(agent_right)
-  if left_alive && right_alive:
+  if left_alive && right_alive:# && genome_left_copy != null && genome_right_copy != null:
     emit_signal("battle_draw", game.genome_duplicate(genome_left_copy), game.genome_duplicate(genome_right_copy))
   elif left_alive:
     emit_signal("battle_won", game.genome_duplicate(genome_left_copy))
