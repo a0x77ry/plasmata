@@ -17,6 +17,7 @@ current = true
 [node name="BattleCages" type="Node2D" parent="." index="1"]
 
 [node name="CageFillTimer" type="Timer" parent="." index="4"]
+wait_time = 0.2
 autostart = true
 
 [connection signal="timeout" from="CageFillTimer" to="." method="_on_CageFillTimer_timeout"]

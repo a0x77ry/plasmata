@@ -2,14 +2,20 @@ extends "res://scripts/game.gd"
 
 const WINNING_FITNESS_POINTS := 3.0
 const DRAW_FITNESS_POINTS := 1.0
-# const AGENT_QUEUE_LIMIT = 150
 const GENOME_QUEUE_LIMIT = 400 
 const TOTAL_QUEUE_CHILDREN = GENOME_QUEUE_LIMIT# * 8
+const COMBAT_AGENT_LIMIT = 140
+const GENOME_QUEUE_SOFT_LIMIT = 200
+const WAIT_TIME_ABOVE_GENOME_LIMIT = 0.1
+const WAIT_TIME_BELOW_GENOME_LIMIT = 0.2
+const WIN_CHILDREN = 4
+const DRAW_CHILDREN = 1
 
 export(PackedScene) var BattleCage
 
 onready var battle_cages_node = get_node("BattleCages")
 onready var camera = get_node("Camera2D")
+onready var cage_fill_timer = get_node("CageFillTimer")
 
 var random = RandomNumberGenerator.new()
 var agent_population : int = 0
@@ -63,7 +69,7 @@ func _input(event):
 
 
 func initialize_cages() -> void:
-  cage_side_size = int(ceil(sqrt(Main.AGENT_LIMIT)))
+  cage_side_size = int(ceil(sqrt(COMBAT_AGENT_LIMIT * 0.5)))
   number_of_cages = int(pow(cage_side_size, 2.0))
   for row in cage_side_size:
     cages_map.append([])
@@ -154,12 +160,6 @@ func spawn_new_agent(b_cage, side, geno: Genome):
   new_agent.position = get_initial_pos(b_cage, side)
   new_agent.rotation = get_initial_rot(side)
 
-  # if side == Main.Side.LEFT:
-  #   b_cage.agent_left = new_agent
-  # elif side == Main.Side.RIGHT:
-  #   b_cage.agent_right = new_agent
-  # b_cage.has_active_battle = true
-
   new_agent.battle_cage = b_cage
   new_agent.side = side
   new_agent.population = population
@@ -175,75 +175,6 @@ func spawn_new_agent(b_cage, side, geno: Genome):
   # print("New agent fitness: %s" % new_agent.current_fitness)
   b_cage.death_timer.start()
   agents_node.call_deferred("add_child", new_agent)
-
-
-# func spawn_children_when_won(agent):
-#   var new_genome = Genome.new(population)
-#   new_genome.copy(agent.genome)
-#   if get_active_agents().size() > Main.AGENT_LIMIT ||\
-#       agent.is_queued_for_deletion():
-#     return
-#
-#   var main_genome = Genome.new(population)
-#   main_genome.copy(agent.genome)
-#   var mate_agent = agent_queue.pop_back()
-#   var mate_genome = Genome.new(population)
-#   mate_genome.copy(mate_agent.genome)
-#   agent.disolve_agent()
-#   agent.queue_free()
-#   mate_agent.disolve_agent()
-#   mate_agent.queue_free()
-#
-#   var cage = available_cages.pop_front()
-#   while cage.has_active_battle:
-#     cage = available_cages.pop_front()
-#   spawn_new_agent(cage, Main.Side.LEFT, new_genome)
-#   spawn_new_agent(cage, Main.Side.RIGHT, get_alter_genome(main_genome, mate_genome))
-#   cage.death_timer.start()
-#   cage.has_active_battle = true
-#
-#   var extra_spawns = 8
-#   while extra_spawns > 0 && available_cages.size() >= 1:
-#     var new_cage = available_cages.pop_front()
-#     while new_cage.has_active_battle:
-#       new_cage = available_cages.pop_front()
-#     spawn_new_agent(new_cage, Main.Side.LEFT, get_alter_genome(main_genome, mate_genome))
-#     spawn_new_agent(new_cage, Main.Side.RIGHT, get_alter_genome(main_genome, mate_genome))
-#     new_cage.death_timer.start()
-#     new_cage.has_active_battle = true
-#     extra_spawns -= 2
-#
-#
-# func spawn_children_when_draw():
-#   if get_active_agents().size() > Main.AGENT_LIMIT:
-#     return
-#   if agent_queue.size() < 2 || available_cages.size() < 1:
-#     return
-#
-#   var main_agent = agent_queue.pop_back()
-#   var mate_agent = agent_queue.pop_back()
-#   var main_genome = Genome.new(population)
-#   main_genome.copy(main_agent.genome)
-#   var mate_genome = Genome.new(population)
-#   mate_genome.copy(mate_agent.genome)
-#   main_agent.disolve_agent()
-#   main_agent.queue_free()
-#   mate_agent.disolve_agent()
-#   mate_agent.queue_free()
-  #
-  #
-  # var extra_spawns = 4
-  # while available_cages.size() >= 1 && extra_spawns > 0:
-  #   var cage = available_cages.pop_front()
-  #   while cage.has_active_battle:
-  #     cage = available_cages.pop_front()
-  #   if cage.has_active_battle:
-  #     breakpoint
-  #   spawn_new_agent(cage, Main.Side.LEFT, get_alter_genome(main_genome, mate_genome))
-  #   spawn_new_agent(cage, Main.Side.RIGHT, get_alter_genome(main_genome, mate_genome))
-  #   cage.death_timer.start()
-  #   cage.has_active_battle = true
-  #   extra_spawns -= 2
 
 
 func get_alter_genome(winner_genome, mate_genome):
@@ -293,14 +224,16 @@ func calc_children_number_and_relative_fitness(genome_index: int) -> Dictionary:
 
 
 func calc_children_number_and_relative_fitness_non_cumulative(genome_index: int) -> Dictionary:
-  var win_num
-  var draw_num
-  if genome_queue.size() < 200:
-    win_num = 5
-    draw_num = 2
-  else:
-    win_num = 2
-    draw_num = 1
+  # var win_num
+  # var draw_num
+  # if genome_queue.size() < 200:
+  #   win_num = 5
+  #   draw_num = 2
+  # else:
+  #   win_num = 2
+  #   draw_num = 1
+  var win_num = WIN_CHILDREN
+  var draw_num = DRAW_CHILDREN
   if genome_queue[genome_index]["genome"].fitness == 3:
     return {"children_number": win_num, "relative_fitness": 0.2}
   else:
@@ -311,11 +244,6 @@ func _on_battle_won(winner_genome):
   # winner_genome.fitness += WINNING_FITNESS_POINTS
   winner_genome.fitness = WINNING_FITNESS_POINTS
   queue_or_dissolve(winner_genome)
-
-  # if genome_queue.size() < GENOME_QUEUE_LIMIT:
-  #   genome_queue.append(winner_genome)
-  # else:
-  #   winner_genome.dissolve_genome()
 
 
 func _on_battle_draw(left_genome, right_genome):
@@ -332,8 +260,12 @@ func _on_cage_cleared(cage):
 
 
 func _on_CageFillTimer_timeout():
-  if get_active_agents().size() > Main.AGENT_LIMIT:
+  if get_active_agents().size() > COMBAT_AGENT_LIMIT:
     return
+  if genome_queue.size() > GENOME_QUEUE_LIMIT:
+    cage_fill_timer.wait_time = WAIT_TIME_ABOVE_GENOME_LIMIT
+  else:
+    cage_fill_timer.wait_time = WAIT_TIME_BELOW_GENOME_LIMIT
   if available_cages.size() > 0 && genome_queue.size() >= 1:
     var cage = available_cages.pop_front()
     # use this if more that two agents appear in a cage
@@ -351,36 +283,28 @@ func _on_CageFillTimer_timeout():
         genome_queue[0]["children_spawned"] += 2
       else:
         var queue_size = genome_queue.size() # because it could change while searching
-        # var removed_counter := 0
         while main_genome == null || mate_genome == null: 
           if genome_queue.size() == 0:
            return
           for i in queue_size:
-            # if i > queue_size - 1 - removed_counter:
-            #   break
-            # var gendict = calc_children_number_and_relative_fitness_non_cumulative(i)
-            # if genome_queue[i]["children_spawned"] >= gendict["children_number"]:
-            #   genome_queue.remove(i)
-            #   removed_counter += 1
-            # else:
-            var gendict = calc_children_number_and_relative_fitness_non_cumulative(i)
+            var rand_index = random.randi_range(0, queue_size - 1)
+            var gendict = calc_children_number_and_relative_fitness_non_cumulative(rand_index)
             if random.randf() < gendict["relative_fitness"]:
               if main_genome == null:
-                main_genome = genome_duplicate(genome_queue[i]["genome"])
-                if (i % 3) == 0:
+                main_genome = genome_duplicate(genome_queue[rand_index]["genome"])
+                if (rand_index % 3) == 0:
                   original_gene_trasfer = true
                 else:
                   original_gene_trasfer = false
-                genome_queue[i]["children_spawned"] += 1
+                genome_queue[rand_index]["children_spawned"] += 1
               elif mate_genome == null:
-                mate_genome = genome_duplicate(genome_queue[i]["genome"])
+                mate_genome = genome_duplicate(genome_queue[rand_index]["genome"])
                 var mate_children_num: int
                 if original_gene_trasfer:
                   mate_children_num = 0
                 else:
                   mate_children_num = 1
-                genome_queue[i]["children_spawned"] += mate_children_num
-
+                genome_queue[rand_index]["children_spawned"] += mate_children_num
       var current_side
       if leftright == 0:
         current_side = Main.Side.LEFT
@@ -390,11 +314,6 @@ func _on_CageFillTimer_timeout():
         spawn_new_agent(cage, current_side, main_genome)
       else:
         spawn_new_agent(cage, current_side, get_alter_genome(main_genome, mate_genome))
-      # if original_gene_trasfer:
-      #   spawn_new_agent(cage, Main.Side.LEFT, main_genome)
-      # else:
-      #   spawn_new_agent(cage, Main.Side.LEFT, get_alter_genome(main_genome, mate_genome))
-      # spawn_new_agent(cage, Main.Side.RIGHT, get_alter_genome(main_genome, mate_genome))
 
     var queue_size = genome_queue.size()
     var removed_counter := 0
