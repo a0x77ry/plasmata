@@ -37,6 +37,7 @@ func _enter_tree():
 
   output_names = [
     "turn_right",
+    # "rotation_target",
     "move_forward",
     "move_right",
     "shooting"

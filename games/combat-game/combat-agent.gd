@@ -52,6 +52,7 @@ func _physics_process(delta):
   if !is_dead:
     var nn_controls := get_nn_controls(nn, get_sensor_input())
     rotation += nn_controls["nn_rotation"] * rotation_speed * delta
+    # rotation = nn_controls["nn_rotation_target"] * PI
 
     real_speed = clamp(nn_controls["nn_move_forward"] * speed, -speed_limit, speed_limit)
     real_lateral_speed = clamp(nn_controls["nn_move_right"] * lateral_speed ,
@@ -77,11 +78,15 @@ func get_nn_controls(_nn: NN, sensor_input: Dictionary) -> Dictionary:
   var input_rotation = nn_output["turn_right"]
   nn_rotation = clamp(input_rotation, -rotation_speed_limit, rotation_speed_limit)
 
+  # New: rotation target
+  # var nn_rotation_target = nn_output["rotation_target"]
+
   var nn_move_forward = nn_output["move_forward"]
   var nn_move_right = nn_output["move_right"]
   var nn_shooting = nn_output["shooting"]
   return {
       "nn_rotation": nn_rotation,
+      # "nn_rotation_target": nn_rotation_target,
       "nn_move_forward": nn_move_forward,
       "nn_move_right": nn_move_right,
       "nn_shooting": nn_shooting
@@ -229,7 +234,6 @@ func get_sensor_input():
 
   if nn_activated_inputs.has("turn_right_input"):
     turn_right_input = (nn_rotation / rotation_speed_limit) * (get_physics_process_delta_time() * rotation_speed)
-    # turn_right_input = rotation / PI
 
   if nn_activated_inputs.has("shooting_input"):
     shooting_input = cooldown_timer.time_left / cooldown_timer.wait_time
@@ -243,9 +247,13 @@ func get_sensor_input():
       opponent_angle = 0.0
     else:
       var opponent_pos = opponent.global_position
-      opponent_angle = global_position.angle_to_point(opponent_pos) / PI
-      # opponent_distance = 1.0 - (global_position.distance_to(opponent_pos) \
-      #     / sqrt(pow(battle_cage_width, 2.0) * pow(battle_cage_height, 2.0)))
+      # opponent_angle = global_position.angle_to_point(opponent_pos) / PI
+
+      # var vector_to_enemy = opponent_pos - global_position
+      var vector_to_enemy = global_position.direction_to(opponent_pos)
+      var agent_facing_vector = Vector2.RIGHT.rotated(rotation)
+      opponent_angle = agent_facing_vector.angle_to(vector_to_enemy) / PI
+
       opponent_distance = (global_position.distance_to(opponent_pos) \
           / sqrt(pow(battle_cage_width, 2.0) * pow(battle_cage_height, 2.0)))
 
