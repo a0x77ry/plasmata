@@ -371,7 +371,7 @@ func get_sensor_input():
     finish_distance = 0.0
     finish_distance = global_position.distance_to(fa_pos) / game.start_finish_distance
     finish_angle = 0.0
-    finish_angle = global_position.angle_to(fa_pos) / PI
+    finish_angle = global_position.angle_to_point(fa_pos) / PI
 
   if nn_activated_inputs.has("ray_f_distance") || nn_activated_inputs.has("rf_col_normal_angle"):
     ray_f_distance = 0.0

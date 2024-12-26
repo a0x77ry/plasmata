@@ -1,15 +1,21 @@
 extends "res://scripts/game.gd"
 
+const HIT_WIN_FITNESS_POINTS := 6.0
 const WINNING_FITNESS_POINTS := 3.0
 const DRAW_FITNESS_POINTS := 1.0
-const GENOME_QUEUE_LIMIT = 400 
+const GENOME_QUEUE_LIMIT = 100 
 const TOTAL_QUEUE_CHILDREN = GENOME_QUEUE_LIMIT# * 8
-const COMBAT_AGENT_LIMIT = 140
-const GENOME_QUEUE_SOFT_LIMIT = 200
-const WAIT_TIME_ABOVE_GENOME_LIMIT = 0.1
-const WAIT_TIME_BELOW_GENOME_LIMIT = 0.2
-const WIN_CHILDREN = 4
+const COMBAT_AGENT_LIMIT = 80
+const GENOME_QUEUE_SOFT_LIMIT = 50
+const WAIT_TIME_ABOVE_GENOME_LIMIT = 0.2
+const WAIT_TIME_BELOW_GENOME_LIMIT = 0.4
+const HIT_WIN_CHILDREN = 6
+const WIN_CHILDREN = 3
 const DRAW_CHILDREN = 1
+const HIT_WIN_RELATIVE_FITNESS = 0.8
+const WIN_RELATIVE_FITNESS = 0.4
+const DRAW_REALTIVE_FITNESS = 0.1
+const INDEX_DIVISOR = 3
 
 export(PackedScene) var BattleCage
 
@@ -196,7 +202,15 @@ func queue_or_dissolve(genome):
   if genome_queue.size() < GENOME_QUEUE_LIMIT:
     genome_queue.append({"genome": genome, "children_spawned": 0})
   else:
-    genome.dissolve_genome()
+    if genome.fitness >= WINNING_FITNESS_POINTS:
+      for i in genome_queue.size():
+        if genome_queue[i]["genome"].fitness <= DRAW_FITNESS_POINTS:
+          genome_queue[i]["genome"].dissolve_genome()
+          genome_queue[i] = {"genome": genome, "children_spawned": 0}
+          return
+    else:
+      genome.dissolve_genome()
+
 
 
 # Determines the maximum number of children a genome in the queue can have
@@ -233,16 +247,22 @@ func calc_children_number_and_relative_fitness_non_cumulative(genome_index: int)
   #   win_num = 2
   #   draw_num = 1
   var win_num = WIN_CHILDREN
+  var hit_win_num = HIT_WIN_CHILDREN
   var draw_num = DRAW_CHILDREN
-  if genome_queue[genome_index]["genome"].fitness == 3:
-    return {"children_number": win_num, "relative_fitness": 0.2}
+  if genome_queue[genome_index]["genome"].fitness == WINNING_FITNESS_POINTS:
+    return {"children_number": hit_win_num, "relative_fitness": WIN_RELATIVE_FITNESS}
+  elif genome_queue[genome_index]["genome"].fitness == HIT_WIN_FITNESS_POINTS:
+    return {"children_number": win_num, "relative_fitness": HIT_WIN_RELATIVE_FITNESS}
   else:
-    return {"children_number": draw_num, "relative_fitness": 0.1}
+    return {"children_number": draw_num, "relative_fitness": DRAW_REALTIVE_FITNESS}
 
 
-func _on_battle_won(winner_genome):
+func _on_battle_won(winner_genome, is_won_with_hit):
   # winner_genome.fitness += WINNING_FITNESS_POINTS
-  winner_genome.fitness = WINNING_FITNESS_POINTS
+  if is_won_with_hit:
+    winner_genome.fitness = HIT_WIN_FITNESS_POINTS
+  else:
+    winner_genome.fitness = WINNING_FITNESS_POINTS
   queue_or_dissolve(winner_genome)
 
 
@@ -278,6 +298,7 @@ func _on_CageFillTimer_timeout():
       var mate_genome: Genome
       var original_gene_trasfer: bool = false
       if genome_queue.size() == 1:
+        original_gene_trasfer = true
         main_genome = genome_duplicate(genome_queue[0]["genome"])
         mate_genome = genome_duplicate(genome_queue[0]["genome"])
         genome_queue[0]["children_spawned"] += 2
@@ -292,7 +313,7 @@ func _on_CageFillTimer_timeout():
             if random.randf() < gendict["relative_fitness"]:
               if main_genome == null:
                 main_genome = genome_duplicate(genome_queue[rand_index]["genome"])
-                if (rand_index % 3) == 0:
+                if (rand_index % INDEX_DIVISOR) == 0:
                   original_gene_trasfer = true
                 else:
                   original_gene_trasfer = false
@@ -328,5 +349,4 @@ func _on_CageFillTimer_timeout():
     for av_cage in available_cages:
       if av_cage.agent_left != null || av_cage.agent_right != null:
         available_cages.erase(av_cage)
-
 

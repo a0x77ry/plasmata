@@ -1,7 +1,7 @@
 extends KinematicBody2D
 
 signal agent_removed(value)
-signal agent_killed(side)
+signal agent_killed(side, is_hit)
 
 export (float) var speed = 20.0 # waa 50.0
 export (float) var lateral_speed = 20.0
@@ -243,9 +243,10 @@ func get_sensor_input():
       opponent_angle = 0.0
     else:
       var opponent_pos = opponent.global_position
-      # var opponent_pos = get_opponent_pos()
-      opponent_angle = global_position.angle_to(opponent_pos) / PI
-      opponent_distance = 1.0 - (global_position.distance_to(opponent_pos) \
+      opponent_angle = global_position.angle_to_point(opponent_pos) / PI
+      # opponent_distance = 1.0 - (global_position.distance_to(opponent_pos) \
+      #     / sqrt(pow(battle_cage_width, 2.0) * pow(battle_cage_height, 2.0)))
+      opponent_distance = (global_position.distance_to(opponent_pos) \
           / sqrt(pow(battle_cage_width, 2.0) * pow(battle_cage_height, 2.0)))
 
   if nn_activated_inputs.has("traced_laser_1_angle") || \
@@ -262,7 +263,7 @@ func get_sensor_input():
       traced_laser_1_angle = 0.0
     else:
       var traced_laser_pos = traced_laser_1.global_position
-      traced_laser_1_angle = global_position.angle_to(traced_laser_pos) / PI
+      traced_laser_1_angle = global_position.angle_to_point(traced_laser_pos) / PI
       traced_laser_1_distance = 1.0 - (global_position.distance_to(traced_laser_pos) \
           / sqrt(pow(battle_cage_width, 2.0) * pow(battle_cage_height, 2.0)))
 
@@ -317,10 +318,10 @@ func get_fitness():
   return genome.fitness
 
 
-func kill_agent():
+func kill_agent(is_hit := false):
   dissolve_agent()
   emit_signal("agent_removed", 1)
-  emit_signal("agent_killed", side)
+  emit_signal("agent_killed", side, is_hit)
   queue_free()
 
 
@@ -353,7 +354,7 @@ func copy():
 
 func _on_agent_hit(agent_id):
   if agent_id == get_instance_id():
-    kill_agent()
+    kill_agent(true)
 
 
 func _on_ShootingCooldownTimer_timeout():

@@ -1,6 +1,6 @@
 extends Node2D
 
-signal battle_won(winner_genome)
+signal battle_won(winner_genome, is_won_with_hit)
 signal battle_draw(genome_left, genome_right)
 signal cage_cleared(cage)
 # signal agent_queued(agent)
@@ -105,7 +105,7 @@ func clean_cage():
   has_active_battle = false
 
 
-func _on_agent_death(side):
+func _on_agent_death(side, is_hit):
   var winner_genome
   assert(side != null)
   if (!is_instance_valid(agent_left) && !is_instance_valid(agent_right)):
@@ -117,7 +117,7 @@ func _on_agent_death(side):
     winner_genome = game.genome_duplicate(genome_right_copy)
   else:
     winner_genome = game.genome_duplicate(genome_left_copy)
-  emit_signal("battle_won", winner_genome)
+  emit_signal("battle_won", winner_genome, is_hit)
   clean_cage()
 
 
