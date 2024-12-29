@@ -24,17 +24,17 @@ func _enter_tree():
     "ray_left_distance_mw",
     "ray_right_distance_mw",
 
-    "ray_f_distance_complement",
-    "ray_f_up_right_distance_complement",
-    "ray_f_down_right_distance_complement",
-    "ray_left_distance_complement",
-    "ray_right_distance_complement",
-
-    "ray_f_distance_mw_complement",
-    "ray_f_up_right_distance_mw_complement",
-    "ray_f_down_right_distance_mw_complement",
-    "ray_left_distance_mw_complement",
-    "ray_right_distance_mw_complement",
+    # "ray_f_distance_complement",
+    # "ray_f_up_right_distance_complement",
+    # "ray_f_down_right_distance_complement",
+    # "ray_left_distance_complement",
+    # "ray_right_distance_complement",
+    #
+    # "ray_f_distance_mw_complement",
+    # "ray_f_up_right_distance_mw_complement",
+    # "ray_f_down_right_distance_mw_complement",
+    # "ray_left_distance_mw_complement",
+    # "ray_right_distance_mw_complement",
 
 
     "rf_col_normal_angle",
@@ -53,6 +53,8 @@ func _enter_tree():
     "mwall_1_ascent_completion",
     "mwall_2_descent_completion",
     "mwall_2_ascent_completion",
+
+    "wall_animation_moving",
   ]
   output_names = [
     "turn_right",

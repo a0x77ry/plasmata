@@ -35,6 +35,7 @@ onready var death_timer = get_node("DeathTimer")
 # onready var teleport_timer = get_node("TeleportTimer")
 # onready var spawning_area = get_node("SpawningArea")
 # onready var solved_text = get_node("UI/Soved/SolvedText")
+# onready var wall_player = get_node("WallPlayer")
 
 
 var random = RandomNumberGenerator.new()
@@ -55,6 +56,7 @@ var finish_time_bonus: float
 var current_pos: Vector2
 var population
 var game
+var wall_player
 var generation := 0
 var fitness_timeline := []
 # var is_original := true
@@ -93,6 +95,7 @@ func _ready():
   if nn_activated_inputs.has("mwall_2_ascent_completion"):
     mwall_2 = get_parent().get_parent().get_node("Walls/MovingWall2")
     mw2_starting_down_y = mwall_2.position.y
+  wall_player = game.get_node("WallPlayer")
 
   if spawn_timer_to_set != 0.0:
     spawn_timer.wait_time = spawn_timer_to_set
@@ -345,6 +348,8 @@ func get_sensor_input():
   var mwall_2_descent_completion: float
   var mwall_1_ascent_completion: float
 
+  var wall_animation_moving: float
+
   if nn_activated_inputs.has("rotation"):
     var current_rot = rotation
     # Normalized rotation in positive radians
@@ -523,12 +528,34 @@ func get_sensor_input():
     # mwall_2_descent_completion = 1.0 - (abs(mw2_starting_down_y - mwall_2.position.y) / mw_distance)
     mwall_2_descent_completion = 1.0 - mwall_2_ascent_completion
 
+  if nn_activated_inputs.has("wall_animation_moving"):
+    var anim_pos = wall_player.current_animation_position
+    # if (anim_pos >= 4.0 && anim_pos < 8.0) || \
+    #     (anim_pos >= 12.0 && anim_pos < 16.0):
+    #   wall_animation_moving = 1.0
+    # else:
+    #   wall_animation_moving = 0.0
+
+    if anim_pos < 4.0:
+      # wall_animation_moving = anim_pos / 4.0 # 0.0 to 1.0
+      wall_animation_moving = 0.0 # 0.0
+    elif anim_pos >= 4.0 && anim_pos < 8.0:
+      # wall_animation_moving = (4.0 - (anim_pos - 4.0)) / 4.0 # 1.0 to 0.0
+      wall_animation_moving =  (anim_pos - 4.0) / 4.0 # 0.0 to 1.0
+      # wall_animation_moving = 0.0
+    elif anim_pos >= 8.0 && anim_pos < 12.0:
+      # wall_animation_moving = (anim_pos - 8.0) / 4.0 # 0.0 to 1.0
+      wall_animation_moving = 1.0 # 1.0
+    else:
+      wall_animation_moving = (4.0 - (anim_pos - 12.0)) / 4.0 # 1.0 to 0.0
+
   var inp_dict = {
         "rotation": newrot,
         "inverse_rotation": invrot,
         "time_since_birth": time_since_birth,
         "pos_x": norm_pos_x,
         "pos_y": norm_pos_y,
+
         "ray_f_distance": ray_f_distance,
         "ray_f_up_right_distance": ray_f_up_right_distance,
         "ray_f_down_right_distance": ray_f_down_right_distance,
@@ -569,6 +596,8 @@ func get_sensor_input():
         "mwall_1_ascent_completion": mwall_1_ascent_completion,
         "mwall_2_ascent_completion": mwall_2_ascent_completion,
         "mwall_2_descent_completion": mwall_2_descent_completion,
+
+        "wall_animation_moving": wall_animation_moving,
       }
 
   var activated_input_dict := {}

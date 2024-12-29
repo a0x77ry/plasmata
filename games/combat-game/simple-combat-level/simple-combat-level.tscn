@@ -58,7 +58,7 @@ margin_right = 1067.0
 margin_bottom = 23.0
 custom_fonts/font = SubResource( 12 )
 
-[node name="CageFillTimer" parent="." index="4"]
+[node name="CageFillTimer" parent="." index="6"]
 wait_time = 0.8
 
 [editable path="UI/SaveUI"]

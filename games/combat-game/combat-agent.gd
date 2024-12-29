@@ -40,6 +40,9 @@ var Agent
 var nn_rotation := 0.0
 var real_speed := 0.0
 var real_lateral_speed := 0.0
+var forward_movement: float = 0.0
+var right_movement: float = 0.0
+var opponent_angle_global := 0.0
 
 
 func _ready():
@@ -57,6 +60,10 @@ func _physics_process(delta):
     real_speed = clamp(nn_controls["nn_move_forward"] * speed, -speed_limit, speed_limit)
     real_lateral_speed = clamp(nn_controls["nn_move_right"] * lateral_speed ,
         -lateral_speed_limit, lateral_speed_limit)
+
+    forward_movement = clamp(real_speed, -speed_limit, speed_limit) / speed_limit
+    right_movement = clamp(real_lateral_speed, -lateral_speed_limit, lateral_speed_limit) / lateral_speed_limit
+
     velocity = Vector2(real_speed, real_lateral_speed).rotated(rotation)
     velocity = move_and_slide(velocity)
 
@@ -139,6 +146,10 @@ func get_sensor_input():
   var opponent_distance: float
   var traced_laser_1_angle: float
   var traced_laser_1_distance: float
+
+  var opponents_forward_movement: float
+  var opponents_right_movement: float
+  var opponents_heading: float
 
   if nn_activated_inputs.has("rotation"):
     var current_rot = rotation
@@ -225,15 +236,26 @@ func get_sensor_input():
         ray_f_down_right_distance = (ray_length - distance) / ray_length
 
   if nn_activated_inputs.has("move_forward_input"):
-    # move_forward_input = clamp(velocity.x, 0, speed_limit) / speed_limit
-    move_forward_input = clamp(real_speed, 0, speed_limit) / speed_limit
+    # move_forward_input = clamp(real_speed, -speed_limit, speed_limit) / speed_limit
+    move_forward_input = forward_movement
 
   if nn_activated_inputs.has("move_right_input"):
-    # move_right_input = clamp(velocity.y, -lateral_speed_limit, lateral_speed_limit) / lateral_speed_limit
-    move_right_input = clamp(real_lateral_speed, -lateral_speed_limit, lateral_speed_limit) / lateral_speed_limit
+    # move_right_input = clamp(real_lateral_speed, -lateral_speed_limit, lateral_speed_limit) / lateral_speed_limit
+    move_right_input = right_movement
 
   if nn_activated_inputs.has("turn_right_input"):
     turn_right_input = (nn_rotation / rotation_speed_limit) * (get_physics_process_delta_time() * rotation_speed)
+
+  if nn_activated_inputs.has("opponents_forward_movement"):
+    opponents_forward_movement = get_opponent().forward_movement
+
+  if nn_activated_inputs.has("opponents_right_movement"):
+    opponents_right_movement = get_opponent().right_movement
+
+  if nn_activated_inputs.has("opponents_heading"):
+    # opponents_heading = get_opponent().opponent_angle_global
+    # opponents_heading = get_opponent().nn_rotation
+    opponents_heading = get_opponent().rotation
 
   if nn_activated_inputs.has("shooting_input"):
     shooting_input = cooldown_timer.time_left / cooldown_timer.wait_time
@@ -253,6 +275,7 @@ func get_sensor_input():
       var vector_to_enemy = global_position.direction_to(opponent_pos)
       var agent_facing_vector = Vector2.RIGHT.rotated(rotation)
       opponent_angle = agent_facing_vector.angle_to(vector_to_enemy) / PI
+      opponent_angle_global = opponent_angle
 
       opponent_distance = (global_position.distance_to(opponent_pos) \
           / sqrt(pow(battle_cage_width, 2.0) * pow(battle_cage_height, 2.0)))
@@ -296,6 +319,10 @@ func get_sensor_input():
         "move_forward_input": move_forward_input,
         "move_right_input": move_right_input,
         "shooting_input": shooting_input,
+
+        "opponents_forward_movement": opponents_forward_movement,
+        "opponents_right_movement": opponents_right_movement,
+        "opponents_heading": opponents_heading,
 
         "opponent_angle": opponent_angle,
         "opponent_distance": opponent_distance,

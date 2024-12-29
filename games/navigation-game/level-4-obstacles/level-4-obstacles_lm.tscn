@@ -1,10 +1,11 @@
-[gd_scene load_steps=17 format=2]
+[gd_scene load_steps=18 format=2]
 
 [ext_resource path="res://games/game.tscn" type="PackedScene" id=1]
 [ext_resource path="res://fonts/Jura-Light.ttf" type="DynamicFontData" id=2]
 [ext_resource path="res://wall.tscn" type="PackedScene" id=3]
 [ext_resource path="res://images/finish-line.png" type="Texture" id=4]
 [ext_resource path="res://games/navigation-game/level-4-obstacles/level-4-obstacles_lm.gd" type="Script" id=5]
+[ext_resource path="res://images/grid-background.jpeg" type="Texture" id=6]
 
 [sub_resource type="RectangleShape2D" id=7]
 resource_local_to_scene = true
@@ -75,17 +76,21 @@ _data = {
 position = Vector2( 301, 232 )
 script = ExtResource( 5 )
 
-[node name="SpawnTimer" type="Timer" parent="." index="0"]
+[node name="Background" type="Sprite" parent="." index="0"]
+position = Vector2( 704, 214 )
+texture = ExtResource( 6 )
+
+[node name="SpawnTimer" type="Timer" parent="." index="1"]
 process_mode = 0
 wait_time = 10.0
 autostart = true
 
-[node name="Finish-line" type="Sprite" parent="." index="2"]
+[node name="Finish-line" type="Sprite" parent="." index="3"]
 position = Vector2( 1304, 263 )
 scale = Vector2( 0.55, 0.55 )
 texture = ExtResource( 4 )
 
-[node name="Walls" type="Node2D" parent="." index="3"]
+[node name="Walls" type="Node2D" parent="." index="4"]
 
 [node name="Wall" parent="Walls" index="0" instance=ExtResource( 3 )]
 position = Vector2( 477, 438 )
@@ -122,7 +127,7 @@ position = Vector2( 6, 264 )
 rotation = -1.57079
 scale = Vector2( 11, -0.802 )
 
-[node name="SpawningArea" type="Area2D" parent="." index="4"]
+[node name="SpawningArea" type="Area2D" parent="." index="5"]
 position = Vector2( 49, 252 )
 __meta__ = {
 "_edit_group_": true
@@ -132,7 +137,7 @@ __meta__ = {
 shape = SubResource( 7 )
 disabled = true
 
-[node name="FinishLine" type="Area2D" parent="." index="5"]
+[node name="FinishLine" type="Area2D" parent="." index="6"]
 modulate = Color( 0.231373, 0.027451, 0.027451, 1 )
 position = Vector2( 1296, 304 )
 scale = Vector2( 2.04, 1 )
@@ -371,7 +376,7 @@ margin_bottom = 50.0
 custom_fonts/font = SubResource( 11 )
 text = "0"
 
-[node name="Path2D" type="Path2D" parent="." index="7"]
+[node name="Path2D" type="Path2D" parent="." index="8"]
 curve = SubResource( 9 )
 
 [connection signal="timeout" from="SpawnTimer" to="." method="_on_SpawnTimer_timeout"]

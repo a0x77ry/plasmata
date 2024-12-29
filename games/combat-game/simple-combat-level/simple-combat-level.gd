@@ -29,8 +29,12 @@ func _enter_tree():
     "move_right_input",
     "shooting_input",
 
+    "opponents_forward_movement",
+    "opponents_right_movement",
+    "opponents_heading",
     "opponent_angle",
     "opponent_distance",
+
     "traced_laser_1_angle",
     "traced_laser_1_distance",
   ]

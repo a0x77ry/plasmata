@@ -51,6 +51,8 @@ func _enter_tree():
     "mwall_1_ascent_completion",
     "mwall_2_descent_completion",
     "mwall_2_ascent_completion",
+
+    "wall_animation_moving",
   ]
   output_names = [
     "turn_right",

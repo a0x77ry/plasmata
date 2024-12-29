@@ -22,11 +22,14 @@ export(PackedScene) var BattleCage
 onready var battle_cages_node = get_node("BattleCages")
 onready var camera = get_node("Camera2D")
 onready var cage_fill_timer = get_node("CageFillTimer")
+onready var background = get_node("Background")
 
 var random = RandomNumberGenerator.new()
 var agent_population : int = 0
 var cage_height := 590
 var cage_width := 950
+var external_cage_height: float
+var external_cage_width: float
 var number_of_cages: int
 var cages_map := []
 var cage_side_size: int
@@ -77,6 +80,12 @@ func _input(event):
 func initialize_cages() -> void:
   cage_side_size = int(ceil(sqrt(COMBAT_AGENT_LIMIT * 0.5)))
   number_of_cages = int(pow(cage_side_size, 2.0))
+  external_cage_height = cage_height * cage_side_size
+  external_cage_width = cage_width * cage_side_size
+  var texture_height = background.texture.get_height()
+  var texture_width = background.texture.get_width()
+  background.scale.x = external_cage_width / texture_width
+  background.scale.y = external_cage_height / texture_height
   for row in cage_side_size:
     cages_map.append([])
     for column in cage_side_size:
@@ -202,7 +211,8 @@ func queue_or_dissolve(genome):
   if genome_queue.size() < GENOME_QUEUE_LIMIT:
     genome_queue.append({"genome": genome, "children_spawned": 0})
   else:
-    if genome.fitness >= WINNING_FITNESS_POINTS:
+    # if genome.fitness >= WINNING_FITNESS_POINTS:
+    if genome.fitness >= HIT_WIN_FITNESS_POINTS:
       for i in genome_queue.size():
         if genome_queue[i]["genome"].fitness <= DRAW_FITNESS_POINTS:
           genome_queue[i]["genome"].dissolve_genome()
