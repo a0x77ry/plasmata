@@ -1,7 +1,7 @@
 extends "res://scripts/game.gd"
 
-const HIT_WIN_FITNESS_POINTS := 6.0
-const WINNING_FITNESS_POINTS := 3.0
+# const HIT_WIN_FITNESS_POINTS := 6.0
+# const WINNING_FITNESS_POINTS := 3.0
 const DRAW_FITNESS_POINTS := 1.0
 const GENOME_QUEUE_LIMIT = 100 
 const TOTAL_QUEUE_CHILDREN = GENOME_QUEUE_LIMIT# * 8
@@ -9,13 +9,23 @@ const COMBAT_AGENT_LIMIT = 80
 const GENOME_QUEUE_SOFT_LIMIT = 50
 const WAIT_TIME_ABOVE_GENOME_LIMIT = 0.2
 const WAIT_TIME_BELOW_GENOME_LIMIT = 0.4
-const HIT_WIN_CHILDREN = 6
-const WIN_CHILDREN = 3
-const DRAW_CHILDREN = 1
+# const HIT_WIN_CHILDREN = 6
+# const WIN_CHILDREN = 3
+# const DRAW_CHILDREN = 1
 const HIT_WIN_RELATIVE_FITNESS = 0.8
 const WIN_RELATIVE_FITNESS = 0.4
 const DRAW_REALTIVE_FITNESS = 0.1
-const INDEX_DIVISOR = 3
+const INDEX_DIVISOR = 4
+const TIME_FITNESS = 1.0
+const WIN_FITNESS = 3.0
+const HIT_WIN_FITNESS = 6.0
+const HIGH_TIER_THRESHOLD = 6.0
+const MID_TIER_THRESHOLD = 3.0
+const LOW_TIER_THRESHOLD = 1.0
+const HIGH_REPLACEMENT_NUMBER := 4
+const MID_REPLACEMENT_NUMBER := 2
+const FITNESS_TO_SELECTION_RATE = 8.0
+const QUEUE_REPLACEMENT_NUMBER := 5
 
 export(PackedScene) var BattleCage
 
@@ -208,77 +218,60 @@ func genome_duplicate(original_genome: Genome) -> Genome:
 
 
 func queue_or_dissolve(genome):
+  if genome_queue.size() >= GENOME_QUEUE_LIMIT:
+    var number_to_remove := 10
+    var queue_size = genome_queue.size()
+    var removed := 0
+    var to_be_removed := []
+    for i in queue_size:
+      if genome_queue[i]["genome"].fitness <= LOW_TIER_THRESHOLD:
+        genome_queue[i]["genome"].dissolve_genome()
+        to_be_removed.append(i)
+        removed += 1
+      if removed >= number_to_remove:
+        break
+    for index in to_be_removed:
+      genome_queue.remove(index)
+
   if genome_queue.size() < GENOME_QUEUE_LIMIT:
     genome_queue.append({"genome": genome, "children_spawned": 0})
   else:
-    # if genome.fitness >= WINNING_FITNESS_POINTS:
-    if genome.fitness >= HIT_WIN_FITNESS_POINTS:
-      for i in genome_queue.size():
-        if genome_queue[i]["genome"].fitness <= DRAW_FITNESS_POINTS:
-          genome_queue[i]["genome"].dissolve_genome()
-          genome_queue[i] = {"genome": genome, "children_spawned": 0}
-          return
-    else:
-      genome.dissolve_genome()
+    genome.dissolve_genome()
+    # var replacement_num: int = 0
+    # if genome.fitness >= HIGH_TIER_THRESHOLD:
+    #   replacement_num = HIGH_REPLACEMENT_NUMBER
+    # elif genome.fitness >= MID_TIER_THRESHOLD:
+    #   replacement_num = MID_REPLACEMENT_NUMBER
+    #
+    # var spawn_number := 0
+    # for i in genome_queue.size():
+    #   if genome_queue[i]["genome"].fitness <= LOW_TIER_THRESHOLD:
+    #     genome_queue[i]["genome"].dissolve_genome()
+    #     genome_queue[i] = {"genome": genome, "children_spawned": 0}
+    #     spawn_number += 1
+    #   if spawn_number >= replacement_num:
+    #     break
+    #
+    # if genome.fitness < MID_TIER_THRESHOLD:
+    #   genome.dissolve_genome()
 
 
-
-# Determines the maximum number of children a genome in the queue can have
-func calc_children_number_and_relative_fitness(genome_index: int) -> Dictionary:
-  # var total_fitness := 0.0
-  var min_fitness: float = INF
-  var max_fitness := 0.0
-  for gen_dict in genome_queue:
-    var gen_fitness = gen_dict["genome"].fitness
-    if gen_fitness < min_fitness:
-      min_fitness = gen_fitness
-    if gen_fitness > max_fitness:
-      max_fitness = gen_fitness
-    # total_fitness += gen_dict["genome"].fitness
-  var fitness_range = max(max_fitness - min_fitness, 0.0001)
-  # print(fitness_range)
-  # var relative_fitness = genome_queue[genome_index]["genome"].fitness / total_fitness
-  var relative_fitness = max((genome_queue[genome_index]["genome"].fitness - min_fitness), 0.0001) / fitness_range
-  # print(relative_fitness)
-  # var children_number = max(int(round(relative_fitness * TOTAL_QUEUE_CHILDREN)), 1)
-  var children_number = int(round(relative_fitness * 10))
-  # print(children_number)
-  var dict = {"children_number": children_number, "relative_fitness": relative_fitness}
-  return dict
+# Non cumulative
+func calc_children_number_and_selection_rate(genome_index: int) -> Dictionary:
+  var genome_fitness = genome_queue[genome_index]["genome"].fitness
+  return {"children_number": int(round(genome_fitness)), "selection_rate": genome_fitness / FITNESS_TO_SELECTION_RATE}
 
 
-func calc_children_number_and_relative_fitness_non_cumulative(genome_index: int) -> Dictionary:
-  # var win_num
-  # var draw_num
-  # if genome_queue.size() < 200:
-  #   win_num = 5
-  #   draw_num = 2
-  # else:
-  #   win_num = 2
-  #   draw_num = 1
-  var win_num = WIN_CHILDREN
-  var hit_win_num = HIT_WIN_CHILDREN
-  var draw_num = DRAW_CHILDREN
-  if genome_queue[genome_index]["genome"].fitness == WINNING_FITNESS_POINTS:
-    return {"children_number": hit_win_num, "relative_fitness": WIN_RELATIVE_FITNESS}
-  elif genome_queue[genome_index]["genome"].fitness == HIT_WIN_FITNESS_POINTS:
-    return {"children_number": win_num, "relative_fitness": HIT_WIN_RELATIVE_FITNESS}
-  else:
-    return {"children_number": draw_num, "relative_fitness": DRAW_REALTIVE_FITNESS}
-
-
-func _on_battle_won(winner_genome, is_won_with_hit):
-  # winner_genome.fitness += WINNING_FITNESS_POINTS
+func _on_battle_won(winner_genome, time_remaining_normalized, is_won_with_hit):
+  winner_genome.fitness = TIME_FITNESS * time_remaining_normalized
   if is_won_with_hit:
-    winner_genome.fitness = HIT_WIN_FITNESS_POINTS
+    winner_genome.fitness = HIT_WIN_FITNESS
   else:
-    winner_genome.fitness = WINNING_FITNESS_POINTS
+    winner_genome.fitness = WIN_FITNESS
   queue_or_dissolve(winner_genome)
 
 
 func _on_battle_draw(left_genome, right_genome):
-  # left_genome.fitness += DRAW_FITNESS_POINTS
-  # right_genome.fitness += DRAW_FITNESS_POINTS
   left_genome.fitness = DRAW_FITNESS_POINTS
   right_genome.fitness = DRAW_FITNESS_POINTS
   queue_or_dissolve(left_genome)
@@ -319,8 +312,8 @@ func _on_CageFillTimer_timeout():
            return
           for i in queue_size:
             var rand_index = random.randi_range(0, queue_size - 1)
-            var gendict = calc_children_number_and_relative_fitness_non_cumulative(rand_index)
-            if random.randf() < gendict["relative_fitness"]:
+            var gendict = calc_children_number_and_selection_rate(rand_index)
+            if random.randf() < gendict["selection_rate"]:
               if main_genome == null:
                 main_genome = genome_duplicate(genome_queue[rand_index]["genome"])
                 if (rand_index % INDEX_DIVISOR) == 0:
@@ -346,16 +339,18 @@ func _on_CageFillTimer_timeout():
       else:
         spawn_new_agent(cage, current_side, get_alter_genome(main_genome, mate_genome))
 
+    # Remove excess children
     var queue_size = genome_queue.size()
     var removed_counter := 0
     for i in queue_size:
       if i > queue_size - 1 - removed_counter:
         break
-      var gendict = calc_children_number_and_relative_fitness_non_cumulative(i)
+      var gendict = calc_children_number_and_selection_rate(i)
       if genome_queue[i]["children_spawned"] >= gendict["children_number"]:
         genome_queue.remove(i)
         removed_counter += 1
 
+    # Remove unavailable cages from available_cages
     for av_cage in available_cages:
       if av_cage.agent_left != null || av_cage.agent_right != null:
         available_cages.erase(av_cage)
