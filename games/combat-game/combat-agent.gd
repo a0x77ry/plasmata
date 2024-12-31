@@ -15,6 +15,7 @@ const NN = preload("res://scripts/neural_network.gd")
 const Laser = preload("res://other/projectile/laser.tscn")
 
 onready var ray_forward = get_node("ray_forward")
+onready var ray_back = get_node("ray_back")
 onready var ray_left = get_node("ray_left")
 onready var ray_right = get_node("ray_right")
 onready var ray_f_up_right = get_node("ray_f_up_right")
@@ -126,12 +127,14 @@ func get_sensor_input():
   var norm_pos_y: float
 
   var ray_f_distance: float
+  var ray_b_distance: float
   var ray_left_distance: float
   var ray_right_distance: float
   var ray_f_up_right_distance: float
   var ray_f_down_right_distance: float
 
   var rf_col_normal_angle: float
+  var rb_col_normal_angle: float
   var rl_col_normal_angle: float
   var rr_col_normal_angle: float
   var rfu_col_normal_angle: float
@@ -173,6 +176,20 @@ func get_sensor_input():
 
       if col.is_in_group("normal_walls"):
         ray_f_distance = (ray_forward.cast_to.x - distance) / ray_forward.cast_to.x
+
+  if nn_activated_inputs.has("ray_b_distance") || nn_activated_inputs.has("rb_col_normal_angle"):
+    ray_b_distance = 0.0
+    rb_col_normal_angle = 0.0
+    if ray_back.is_colliding():
+      var distance = global_position.distance_to(ray_back.get_collision_point())
+      var col = ray_back.get_collider()
+
+      if nn_activated_inputs.has("rb_col_normal_angle"):
+        var col_normal = ray_back.get_collision_normal()
+        rb_col_normal_angle = col_normal.angle() / PI
+
+      if col.is_in_group("normal_walls"):
+        ray_b_distance = (abs(ray_back.cast_to.x) - distance) / abs(ray_forward.cast_to.x)
 
   if nn_activated_inputs.has("ray_left_distance") || nn_activated_inputs.has("rl_col_normal_angle"):
     ray_left_distance = 0.0 # is was 1.0
@@ -304,12 +321,14 @@ func get_sensor_input():
         "pos_y": norm_pos_y,
 
         "ray_f_distance": ray_f_distance,
+        "ray_b_distance": ray_b_distance,
         "ray_f_up_right_distance": ray_f_up_right_distance,
         "ray_f_down_right_distance": ray_f_down_right_distance,
         "ray_left_distance": ray_left_distance,
         "ray_right_distance": ray_right_distance,
 
         "rf_col_normal_angle": rf_col_normal_angle,
+        "rb_col_normal_angle": rb_col_normal_angle,
         "rl_col_normal_angle": rl_col_normal_angle,
         "rr_col_normal_angle": rr_col_normal_angle,
         "rfu_col_normal_angle": rfu_col_normal_angle,

@@ -26,27 +26,32 @@ shape = SubResource( 1 )
 
 [node name="ray_forward" type="RayCast2D" parent="."]
 enabled = true
-cast_to = Vector2( 500, 0 )
+cast_to = Vector2( 700, 0 )
+collision_mask = 2
+
+[node name="ray_back" type="RayCast2D" parent="."]
+enabled = true
+cast_to = Vector2( -700, 0 )
 collision_mask = 2
 
 [node name="ray_left" type="RayCast2D" parent="."]
 enabled = true
-cast_to = Vector2( 0, -500 )
+cast_to = Vector2( 0, -700 )
 collision_mask = 2
 
 [node name="ray_right" type="RayCast2D" parent="."]
 enabled = true
-cast_to = Vector2( 0, 500 )
+cast_to = Vector2( 0, 700 )
 collision_mask = 2
 
 [node name="ray_f_up_right" type="RayCast2D" parent="."]
 enabled = true
-cast_to = Vector2( 353.55, -353.55 )
+cast_to = Vector2( 494.97, -494.97 )
 collision_mask = 2
 
 [node name="ray_f_down_right" type="RayCast2D" parent="."]
 enabled = true
-cast_to = Vector2( 353.55, 353.55 )
+cast_to = Vector2( 494.97, 494.97 )
 collision_mask = 2
 
 [node name="ShootingCooldownTimer" type="Timer" parent="."]
