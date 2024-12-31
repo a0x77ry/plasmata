@@ -172,7 +172,6 @@ func get_sensor_input():
         rf_col_normal_angle = col_normal.angle() / PI
 
       if col.is_in_group("normal_walls"):
-        # ray_f_distance = distance / ray_forward.cast_to.x
         ray_f_distance = (ray_forward.cast_to.x - distance) / ray_forward.cast_to.x
 
   if nn_activated_inputs.has("ray_left_distance") || nn_activated_inputs.has("rl_col_normal_angle"):
@@ -187,6 +186,7 @@ func get_sensor_input():
         rl_col_normal_angle = col_normal.angle() / PI
 
       if col.is_in_group("normal_walls"):
+        # ray_left.cast_to.y needs abs because it's negative
         ray_left_distance = (abs(ray_left.cast_to.y) - distance) / abs(ray_left.cast_to.y)
 
   if nn_activated_inputs.has("ray_right_distance") || nn_activated_inputs.has("rr_col_normal_angle"):
@@ -201,7 +201,7 @@ func get_sensor_input():
         rr_col_normal_angle = col_normal.angle() / PI
 
       if col.is_in_group("normal_walls"):
-        ray_right_distance = (ray_right.cast_to.y - distance) / ray_right.cast_to.y
+        ray_right_distance = (ray_right.cast_to.y - distance) / ray_right.cast_to.y # 0.0 to 1.0
 
   if nn_activated_inputs.has("ray_f_up_right_distance") || nn_activated_inputs.has("rfu_col_normal_angle"):
     ray_f_up_right_distance = 0.0

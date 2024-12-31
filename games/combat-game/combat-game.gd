@@ -226,12 +226,15 @@ func queue_or_dissolve(genome):
     for i in queue_size:
       if genome_queue[i]["genome"].fitness <= LOW_TIER_THRESHOLD:
         genome_queue[i]["genome"].dissolve_genome()
-        to_be_removed.append(i)
+        to_be_removed.append(genome_queue[i])
         removed += 1
       if removed >= number_to_remove:
         break
-    for index in to_be_removed:
-      genome_queue.remove(index)
+    # for index in to_be_removed:
+    for gendict in to_be_removed:
+      # genome_queue[index]["genome"].dissolve_genome()
+      # genome_queue.remove(index)
+      genome_queue.erase(gendict)
 
   if genome_queue.size() < GENOME_QUEUE_LIMIT:
     genome_queue.append({"genome": genome, "children_spawned": 0})
