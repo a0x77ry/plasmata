@@ -2,7 +2,7 @@ extends "res://scripts/game.gd"
 
 # const HIT_WIN_FITNESS_POINTS := 6.0
 # const WINNING_FITNESS_POINTS := 3.0
-const GENOME_QUEUE_LIMIT = 150 # last : 100
+const GENOME_QUEUE_LIMIT = 100 # last : 100
 # const TOTAL_QUEUE_CHILDREN = GENOME_QUEUE_LIMIT# * 8
 const COMBAT_AGENT_LIMIT = 80
 # const GENOME_QUEUE_SOFT_LIMIT = 50
@@ -77,12 +77,14 @@ func _input(event):
     original_mouse_pos = event.global_position
 
   if event.is_action_pressed("zoom_in"):
-    camera.zoom.x -= 0.1
-    camera.zoom.y -= 0.1
+    if camera.zoom.x > 0.11 && camera.zoom.y > 0.11:
+      camera.zoom.x -= 0.1
+      camera.zoom.y -= 0.1
 
   if event.is_action_pressed("zoom_out"):
-    camera.zoom.x += 0.1
-    camera.zoom.y += 0.1
+    if camera.zoom.x < 10.0 && camera.zoom.y < 10.0:
+      camera.zoom.x += 0.1
+      camera.zoom.y += 0.1
 
 
 func initialize_cages() -> void:
@@ -215,21 +217,52 @@ func genome_duplicate(original_genome: Genome) -> Genome:
   return new_genome
 
 
+func remove_random_from_queue():
+  var queue_size = genome_queue.size()
+  var low_tier_gendicts := []
+  var to_be_removed := []
+
+  for i in queue_size:
+    if genome_queue[i]["genome"].fitness <= LOW_TIER_THRESHOLD:
+      low_tier_gendicts.append(genome_queue[i])
+  for gendict in low_tier_gendicts:
+    if random.randf() < float(REMOVE_ON_LIMIT) / float(low_tier_gendicts.size()):
+      to_be_removed.append(gendict)
+      gendict["genome"].dissolve_genome()
+  
+  for gendict in to_be_removed:
+    genome_queue.erase(gendict)
+
+func remove_from_queue():
+  var queue_size = genome_queue.size()
+  var removed := 0
+  var to_be_removed := []
+  for i in queue_size:
+    if genome_queue[i]["genome"].fitness <= LOW_TIER_THRESHOLD:
+      genome_queue[i]["genome"].dissolve_genome()
+      to_be_removed.append(genome_queue[i])
+      removed += 1
+    if removed >= REMOVE_ON_LIMIT:
+      break
+  for gendict in to_be_removed:
+    genome_queue.erase(gendict)
+
+
 func queue_or_dissolve(genome):
-  if genome_queue.size() >= GENOME_QUEUE_LIMIT:
-    var number_to_remove := REMOVE_ON_LIMIT
-    var queue_size = genome_queue.size()
-    var removed := 0
-    var to_be_removed := []
-    for i in queue_size:
-      if genome_queue[i]["genome"].fitness <= LOW_TIER_THRESHOLD:
-        genome_queue[i]["genome"].dissolve_genome()
-        to_be_removed.append(genome_queue[i])
-        removed += 1
-      if removed >= number_to_remove:
-        break
-    for gendict in to_be_removed:
-      genome_queue.erase(gendict)
+  var queue_size = genome_queue.size()
+  if queue_size >= GENOME_QUEUE_LIMIT:
+    remove_random_from_queue()
+    # var removed := 0
+    # var to_be_removed := []
+    # for i in queue_size:
+    #   if genome_queue[i]["genome"].fitness <= LOW_TIER_THRESHOLD:
+    #     genome_queue[i]["genome"].dissolve_genome()
+    #     to_be_removed.append(genome_queue[i])
+    #     removed += 1
+    #   if removed >= REMOVE_ON_LIMIT:
+    #     break
+    # for gendict in to_be_removed:
+    #   genome_queue.erase(gendict)
 
   if genome_queue.size() < GENOME_QUEUE_LIMIT:
     genome_queue.append({"genome": genome, "children_spawned": 0})
@@ -287,7 +320,7 @@ func _on_cage_cleared(cage):
 func _on_CageFillTimer_timeout():
   if get_active_agents().size() > COMBAT_AGENT_LIMIT:
     return
-  if genome_queue.size() > GENOME_QUEUE_LIMIT:
+  if genome_queue.size() > round(GENOME_QUEUE_LIMIT * 0.5):
     cage_fill_timer.wait_time = WAIT_TIME_ABOVE_GENOME_LIMIT
   else:
     cage_fill_timer.wait_time = WAIT_TIME_BELOW_GENOME_LIMIT

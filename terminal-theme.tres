@@ -13,11 +13,12 @@ font_data = ExtResource( 1 )
 [sub_resource type="StyleBoxEmpty" id=4]
 
 [sub_resource type="StyleBoxFlat" id=5]
-bg_color = Color( 0.305882, 0.337255, 0.341176, 0.882353 )
+bg_color = Color( 0.40625, 0.21582, 0.21582, 1 )
 
-[sub_resource type="StyleBoxEmpty" id=2]
+[sub_resource type="StyleBoxFlat" id=13]
+bg_color = Color( 0.273438, 0.170898, 0.170898, 1 )
 
-[sub_resource type="StyleBoxEmpty" id=6]
+[sub_resource type="StyleBoxEmpty" id=14]
 
 [sub_resource type="DynamicFont" id=7]
 size = 30
@@ -48,8 +49,8 @@ Button/fonts/font = SubResource( 12 )
 Button/styles/disabled = SubResource( 3 )
 Button/styles/focus = SubResource( 4 )
 Button/styles/hover = SubResource( 5 )
-Button/styles/normal = SubResource( 2 )
-Button/styles/pressed = SubResource( 6 )
+Button/styles/normal = SubResource( 13 )
+Button/styles/pressed = SubResource( 14 )
 Label/colors/font_color = Color( 0.564706, 0.658824, 0.219608, 1 )
 Label/fonts/font = SubResource( 7 )
 Label/styles/normal = SubResource( 8 )

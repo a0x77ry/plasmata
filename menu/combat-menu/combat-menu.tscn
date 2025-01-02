@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=8 format=2]
 
 [ext_resource path="res://fonts/Workbench-Regular.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://menu/combat-menu/combat-menu.gd" type="Script" id=2]
@@ -14,6 +14,12 @@ font_data = ExtResource( 1 )
 [sub_resource type="DynamicFont" id=2]
 resource_local_to_scene = true
 size = 45
+use_filter = true
+font_data = ExtResource( 1 )
+
+[sub_resource type="DynamicFont" id=3]
+resource_local_to_scene = true
+size = 30
 use_filter = true
 font_data = ExtResource( 1 )
 
@@ -43,6 +49,17 @@ margin_bottom = 206.0
 custom_colors/font_color = Color( 0.564706, 0.658824, 0.219608, 1 )
 custom_fonts/font = SubResource( 2 )
 text = "> combat"
+valign = 2
+
+[node name="Tip" type="Label" parent="."]
+margin_left = 60.0
+margin_top = 374.0
+margin_right = 1311.0
+margin_bottom = 480.0
+custom_colors/font_color = Color( 0.564706, 0.658824, 0.219608, 1 )
+custom_fonts/font = SubResource( 3 )
+text = "tip: in training use the scroll
+ wheel to scroll, and drag to pan"
 valign = 2
 
 [node name="ButtonsBox" type="VBoxContainer" parent="."]

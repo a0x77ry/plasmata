@@ -172,6 +172,6 @@ func _on_SpawnTimer_timeout():
   if is_loading_mode_enabled:
     return
   var agents = get_active_agents()
-  if agents.size() < ceil(Main.AGENT_LIMIT / 5.0):
+  if agents.size() < ceil(float(Main.AGENT_LIMIT) / 5.0):
     generate_agent_population(true)
 

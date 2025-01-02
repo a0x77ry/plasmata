@@ -14,7 +14,7 @@ export (float) var rotation_speed_limit = 2.0
 const NN = preload("res://scripts/neural_network.gd")
 const Laser = preload("res://other/projectile/laser.tscn")
 const combat_blue = Color(0.57, 0.58, 0.96, 1.0)
-const combat_red = Color(0.96, 0.53, 0.53, 1.0)
+const combat_green = Color(0.17, 0.7, 0.17, 1.0)
 
 onready var ray_forward = get_node("ray_forward")
 onready var ray_back = get_node("ray_back")
@@ -55,7 +55,7 @@ func _ready():
   if side == Main.Side.LEFT:
     get_node("Sprite").modulate = combat_blue
   else:
-    get_node("Sprite").modulate = combat_red
+    get_node("Sprite").modulate = combat_green
 
 
 func _physics_process(delta):
