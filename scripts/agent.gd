@@ -95,7 +95,8 @@ func _ready():
   if nn_activated_inputs.has("mwall_2_ascent_completion"):
     mwall_2 = get_parent().get_parent().get_node("Walls/MovingWall2")
     mw2_starting_down_y = mwall_2.position.y
-  wall_player = game.get_node("WallPlayer")
+  if nn_activated_inputs.has("ray_f_distance_mw"):
+    wall_player = game.get_node("WallPlayer")
 
   if spawn_timer_to_set != 0.0:
     spawn_timer.wait_time = spawn_timer_to_set

@@ -2,30 +2,27 @@ extends "res://scripts/game.gd"
 
 # const HIT_WIN_FITNESS_POINTS := 6.0
 # const WINNING_FITNESS_POINTS := 3.0
-const DRAW_FITNESS_POINTS := 1.0
 const GENOME_QUEUE_LIMIT = 100 
-const TOTAL_QUEUE_CHILDREN = GENOME_QUEUE_LIMIT# * 8
+# const TOTAL_QUEUE_CHILDREN = GENOME_QUEUE_LIMIT# * 8
 const COMBAT_AGENT_LIMIT = 80
-const GENOME_QUEUE_SOFT_LIMIT = 50
+# const GENOME_QUEUE_SOFT_LIMIT = 50
 const WAIT_TIME_ABOVE_GENOME_LIMIT = 0.2
 const WAIT_TIME_BELOW_GENOME_LIMIT = 0.4
-# const HIT_WIN_CHILDREN = 6
-# const WIN_CHILDREN = 3
-# const DRAW_CHILDREN = 1
-const HIT_WIN_RELATIVE_FITNESS = 0.8
-const WIN_RELATIVE_FITNESS = 0.4
-const DRAW_REALTIVE_FITNESS = 0.1
+# const HIT_WIN_RELATIVE_FITNESS = 0.8
+# const WIN_RELATIVE_FITNESS = 0.4
+# const DRAW_REALTIVE_FITNESS = 0.1
 const INDEX_DIVISOR = 4
 const TIME_FITNESS = 4.0
-const WIN_FITNESS = 3.0
-const HIT_WIN_FITNESS = 6.0
-const HIGH_TIER_THRESHOLD = 6.0
-const MID_TIER_THRESHOLD = 3.0
-const LOW_TIER_THRESHOLD = 1.0
-const HIGH_REPLACEMENT_NUMBER := 4
-const MID_REPLACEMENT_NUMBER := 2
+const DRAW_FITNESS_POINTS := 3.0 # was 2.0
+const WIN_FITNESS = 5.0
+const HIT_WIN_FITNESS = 7.0 # was 6.0
+# const HIGH_TIER_THRESHOLD = 6.0
+# const MID_TIER_THRESHOLD = 3.0
+const LOW_TIER_THRESHOLD = DRAW_FITNESS_POINTS
+# const HIGH_REPLACEMENT_NUMBER := 4
+# const MID_REPLACEMENT_NUMBER := 2
 const FITNESS_TO_SELECTION_RATE = 8.0
-const QUEUE_REPLACEMENT_NUMBER := 5
+# const QUEUE_REPLACEMENT_NUMBER := 5
 
 export(PackedScene) var BattleCage
 
@@ -230,10 +227,7 @@ func queue_or_dissolve(genome):
         removed += 1
       if removed >= number_to_remove:
         break
-    # for index in to_be_removed:
     for gendict in to_be_removed:
-      # genome_queue[index]["genome"].dissolve_genome()
-      # genome_queue.remove(index)
       genome_queue.erase(gendict)
 
   if genome_queue.size() < GENOME_QUEUE_LIMIT:
@@ -266,10 +260,14 @@ func calc_children_number_and_selection_rate(genome_index: int) -> Dictionary:
 
 
 func _on_battle_won(winner_genome, time_remaining_normalized, is_won_with_hit):
-  winner_genome.fitness = TIME_FITNESS * time_remaining_normalized
+  # winner_genome.fitness = TIME_FITNESS * time_remaining_normalized
   if is_won_with_hit:
+    # winner_genome.fitness = HIT_WIN_FITNESS + (TIME_FITNESS * time_remaining_normalized)
     winner_genome.fitness = HIT_WIN_FITNESS
+    # winner_genome.fitness = WIN_FITNESS
   else:
+    # winner_genome.fitness = WIN_FITNESS + ((TIME_FITNESS / 2.0) * time_remaining_normalized)
+    # winner_genome.fitness = HIT_WIN_FITNESS
     winner_genome.fitness = WIN_FITNESS
   queue_or_dissolve(winner_genome)
 

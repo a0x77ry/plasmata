@@ -1,0 +1,76 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://fonts/Workbench-Regular.ttf" type="DynamicFontData" id=1]
+[ext_resource path="res://menu/combat-menu/combat-menu.gd" type="Script" id=2]
+[ext_resource path="res://terminal-theme.tres" type="Theme" id=3]
+[ext_resource path="res://games/combat-game/simple-combat-level/simple-combat-level.tscn" type="PackedScene" id=5]
+
+[sub_resource type="DynamicFont" id=1]
+resource_local_to_scene = true
+size = 60
+use_filter = true
+font_data = ExtResource( 1 )
+
+[sub_resource type="DynamicFont" id=2]
+resource_local_to_scene = true
+size = 45
+use_filter = true
+font_data = ExtResource( 1 )
+
+[node name="CombatMenu" type="Control"]
+script = ExtResource( 2 )
+combat_game = ExtResource( 5 )
+
+[node name="ColorRect" type="ColorRect" parent="."]
+margin_right = 1920.0
+margin_bottom = 1080.0
+color = Color( 0.196078, 0.117647, 0.117647, 1 )
+
+[node name="Title" type="Label" parent="."]
+margin_left = 50.0
+margin_right = 1301.0
+margin_bottom = 106.0
+custom_colors/font_color = Color( 0.564706, 0.658824, 0.219608, 1 )
+custom_fonts/font = SubResource( 1 )
+text = "> plasmata"
+valign = 2
+
+[node name="Combat game" type="Label" parent="."]
+margin_left = 50.0
+margin_top = 100.0
+margin_right = 1301.0
+margin_bottom = 206.0
+custom_colors/font_color = Color( 0.564706, 0.658824, 0.219608, 1 )
+custom_fonts/font = SubResource( 2 )
+text = "> combat"
+valign = 2
+
+[node name="ButtonsBox" type="VBoxContainer" parent="."]
+margin_left = 67.0
+margin_top = 248.0
+margin_right = 248.0
+margin_bottom = 446.0
+
+[node name="Train" type="Button" parent="ButtonsBox"]
+margin_right = 181.0
+margin_bottom = 40.0
+rect_min_size = Vector2( 0, 40 )
+focus_mode = 0
+theme = ExtResource( 3 )
+enabled_focus_mode = 0
+text = "train"
+align = 0
+
+[node name="Back" type="Button" parent="ButtonsBox"]
+margin_top = 44.0
+margin_right = 181.0
+margin_bottom = 84.0
+rect_min_size = Vector2( 0, 40 )
+focus_mode = 0
+theme = ExtResource( 3 )
+enabled_focus_mode = 0
+text = "back"
+align = 0
+
+[connection signal="pressed" from="ButtonsBox/Train" to="." method="_on_Train_pressed"]
+[connection signal="pressed" from="ButtonsBox/Back" to="." method="_on_Back_pressed"]
