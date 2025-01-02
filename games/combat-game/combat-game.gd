@@ -2,7 +2,7 @@ extends "res://scripts/game.gd"
 
 # const HIT_WIN_FITNESS_POINTS := 6.0
 # const WINNING_FITNESS_POINTS := 3.0
-const GENOME_QUEUE_LIMIT = 100 
+const GENOME_QUEUE_LIMIT = 150 # last : 100
 # const TOTAL_QUEUE_CHILDREN = GENOME_QUEUE_LIMIT# * 8
 const COMBAT_AGENT_LIMIT = 80
 # const GENOME_QUEUE_SOFT_LIMIT = 50
@@ -12,17 +12,18 @@ const WAIT_TIME_BELOW_GENOME_LIMIT = 0.4
 # const WIN_RELATIVE_FITNESS = 0.4
 # const DRAW_REALTIVE_FITNESS = 0.1
 const INDEX_DIVISOR = 4
-const TIME_FITNESS = 4.0
-const DRAW_FITNESS_POINTS := 3.0 # was 2.0
-const WIN_FITNESS = 5.0
-const HIT_WIN_FITNESS = 7.0 # was 6.0
+# const TIME_FITNESS = 4.0
+const DRAW_FITNESS_POINTS := 3.0 # last 3.0
+const WIN_FITNESS = 5.0 # last 5.0
+const HIT_WIN_FITNESS = 7.0 # last 7.0
 # const HIGH_TIER_THRESHOLD = 6.0
 # const MID_TIER_THRESHOLD = 3.0
 const LOW_TIER_THRESHOLD = DRAW_FITNESS_POINTS
 # const HIGH_REPLACEMENT_NUMBER := 4
 # const MID_REPLACEMENT_NUMBER := 2
-const FITNESS_TO_SELECTION_RATE = 8.0
+const FITNESS_TO_SELECTION_RATE = 8.0 # last 8.0
 # const QUEUE_REPLACEMENT_NUMBER := 5
+const REMOVE_ON_LIMIT := 15 # last 10
 
 export(PackedScene) var BattleCage
 
@@ -216,7 +217,7 @@ func genome_duplicate(original_genome: Genome) -> Genome:
 
 func queue_or_dissolve(genome):
   if genome_queue.size() >= GENOME_QUEUE_LIMIT:
-    var number_to_remove := 10
+    var number_to_remove := REMOVE_ON_LIMIT
     var queue_size = genome_queue.size()
     var removed := 0
     var to_be_removed := []

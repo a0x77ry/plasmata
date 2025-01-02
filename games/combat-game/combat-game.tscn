@@ -26,8 +26,9 @@ region_enabled = true
 region_rect = Rect2( 0, 0, 5000, 5000 )
 
 [node name="Camera2D" type="Camera2D" parent="." index="2"]
-position = Vector2( 952, 532 )
+position = Vector2( 2672, 1484 )
 current = true
+zoom = Vector2( 2.9, 2.9 )
 
 [node name="BattleCages" type="Node2D" parent="." index="3"]
 
