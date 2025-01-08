@@ -1,6 +1,7 @@
 extends Node2D
 
-signal battle_won(winner_genome, time_remaining_normalized, is_won_with_hit)
+# signal battle_won(winner_genome, time_remaining_normalized, is_won_with_hit)
+signal battle_won(winner_genome, is_won_with_hit)
 signal battle_draw(genome_left, genome_right)
 signal cage_cleared(cage)
 # signal agent_queued(agent)
@@ -117,8 +118,8 @@ func _on_agent_death(side, is_hit):
     winner_genome = game.genome_duplicate(genome_right_copy)
   else:
     winner_genome = game.genome_duplicate(genome_left_copy)
-  var time_remain_norm = death_timer.time_left / death_timer.wait_time
-  emit_signal("battle_won", winner_genome, time_remain_norm, is_hit)
+  # var time_remain_norm = death_timer.time_left / death_timer.wait_time
+  emit_signal("battle_won", winner_genome, is_hit)
   clean_cage()
 
 

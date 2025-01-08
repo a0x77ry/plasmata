@@ -56,7 +56,7 @@ func save(genome_dict, filename):
   var dirpath = "user://{game_name}/{level_name}".format({"game_name": game_name, "level_name": level_name})
   if !dir.dir_exists(dirpath):
     if dir.make_dir_recursive(dirpath) != OK:
-      print("Cannot make save directory")
+      printerr("Cannot make save directory")
 
   var filepath = "user://{game_name}/{level_name}/{filename}.save"\
       .format({"game_name": game_name, "level_name": level_name, "filename": filename})
@@ -150,8 +150,10 @@ func _on_MainMenu_pressed():
 
 
 func _on_Save_Best_Agent_pressed():
-  # save(finished_agent.genome.to_dict(), "testsave")
-  # pause_ui.visible = false
+  enter_save_menu()
+
+
+func enter_save_menu():
   is_in_save_menu = true
   save_ui.visible = true
   save_ui_lineedit.grab_focus()
