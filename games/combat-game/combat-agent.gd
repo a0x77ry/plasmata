@@ -270,15 +270,27 @@ func get_sensor_input():
     turn_right_input = (nn_rotation / rotation_speed_limit) * (get_physics_process_delta_time() * rotation_speed)
 
   if nn_activated_inputs.has("opponents_forward_movement"):
-    opponents_forward_movement = get_opponent().forward_movement
+    var opponent = get_opponent()
+    if !is_instance_valid(opponent) || !opponent.is_inside_tree():
+      opponents_forward_movement = 0.0
+    else:
+      opponents_forward_movement = opponent.forward_movement
 
   if nn_activated_inputs.has("opponents_right_movement"):
-    opponents_right_movement = get_opponent().right_movement
+    var opponent = get_opponent()
+    if !is_instance_valid(opponent) || !opponent.is_inside_tree():
+      opponents_right_movement = 0.0
+    else:
+      opponents_right_movement = opponent.right_movement
 
   if nn_activated_inputs.has("opponents_heading"):
     # opponents_heading = get_opponent().opponent_angle_global
     # opponents_heading = get_opponent().nn_rotation
-    opponents_heading = get_opponent().rotation
+    var opponent = get_opponent()
+    if !is_instance_valid(opponent) || !opponent.is_inside_tree():
+      opponents_heading = 0.0
+    else:
+      opponents_heading = opponent.rotation
 
   if nn_activated_inputs.has("shooting_input"):
     shooting_input = cooldown_timer.time_left / cooldown_timer.wait_time

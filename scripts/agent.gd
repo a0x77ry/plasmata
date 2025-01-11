@@ -610,6 +610,7 @@ func get_sensor_input():
 
 func set_finished_agent():
   game.finished_agent = self.copy()
+  game.winner_genome = genome
   game.completion_times.text = String(game.finished_agent.agent_completion_counter)
 
 

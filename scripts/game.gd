@@ -22,9 +22,11 @@ var output_names = []
 # var sorted_agents = []
 var is_loading_mode_enabled := false
 var finished_agent
+var winner_genome
 var game_name
 var level_name
 var is_in_save_menu := false
+var exit_when_finished_saving := false
 
 
 func _process(_delta):
@@ -153,19 +155,25 @@ func _on_Save_Best_Agent_pressed():
   enter_save_menu()
 
 
-func enter_save_menu():
+func enter_save_menu(exit_after: bool = false):
   is_in_save_menu = true
   save_ui.visible = true
+  exit_when_finished_saving = exit_after
   save_ui_lineedit.grab_focus()
   save_ui_lineedit.caret_blink = true
   save_ui_lineedit.caret_blink_speed = 0.8
 
 
 func _on_Filename_text_entered(new_text:String):
-  save(finished_agent.genome.to_dict(), new_text)
+  # save(finished_agent.genome.to_dict(), new_text)
+  save(winner_genome.to_dict(), new_text)
   is_in_save_menu = false
   save_ui.visible = false
   # pause_ui.visible = true
+  if exit_when_finished_saving:
+    var err = get_tree().change_scene("res://menu/main-menu/main-menu.tscn")
+    if err != OK:
+      printerr("Cannot change scene")
 
 
 

@@ -106,11 +106,20 @@ func clean_cage():
   has_active_battle = false
 
 
+func emit_serially(sig: String, winner_genome = null, is_hit = false) -> void:
+  if sig == "battle_won":
+    emit_signal("battle_won", winner_genome, is_hit)
+  elif sig == "battle_draw":
+    emit_signal(sig, game.genome_duplicate(genome_left_copy), game.genome_duplicate(genome_right_copy))
+  yield(get_tree(), "idle_frame") # returns a GDScriptFunctionState object
+
+
 func _on_agent_death(side, is_hit):
   var winner_genome
   assert(side != null)
   if (!is_instance_valid(agent_left) && !is_instance_valid(agent_right)):
-    emit_signal("battle_draw", game.genome_duplicate(genome_left_copy), game.genome_duplicate(genome_right_copy))
+    # emit_signal("battle_draw", game.genome_duplicate(genome_left_copy), game.genome_duplicate(genome_right_copy))
+    yield(emit_serially("battle_draw"), "completed")
     clean_cage()
     return
 
@@ -119,7 +128,8 @@ func _on_agent_death(side, is_hit):
   else:
     winner_genome = game.genome_duplicate(genome_left_copy)
   # var time_remain_norm = death_timer.time_left / death_timer.wait_time
-  emit_signal("battle_won", winner_genome, is_hit)
+  # emit_signal("battle_won", winner_genome, is_hit)
+  yield(emit_serially("battle_won", winner_genome, is_hit), "completed")
   clean_cage()
 
 
@@ -127,16 +137,7 @@ func _on_DeathTimer_timeout():
   var left_alive = is_instance_valid(agent_left)
   var right_alive = is_instance_valid(agent_right)
   if left_alive && right_alive:# && genome_left_copy != null && genome_right_copy != null:
-    emit_signal("battle_draw", game.genome_duplicate(genome_left_copy), game.genome_duplicate(genome_right_copy))
-  elif left_alive:
-    emit_signal("battle_won", game.genome_duplicate(genome_left_copy))
-  elif right_alive:
-    emit_signal("battle_won", game.genome_duplicate(genome_right_copy))
-
-  # if is_instance_valid(agent_left):
-  #   emit_signal("agent_queued", agent_left.copy())
-  # if is_instance_valid(agent_right):
-  #   emit_signal("agent_queued", agent_right.copy())
-  # emit_signal("battle_draw")
+    # emit_signal("battle_draw", game.genome_duplicate(genome_left_copy), game.genome_duplicate(genome_right_copy))
+    yield(emit_serially("battle_draw"), "completed")
   clean_cage()
 

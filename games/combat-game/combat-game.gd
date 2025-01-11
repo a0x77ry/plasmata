@@ -10,6 +10,7 @@ const HIT_WIN_FITNESS = 7.0 # last 7.0
 const LOW_TIER_THRESHOLD = WIN_FITNESS
 const FITNESS_TO_SELECTION_RATE = 8.0 # last 8.0
 const REMOVE_ON_LIMIT := 15 # last 10
+const THRESHOLD_FOR_NEW_ROUND := 2
 
 export(PackedScene) var BattleCage
 
@@ -42,6 +43,7 @@ func _ready():
   init_population()
   set_time_scale(combat_time_scale)
   unpaused_time_scale = combat_time_scale
+  game_name = "combat_game"
 
 
 # func _physics_process(_delta):
@@ -313,47 +315,74 @@ func populate_cage(cage):
     else:
       current_side = Main.Side.RIGHT
     spawn_new_agent(cage, current_side, get_alter_genome(main_genome, mate_genome))
+  
+  # Erase genomes if the have more children that their limit
+  # var gen_queue_dict_to_remove := []
+  # for index in chosen_indices:
+  #   if genome_queue[index]["children_spawned"] > calc_children_number_and_selection_rate_index(index)["children_number"]:
+  #     gen_queue_dict_to_remove.append(genome_queue[index])
+  # for genome_queue_dict in gen_queue_dict_to_remove:
+  #   genome_queue.erase(genome_queue_dict)
+
   # erase cage from available_cages
   assert(cage.agent_left != null && cage.agent_right != null)
   available_cages.erase(cage)
 
 
 func start_new_round():
-  print("starting new round")
-  print("genome population before herod: %s" % genome_queue.size())
   assert(genome_queue.size() >= 2)
   while available_cages.size() > 0:
     var cage = get_first_available_cage()
     populate_cage(cage)
-  herod()
-  print("genome population after herod: %s" % genome_queue.size())
+    herod()
+    if genome_queue.size() < 2:
+      break
 
 
-func _on_battle_won(winner_genome, is_won_with_hit):
-  # if is_in_knockout_mode:
-  #   print("agents: %s, available_cages: %s" % [get_active_agents().size(), available_cages.size()])
+func _on_battle_won(winner_gen, is_won_with_hit):
   if is_won_with_hit:
-    winner_genome.fitness = HIT_WIN_FITNESS
+    winner_gen.fitness = HIT_WIN_FITNESS
   else:
-    winner_genome.fitness = WIN_FITNESS
+    winner_gen.fitness = WIN_FITNESS
+  queue_or_dissolve(winner_gen)
 
-  if is_in_knockout_mode && genome_queue.size() == 0 && get_active_agents().size() == 2:
-    enter_save_menu()
-    var err = get_tree().change_scene("res://menu/combat-menu/combat-menu.tscn")
-    if err != OK:
-      printerr("Cannot change scene")
-  elif is_in_knockout_mode && get_active_agents().size() == 2:
+  if is_in_knockout_mode:
+    # yield(get_tree(), "idle_frame")
+    print("agents: %s, available_cages: %s" % [get_active_agents().size(), available_cages.size()])
+
+  if is_in_knockout_mode && genome_queue.size() == 1 && get_active_agents().size() <= THRESHOLD_FOR_NEW_ROUND:
+    print("Call save from won")
+    pause()
+    winner_genome = genome_queue[0]["genome"]
+    enter_save_menu(true)
+
+    # var err = get_tree().change_scene("res://menu/combat-menu/combat-menu.tscn")
+    # if err != OK:
+    #   printerr("Cannot change scene")
+
+  elif is_in_knockout_mode && genome_queue.size() < 2:
+    return
+  elif is_in_knockout_mode && get_active_agents().size() <= THRESHOLD_FOR_NEW_ROUND:
     print("Call new round from won")
     start_new_round()
+    # call_deferred("start_new_round")
     return
-
-  queue_or_dissolve(winner_genome)
 
 
 func _on_battle_draw(left_genome, right_genome):
-  if is_in_knockout_mode && get_active_agents().size() == 2:
-    # print("agents: %s, available_cages: %s" % [get_active_agents().size(), available_cages.size()])
+  if is_in_knockout_mode:
+    # yield(get_tree(), "idle_frame")
+    print("agents: %s, available_cages: %s" % [get_active_agents().size(), available_cages.size()])
+
+  if is_in_knockout_mode && get_active_agents().size() <= THRESHOLD_FOR_NEW_ROUND:
     print("Call new round from draw")
+    left_genome.fitness = DRAW_FITNESS_POINTS
+    right_genome.fitness = DRAW_FITNESS_POINTS
+    # breakpoint
+    queue_or_dissolve(left_genome)
+    queue_or_dissolve(right_genome)
+    assert(genome_queue.size() >= 2)
+    # call_deferred("start_new_round")
     start_new_round()
     return
 
