@@ -20,6 +20,7 @@ var right_traced_lasers = []
 var left_rot = 0.0
 var right_rot = PI
 var has_active_battle := false
+var has_winner := false # guards against both being winners
 var game
 
 
@@ -102,8 +103,9 @@ func clean_cage():
   agent_left = null
   agent_right = null
   death_timer.stop()
-  emit_signal("cage_cleared", self)
   has_active_battle = false
+  has_winner = false
+  emit_signal("cage_cleared", self)
 
 
 func emit_serially(sig: String, winner_genome = null, is_hit = false) -> void:
@@ -118,17 +120,24 @@ func _on_agent_death(side, is_hit):
   var winner_genome
   assert(side != null)
   if (!is_instance_valid(agent_left) && !is_instance_valid(agent_right)):
+  # if (is_instance_valid(agent_left) && is_instance_valid(agent_right)):
+    print("It's a draw")
     # emit_signal("battle_draw", game.genome_duplicate(genome_left_copy), game.genome_duplicate(genome_right_copy))
     yield(emit_serially("battle_draw"), "completed")
     clean_cage()
+    return
+
+  if has_winner:
     return
 
   if side == Main.Side.LEFT:
     winner_genome = game.genome_duplicate(genome_right_copy)
   else:
     winner_genome = game.genome_duplicate(genome_left_copy)
+  # print("We have a winner")
   # var time_remain_norm = death_timer.time_left / death_timer.wait_time
   # emit_signal("battle_won", winner_genome, is_hit)
+  has_winner = true
   yield(emit_serially("battle_won", winner_genome, is_hit), "completed")
   clean_cage()
 
