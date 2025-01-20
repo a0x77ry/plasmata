@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://games/game.tscn" type="PackedScene" id=1]
 [ext_resource path="res://games/combat-game/combat-game.gd" type="Script" id=2]
@@ -6,18 +6,53 @@
 [ext_resource path="res://games/combat-game/battle-cage.tscn" type="PackedScene" id=4]
 [ext_resource path="res://images/circuit_board.jpeg" type="Texture" id=5]
 [ext_resource path="res://images/starfield.jpeg" type="Texture" id=6]
+[ext_resource path="res://terminal-theme.tres" type="Theme" id=7]
+[ext_resource path="res://fonts/Workbench-Regular.ttf" type="DynamicFontData" id=8]
+[ext_resource path="res://fonts/Jura-Light.ttf" type="DynamicFontData" id=9]
+
+[sub_resource type="DynamicFont" id=1]
+size = 30
+font_data = ExtResource( 8 )
+
+[sub_resource type="DynamicFont" id=2]
+size = 30
+font_data = ExtResource( 9 )
 
 [node name="CombatGame" instance=ExtResource( 1 )]
 script = ExtResource( 2 )
 Agent = ExtResource( 3 )
 BattleCage = ExtResource( 4 )
 
-[node name="Background" type="Sprite" parent="." index="0"]
+[node name="CanvasLayer" type="CanvasLayer" parent="." index="0"]
+
+[node name="KnockoutLabel" type="Label" parent="CanvasLayer" index="0"]
+visible = false
+margin_left = 67.0
+margin_top = 63.0
+margin_right = 262.0
+margin_bottom = 94.0
+theme = ExtResource( 7 )
+custom_fonts/font = SubResource( 1 )
+text = "Knockout Mode"
+align = 1
+valign = 1
+
+[node name="StopwatchLabel" type="Label" parent="CanvasLayer" index="1"]
+anchor_left = 1.0
+anchor_right = 1.0
+margin_left = -185.0
+margin_right = 16.0
+margin_bottom = 119.0
+custom_fonts/font = SubResource( 2 )
+text = "00:00:00"
+valign = 1
+
+[node name="Background" type="Sprite" parent="." index="1"]
 modulate = Color( 0.427451, 0.235294, 0.235294, 1 )
 texture = ExtResource( 6 )
 centered = false
 
-[node name="BackgroundTiled" type="Sprite" parent="." index="1"]
+[node name="BackgroundTiled" type="Sprite" parent="." index="2"]
 visible = false
 modulate = Color( 0.478431, 0.443137, 0.443137, 1 )
 texture = ExtResource( 5 )
@@ -25,14 +60,14 @@ centered = false
 region_enabled = true
 region_rect = Rect2( 0, 0, 5000, 5000 )
 
-[node name="Camera2D" type="Camera2D" parent="." index="2"]
+[node name="Camera2D" type="Camera2D" parent="." index="3"]
 position = Vector2( 2672, 1484 )
 current = true
 zoom = Vector2( 2.9, 2.9 )
 
-[node name="BattleCages" type="Node2D" parent="." index="3"]
+[node name="BattleCages" type="Node2D" parent="." index="4"]
 
-[node name="CageFillTimer" type="Timer" parent="." index="6"]
+[node name="CageFillTimer" type="Timer" parent="." index="7"]
 wait_time = 0.2
 autostart = true
 

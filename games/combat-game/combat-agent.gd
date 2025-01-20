@@ -3,13 +3,18 @@ extends KinematicBody2D
 signal agent_removed(value)
 signal agent_killed(side, is_hit)
 
-export (float) var speed = 20.0 # waa 50.0
-export (float) var lateral_speed = 20.0
-export (float) var rotation_speed = 1.0 # was 0.5
-export (float) var speed_limit = 110.0
-export (float) var lateral_speed_limit = 80.0
-export (float) var rotation_speed_limit = 2.0
-# export(PackedScene) var Agent
+# export (float) var speed = 40.0
+export (float) var speed = 60.0
+# export (float) var lateral_speed = 40.0
+export (float) var lateral_speed = 60.0
+export (float) var rotation_speed = 2.0
+# export (float) var speed_limit = 220.0
+export (float) var speed_limit = 330.0
+# export (float) var lateral_speed_limit = 160.0
+export (float) var lateral_speed_limit = 240.0
+export (float) var rotation_speed_limit = 4.0
+# export (float) var laser_cooldown = 2.0
+export (float) var laser_cooldown = 1.3
 
 const NN = preload("res://scripts/neural_network.gd")
 const Laser = preload("res://other/projectile/laser.tscn")
@@ -46,10 +51,13 @@ var real_lateral_speed := 0.0
 var forward_movement: float = 0.0
 var right_movement: float = 0.0
 var opponent_angle_global := 0.0
+var temp_vel := Vector2.ZERO
+var normalized_vel := Vector2.ZERO
 
 
 func _ready():
   assert(genome != null, "genome is not initialized in combat agent")
+  cooldown_timer.wait_time = laser_cooldown
   nn = NN.new(genome)
   Agent = game.Agent
   if side == Main.Side.LEFT:
@@ -67,12 +75,18 @@ func _physics_process(delta):
     real_speed = clamp(nn_controls["nn_move_forward"] * speed, -speed_limit, speed_limit)
     real_lateral_speed = clamp(nn_controls["nn_move_right"] * lateral_speed ,
         -lateral_speed_limit, lateral_speed_limit)
+    normalized_vel = Vector2(real_speed, real_lateral_speed).normalized()
 
-    forward_movement = clamp(real_speed, -speed_limit, speed_limit) / speed_limit
-    right_movement = clamp(real_lateral_speed, -lateral_speed_limit, lateral_speed_limit) / lateral_speed_limit
+    # To be used as inputs in the neural network
+    # forward_movement = clamp(real_speed, -speed_limit, speed_limit) / speed_limit
+    # right_movement = clamp(real_lateral_speed, -lateral_speed_limit, lateral_speed_limit) / lateral_speed_limit
 
-    velocity = Vector2(real_speed, real_lateral_speed).rotated(rotation)
-    velocity = move_and_slide(velocity)
+    forward_movement = clamp(normalized_vel.x * real_speed, -speed_limit, speed_limit) / speed_limit
+    right_movement = clamp(normalized_vel.y * real_lateral_speed, -lateral_speed_limit, lateral_speed_limit) / lateral_speed_limit
+
+    # temp_vel = Vector2(real_speed, real_lateral_speed).rotated(rotation)
+    temp_vel = Vector2(normalized_vel.x * real_speed, normalized_vel.y * real_lateral_speed).rotated(rotation)
+    velocity = move_and_slide(temp_vel)
 
     if nn_controls["nn_shooting"] > 0.0:
       shoot()
@@ -313,17 +327,18 @@ func get_sensor_input():
       opponent_angle_global = opponent_angle
 
       opponent_distance = (global_position.distance_to(opponent_pos) \
-          / sqrt(pow(battle_cage_width, 2.0) * pow(battle_cage_height, 2.0)))
+          / sqrt(pow(battle_cage_width, 2.0) + pow(battle_cage_height, 2.0)))
 
   if nn_activated_inputs.has("traced_laser_1_angle") || \
       nn_activated_inputs.has("trase_laser_1_distance"):
     var traced_laser_1
     if side == Main.Side.LEFT:
-      if !battle_cage.left_traced_lasers.empty():
-        traced_laser_1 = battle_cage.left_traced_lasers[0]
-    elif side == Main.Side.RIGHT:
+      # track the opponent's laser
       if !battle_cage.right_traced_lasers.empty():
         traced_laser_1 = battle_cage.right_traced_lasers[0]
+    elif side == Main.Side.RIGHT:
+      if !battle_cage.left_traced_lasers.empty():
+        traced_laser_1 = battle_cage.left_traced_lasers[0]
     if !is_instance_valid(traced_laser_1) || !traced_laser_1.is_inside_tree():
       traced_laser_1_distance = 0.0
       traced_laser_1_angle = 0.0
@@ -331,7 +346,9 @@ func get_sensor_input():
       var traced_laser_pos = traced_laser_1.global_position
       traced_laser_1_angle = global_position.angle_to_point(traced_laser_pos) / PI
       traced_laser_1_distance = 1.0 - (global_position.distance_to(traced_laser_pos) \
-          / sqrt(pow(battle_cage_width, 2.0) * pow(battle_cage_height, 2.0)))
+          / sqrt(pow(battle_cage_width, 2.0) + pow(battle_cage_height, 2.0)))
+      # if traced_laser_1_distance < 0.5:
+      #   print("traced angle: %s, traced distance: %s" % [traced_laser_1_angle, traced_laser_1_distance])
 
   var inp_dict = {
         "rotation": newrot,
@@ -380,6 +397,11 @@ func shoot():
     laser.global_position = projectile_pos.global_position
     laser.global_rotation = projectile_pos.global_rotation
     laser.side = side
+
+    laser.agent = self
+    laser.opponent_agent = get_opponent()
+    battle_cage.all_active_lasers.append(laser)
+
     get_tree().get_root().add_child(laser)
     can_shoot = false
     cooldown_timer.start()
@@ -424,9 +446,12 @@ func copy():
   return agent
 
 
-func _on_agent_hit(agent_id):
-  if agent_id == get_instance_id():
-    kill_agent(true)
+func _on_agent_hit():
+  kill_agent(true)
+
+
+# func _on_laser_hit():
+#   can_shoot = true
 
 
 func _on_ShootingCooldownTimer_timeout():

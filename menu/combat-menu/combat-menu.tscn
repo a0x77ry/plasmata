@@ -1,8 +1,9 @@
-[gd_scene load_steps=8 format=2]
+[gd_scene load_steps=23 format=2]
 
 [ext_resource path="res://fonts/Workbench-Regular.ttf" type="DynamicFontData" id=1]
 [ext_resource path="res://menu/combat-menu/combat-menu.gd" type="Script" id=2]
 [ext_resource path="res://terminal-theme.tres" type="Theme" id=3]
+[ext_resource path="res://games/combat-game/fight/fight.tscn" type="PackedScene" id=4]
 [ext_resource path="res://games/combat-game/simple-combat-level/simple-combat-level.tscn" type="PackedScene" id=5]
 
 [sub_resource type="DynamicFont" id=1]
@@ -23,9 +24,75 @@ size = 30
 use_filter = true
 font_data = ExtResource( 1 )
 
+[sub_resource type="DynamicFont" id=12]
+resource_local_to_scene = true
+size = 30
+use_filter = true
+font_data = ExtResource( 1 )
+
+[sub_resource type="StyleBoxEmpty" id=13]
+
+[sub_resource type="StyleBoxEmpty" id=4]
+
+[sub_resource type="StyleBoxFlat" id=5]
+bg_color = Color( 0.305882, 0.337255, 0.341176, 0.882353 )
+
+[sub_resource type="StyleBoxEmpty" id=14]
+
+[sub_resource type="StyleBoxEmpty" id=6]
+
+[sub_resource type="DynamicFont" id=7]
+size = 30
+font_data = ExtResource( 1 )
+
+[sub_resource type="StyleBoxEmpty" id=8]
+
+[sub_resource type="DynamicFont" id=9]
+size = 25
+use_filter = true
+font_data = ExtResource( 1 )
+
+[sub_resource type="StyleBoxFlat" id=10]
+bg_color = Color( 0.388235, 0.364706, 0.34902, 1 )
+
+[sub_resource type="DynamicFont" id=11]
+size = 20
+font_data = ExtResource( 1 )
+
+[sub_resource type="Theme" id=15]
+Button/colors/font_color = Color( 0.564706, 0.658824, 0.219608, 1 )
+Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
+Button/colors/font_color_focus = Color( 0.564706, 0.658824, 0.219608, 1 )
+Button/colors/font_color_hover = Color( 0.564706, 0.658824, 0.219608, 1 )
+Button/colors/font_color_pressed = Color( 0.564706, 0.658824, 0.219608, 1 )
+Button/constants/hseparation = 2
+Button/fonts/font = SubResource( 12 )
+Button/styles/disabled = SubResource( 13 )
+Button/styles/focus = SubResource( 4 )
+Button/styles/hover = SubResource( 5 )
+Button/styles/normal = SubResource( 14 )
+Button/styles/pressed = SubResource( 6 )
+Label/colors/font_color = Color( 0.564706, 0.658824, 0.219608, 1 )
+Label/fonts/font = SubResource( 7 )
+Label/styles/normal = SubResource( 8 )
+OptionButton/fonts/font = SubResource( 9 )
+OptionButton/styles/hover = SubResource( 10 )
+PopupMenu/fonts/font = SubResource( 11 )
+
+[sub_resource type="DynamicFont" id=16]
+size = 20
+use_filter = true
+font_data = ExtResource( 1 )
+
+[sub_resource type="DynamicFont" id=17]
+size = 20
+use_filter = true
+font_data = ExtResource( 1 )
+
 [node name="CombatMenu" type="Control"]
 script = ExtResource( 2 )
 combat_game = ExtResource( 5 )
+level_to_load = ExtResource( 4 )
 
 [node name="ColorRect" type="ColorRect" parent="."]
 margin_right = 1920.0
@@ -52,14 +119,27 @@ text = "> combat"
 valign = 2
 
 [node name="Tip" type="Label" parent="."]
-margin_left = 60.0
-margin_top = 374.0
-margin_right = 1311.0
-margin_bottom = 480.0
+margin_left = 63.0
+margin_top = 470.0
+margin_right = 1314.0
+margin_bottom = 909.0
 custom_colors/font_color = Color( 0.564706, 0.658824, 0.219608, 1 )
 custom_fonts/font = SubResource( 3 )
-text = "tip: in training use the scroll
- wheel to scroll, and drag to pan"
+text = "Fight Controls:
+
+Movement: A, S, D, W
+Direction: Mouse
+Shooting: Right Click
+
+
+Training:
+
+In training, use the scroll
+wheel to scroll, and drag to pan.
+
+Press k to enter knockout mode.
+This will fade out the training and
+enable you to save the best AI agent"
 valign = 2
 
 [node name="ButtonsBox" type="VBoxContainer" parent="."]
@@ -69,7 +149,7 @@ margin_right = 248.0
 margin_bottom = 446.0
 
 [node name="Train" type="Button" parent="ButtonsBox"]
-margin_right = 181.0
+margin_right = 240.0
 margin_bottom = 40.0
 rect_min_size = Vector2( 0, 40 )
 focus_mode = 0
@@ -78,10 +158,30 @@ enabled_focus_mode = 0
 text = "train"
 align = 0
 
-[node name="Back" type="Button" parent="ButtonsBox"]
+[node name="Load Genome" type="Button" parent="ButtonsBox"]
 margin_top = 44.0
-margin_right = 181.0
-margin_bottom = 84.0
+margin_right = 240.0
+margin_bottom = 75.0
+focus_mode = 0
+theme = ExtResource( 3 )
+enabled_focus_mode = 0
+text = "fight an AI"
+align = 0
+
+[node name="RemoveGenome" type="Button" parent="ButtonsBox"]
+margin_top = 79.0
+margin_right = 240.0
+margin_bottom = 110.0
+focus_mode = 0
+theme = ExtResource( 3 )
+enabled_focus_mode = 0
+text = "remove genome   "
+align = 0
+
+[node name="Back" type="Button" parent="ButtonsBox"]
+margin_top = 114.0
+margin_right = 240.0
+margin_bottom = 154.0
 rect_min_size = Vector2( 0, 40 )
 focus_mode = 0
 theme = ExtResource( 3 )
@@ -89,5 +189,39 @@ enabled_focus_mode = 0
 text = "back"
 align = 0
 
+[node name="SelectGenomeContainer" type="HBoxContainer" parent="."]
+margin_left = 323.0
+margin_top = 306.0
+margin_right = 697.0
+margin_bottom = 346.0
+rect_min_size = Vector2( 0, 40 )
+
+[node name="Label" type="Label" parent="SelectGenomeContainer"]
+margin_top = 9.0
+margin_right = 170.0
+margin_bottom = 30.0
+theme = SubResource( 15 )
+custom_fonts/font = SubResource( 16 )
+text = "  Select genome: "
+
+[node name="SavesList" type="OptionButton" parent="SelectGenomeContainer"]
+margin_left = 174.0
+margin_right = 374.0
+margin_bottom = 40.0
+rect_min_size = Vector2( 200, 0 )
+theme = ExtResource( 3 )
+custom_fonts/font = SubResource( 17 )
+
+[node name="join" type="Label" parent="."]
+margin_left = 308.0
+margin_top = 312.0
+margin_right = 348.0
+margin_bottom = 343.0
+theme = ExtResource( 3 )
+text = "}"
+
 [connection signal="pressed" from="ButtonsBox/Train" to="." method="_on_Train_pressed"]
+[connection signal="pressed" from="ButtonsBox/Load Genome" to="." method="_on_Load_Genome_pressed"]
+[connection signal="pressed" from="ButtonsBox/RemoveGenome" to="." method="_on_RemoveGenome_pressed"]
 [connection signal="pressed" from="ButtonsBox/Back" to="." method="_on_Back_pressed"]
+[connection signal="item_selected" from="SelectGenomeContainer/SavesList" to="." method="_on_SavesList_item_selected"]

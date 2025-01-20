@@ -3,7 +3,7 @@ extends "res://scripts/game.gd"
 const GENOME_QUEUE_LIMIT = 100 # last : 100
 const COMBAT_AGENT_LIMIT = 80
 const WAIT_TIME_ABOVE_GENOME_LIMIT = 0.2
-const WAIT_TIME_BELOW_GENOME_LIMIT = 0.4
+const WAIT_TIME_BELOW_GENOME_LIMIT = 0.2
 const DRAW_FITNESS_POINTS := 3.0 # last 3.0
 const WIN_FITNESS = 5.0 # last 5.0
 const HIT_WIN_FITNESS = 7.0 # last 7.0
@@ -18,6 +18,8 @@ onready var battle_cages_node = get_node("BattleCages")
 onready var camera = get_node("Camera2D")
 onready var cage_fill_timer = get_node("CageFillTimer")
 onready var background = get_node("Background")
+onready var knockout_label = get_node("CanvasLayer/KnockoutLabel")
+onready var stopwatch_label = get_node("CanvasLayer/StopwatchLabel")
 
 var random = RandomNumberGenerator.new()
 var agent_population : int = 0
@@ -35,7 +37,10 @@ var is_in_knockout_mode := false
 var starting_new_round := false
 
 var is_dragging: bool = false
-var combat_time_scale = 2.0
+var combat_time_scale = 1.0
+var start_time
+var elapsed_time
+var pause_start_time
 
 
 func _ready():
@@ -45,11 +50,22 @@ func _ready():
   set_time_scale(combat_time_scale)
   unpaused_time_scale = combat_time_scale
   game_name = "combat_game"
+  start_time = OS.get_ticks_msec()
 
 
-# func _physics_process(_delta):
-#   if is_in_knockout_mode && get_active_agents().size() == 0:
-#     pass
+func _process(_delta):
+  if is_in_knockout_mode || is_game_paused:
+    return
+
+  elapsed_time = OS.get_ticks_msec() - start_time
+  var msecs_in_an_hour = 1000 * 60 * 60
+  var msecs_in_a_minute = 1000 * 60
+  var msecs_in_a_second = 1000
+  var hours = elapsed_time / msecs_in_an_hour
+  var mins = (elapsed_time % msecs_in_an_hour) / msecs_in_a_minute
+  var secs = ((elapsed_time % msecs_in_an_hour) % msecs_in_a_minute) / msecs_in_a_second
+
+  stopwatch_label.text = String("%02d:%02d:%02d" % [hours, mins, secs])
 
 
 func _input(event):
@@ -75,6 +91,7 @@ func _input(event):
       camera.zoom.y += 0.1
 
   if event.is_action_pressed("knockout"):
+    knockout_label.visible = true
     is_in_knockout_mode = true
     cage_fill_timer.stop()
 
@@ -189,7 +206,6 @@ func spawn_new_agent(b_cage, side, geno: Genome):
   increment_agent_population()
   new_agent.connect("agent_removed", self, "decrement_agent_population")
   new_agent.connect("agent_killed", b_cage, "_on_agent_death")
-  # print("New agent fitness: %s" % new_agent.current_fitness)
   b_cage.death_timer.start()
   agents_node.call_deferred("add_child", new_agent)
 
@@ -217,32 +233,12 @@ func remove_random_from_queue():
   for i in queue_size:
     if genome_queue[i]["genome"].fitness <= LOW_TIER_THRESHOLD:
       low_tier_gendicts.append(genome_queue[i])
-  # for gendict in low_tier_gendicts:
-  #   if random.randf() < float(REMOVE_ON_LIMIT) / float(low_tier_gendicts.size()):
-  #     to_be_removed.append(gendict)
-  #     gendict["genome"].dissolve_genome()
   for i in low_tier_gendicts.size():
     to_be_removed.append(low_tier_gendicts[i])
     low_tier_gendicts[i]["genome"].dissolve_genome()
   
   for gendict in to_be_removed:
-    # if genome_queue.has(gendict):
-    #   print("Erase to make room")
     genome_queue.erase(gendict)
-
-# func remove_from_queue():
-#   var queue_size = genome_queue.size()
-#   var removed := 0
-#   var to_be_removed := []
-#   for i in queue_size:
-#     if genome_queue[i]["genome"].fitness <= LOW_TIER_THRESHOLD:
-#       genome_queue[i]["genome"].dissolve_genome()
-#       to_be_removed.append(genome_queue[i])
-#       removed += 1
-#     if removed >= REMOVE_ON_LIMIT:
-#       break
-#   for gendict in to_be_removed:
-#     genome_queue.erase(gendict)
 
 
 func queue_or_dissolve(genome):
@@ -311,8 +307,6 @@ func populate_cage(cage):
     else:
       current_side = Main.Side.RIGHT
     if is_in_knockout_mode:
-      # print("knockout populate. side: %s main_genome: %s, mate_genome: %s"
-      #   % [current_side, main_genome, mate_genome])
       spawn_new_agent(cage, current_side, main_genome)
       continue
     spawn_new_agent(cage, current_side, get_alter_genome(main_genome, mate_genome))
@@ -346,29 +340,16 @@ func _on_battle_won(winner_gen, is_won_with_hit):
       winner_gen.fitness = WIN_FITNESS
     queue_or_dissolve(winner_gen)
 
-  if is_in_knockout_mode:
-    # yield(get_tree(), "idle_frame")
-    print("win: agents: %s, queue size: %s available_cages: %s" 
-      % [get_active_agents().size()
-      , genome_queue.size()
-      , available_cages.size()])
-
-  # if is_in_knockout_mode && genome_queue.size() <= 1 \
   if is_in_knockout_mode && genome_queue.size() <= 0 \
       && get_active_agents().size() <= THRESHOLD_FOR_NEW_ROUND \
       && !starting_new_round:
-    print("Call save from won")
-    # pause()
-    Engine.time_scale = 0.0
-    # winner_genome = genome_queue[0]["genome"]
+    # Engine.time_scale = 0.0
     winner_genome = winner_gen
     enter_save_menu(true)
 
   elif is_in_knockout_mode && genome_queue.size() < 2:
-    print("Just returning from won")
     return
   elif is_in_knockout_mode && get_active_agents().size() <= THRESHOLD_FOR_NEW_ROUND:
-    print("Call new round from won")
     start_new_round()
     return
 
@@ -376,18 +357,18 @@ func _on_battle_won(winner_gen, is_won_with_hit):
 func _on_battle_draw(left_genome, right_genome):
   if is_in_knockout_mode:
     yield(get_tree(), "idle_frame")
-    print("draw: agents: %s, queue size: %s available_cages: %s" 
-      % [get_active_agents().size()
-      , genome_queue.size()
-      , available_cages.size()])
 
   if is_in_knockout_mode && get_active_agents().size() <= THRESHOLD_FOR_NEW_ROUND:
-    print("Call new round from draw")
-    if genome_queue.size() < 2:
+    if genome_queue.size() == 0:
       left_genome.fitness = DRAW_FITNESS_POINTS
       right_genome.fitness = DRAW_FITNESS_POINTS
       queue_or_dissolve(left_genome)
       queue_or_dissolve(right_genome)
+    elif genome_queue.size() == 1 && !starting_new_round:
+      # Engine.time_scale = 0.0
+      winner_genome = genome_queue[0]
+      enter_save_menu(true)
+
     assert(genome_queue.size() >= 2)
     start_new_round()
     return
@@ -400,7 +381,6 @@ func _on_battle_draw(left_genome, right_genome):
 
 
 func _on_cage_cleared(cage):
-  # print("Appending cage: %s" % cage)
   available_cages.append(cage)
 
 
@@ -413,6 +393,15 @@ func herod():
       gen_queue_dict_to_be_erased.append(gen_queue_dict)
   for gen_queue_dict in gen_queue_dict_to_be_erased:
     genome_queue.erase(gen_queue_dict)
+
+
+func pause():
+  if !is_game_paused:
+    pause_start_time = OS.get_ticks_msec()
+  else:
+    start_time += OS.get_ticks_msec() - pause_start_time
+  .pause()
+
 
 
 func _on_CageFillTimer_timeout():

@@ -67,10 +67,10 @@ func save(genome_dict, filename):
   save_game.close()
 
 
-func load_agent(name) -> Dictionary:
+func load_agent(name, game_name: String) -> Dictionary:
   var saved_agent = File.new()
   var filepath = "user://{game_name}/{level_name}/{name}"\
-      .format({"game_name": "nav_game", "level_name": level_name, "name": name})
+      .format({"game_name": game_name, "level_name": level_name, "name": name})
   assert(saved_agent.file_exists(filepath))
   saved_agent.open(filepath, File.READ)
   var saved_agent_dict = parse_json(saved_agent.get_line())

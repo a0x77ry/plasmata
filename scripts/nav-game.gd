@@ -105,10 +105,9 @@ func generate_from_save():
   agent.lineage_times_finished = 0
 
   var gen = Genome.new(population)
-  gen.from_dict(load_agent(Main.filename_to_load))
+  gen.from_dict(load_agent(Main.filename_to_load, "nav_game"))
   agent.genome = gen
 
-  agent.game = self
   agent.lineage_times_finished = 0
   agent.add_to_group("agents")
   increment_agent_population()
