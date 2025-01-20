@@ -130,7 +130,8 @@ text = "Fight Controls:
 Movement: A, S, D, W
 Direction: Mouse
 Shooting: Right Click
-
+(you must have a saved AI 
+in order to fight it)
 
 Training:
 
@@ -149,18 +150,18 @@ margin_right = 248.0
 margin_bottom = 446.0
 
 [node name="Train" type="Button" parent="ButtonsBox"]
-margin_right = 240.0
+margin_right = 181.0
 margin_bottom = 40.0
 rect_min_size = Vector2( 0, 40 )
 focus_mode = 0
 theme = ExtResource( 3 )
 enabled_focus_mode = 0
-text = "train"
+text = "train an AI"
 align = 0
 
 [node name="Load Genome" type="Button" parent="ButtonsBox"]
 margin_top = 44.0
-margin_right = 240.0
+margin_right = 181.0
 margin_bottom = 75.0
 focus_mode = 0
 theme = ExtResource( 3 )
@@ -170,17 +171,17 @@ align = 0
 
 [node name="RemoveGenome" type="Button" parent="ButtonsBox"]
 margin_top = 79.0
-margin_right = 240.0
+margin_right = 181.0
 margin_bottom = 110.0
 focus_mode = 0
 theme = ExtResource( 3 )
 enabled_focus_mode = 0
-text = "remove genome   "
+text = "remove  "
 align = 0
 
 [node name="Back" type="Button" parent="ButtonsBox"]
 margin_top = 114.0
-margin_right = 240.0
+margin_right = 181.0
 margin_bottom = 154.0
 rect_min_size = Vector2( 0, 40 )
 focus_mode = 0
@@ -198,15 +199,15 @@ rect_min_size = Vector2( 0, 40 )
 
 [node name="Label" type="Label" parent="SelectGenomeContainer"]
 margin_top = 9.0
-margin_right = 170.0
+margin_right = 100.0
 margin_bottom = 30.0
 theme = SubResource( 15 )
 custom_fonts/font = SubResource( 16 )
-text = "  Select genome: "
+text = "  Select: "
 
 [node name="SavesList" type="OptionButton" parent="SelectGenomeContainer"]
-margin_left = 174.0
-margin_right = 374.0
+margin_left = 104.0
+margin_right = 304.0
 margin_bottom = 40.0
 rect_min_size = Vector2( 200, 0 )
 theme = ExtResource( 3 )
